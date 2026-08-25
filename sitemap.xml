@@ -1,27 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sasasakaz.github.io/utility/</loc>
+    <loc>https://sasasakaz.github.io/</loc>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://sasasakaz.github.io/utility/pages/markdown_converter.html</loc>
+    <loc>https://sasasakaz.github.io/pages/markdown_converter.html</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sasasakaz.github.io/utility/pages/diff_viewer.html</loc>
+    <loc>https://sasasakaz.github.io/pages/beat_5g.html</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sasasakaz.github.io/utility/pages/amazon_url_shortener.html</loc>
+    <loc>https://sasasakaz.github.io/pages/diff_viewer.html</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sasasakaz.github.io/utility/pages/qr_contact_url_generator.html</loc>
+    <loc>https://sasasakaz.github.io/pages/amazon_url_shortener.html</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sasasakaz.github.io/utility/pages/url_to_qr_code.html</loc>
+    <loc>https://sasasakaz.github.io/pages/qr_contact_url_generator.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sasasakaz.github.io/pages/url_to_qr_code.html</loc>
     <priority>0.8</priority>
   </url>
 </urlset>

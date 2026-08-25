@@ -1,3 +1,3 @@
 User-agent: *
 Allow: /
-Sitemap: https://sasasakaz.github.io/utility/sitemap.xml
+Sitemap: https://sasasakaz.github.io/sitemap.xml
