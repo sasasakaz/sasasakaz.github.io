@@ -45,6 +45,8 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
 
     .editor-section {
       flex: 1;
+      /* 長いURL等の中身がflexアイテムの最小幅を押し広げてしまうのを防ぐ（主にSafari対策） */
+      min-width: 0;
       display: flex;
       flex-direction: column;
     }
@@ -61,6 +63,8 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
       font-family: monospace;
       font-size: 0.9rem;
       overflow-y: auto;
+      /* 改行できない長いURL等も強制的に折り返す */
+      overflow-wrap: anywhere;
     }
 
     /* 入力と出力の高さを固定 */
@@ -108,6 +112,19 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
     .settings-area textarea {
       height: 80px;
       background: #fafafa;
+    }
+
+    /* 予備欄（迷ってるmdの避難用メモ） */
+    .draft-label {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #999;
+      margin: 0.6rem 0 0.25rem;
+    }
+
+    #draft-input {
+      height: 70vh;
+      background: #fffdf5;
     }
 
     /* 変換方向のスライドスイッチ */
@@ -257,24 +274,14 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
   </div>
 
   <div class="main-container">
-    <!-- 左側：入力と設定 -->
+    <!-- 左側：入力と予備欄 -->
     <div class="editor-section">
       <textarea id="markdown-input" placeholder="Input Markdown..."></textarea>
-
-      <div class="settings-wrapper" id="settings-wrapper">
-        <div class="settings-area">
-          <label>Preview画面に適用するCSS</label>
-          <textarea id="css-input"></textarea>
-        </div>
-
-        <div class="settings-area">
-          <label>Preview画面に適用するHTML {{content}}部分に変換結果が入る</label>
-          <textarea id="wrapper-input"></textarea>
-        </div>
-      </div>
+      <div class="draft-label">📝 予備欄（迷ってる文案の避難用メモ・自動保存されます）</div>
+      <textarea id="draft-input" placeholder="採用するか迷っているmdをここに置いておけます..."></textarea>
     </div>
 
-    <!-- 右側：出力とボタン -->
+    <!-- 右側：出力とボタン、設定欄 -->
     <div class="editor-section">
       <div id="html-output" class="output"></div>
       <div class="bottom-controls">
@@ -288,6 +295,18 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
             <div class="mode-switch-knob" id="mode-switch-knob"></div>
           </div>
           <span class="switch-label" id="switch-label-right">HTML→MD</span>
+        </div>
+      </div>
+
+      <div class="settings-wrapper" id="settings-wrapper">
+        <div class="settings-area">
+          <label>Preview画面に適用するCSS</label>
+          <textarea id="css-input"></textarea>
+        </div>
+
+        <div class="settings-area">
+          <label>Preview画面に適用するHTML {{content}}部分に変換結果が入る</label>
+          <textarea id="wrapper-input"></textarea>
         </div>
       </div>
     </div>
@@ -327,6 +346,32 @@ mark { background-color: #fff176; }
     const cssInput = document.getElementById('css-input');
     const wrapperInput = document.getElementById('wrapper-input');
     const turndownService = new TurndownService({ headingStyle: 'atx', bulletListMarker: '-' });
+
+    // --- localStorageへの自動保存 ---
+    const STORAGE_KEY_CONTENT = 'mdConverter_content';
+    const STORAGE_KEY_MODE = 'mdConverter_mode';
+    const STORAGE_KEY_DRAFT = 'mdConverter_draft';
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY_CONTENT, input.value);
+        localStorage.setItem(STORAGE_KEY_MODE, currentMode);
+      } catch (e) {
+        // プライベートブラウジング等でlocalStorageが使えない場合は何もしない
+        console.warn('localStorageへの保存に失敗しました', e);
+      }
+    }
+
+    // 予備欄（避難用メモ）はメイン欄・モードとは独立して保存する
+    const draftInput = document.getElementById('draft-input');
+    function saveDraftState() {
+      try {
+        localStorage.setItem(STORAGE_KEY_DRAFT, draftInput.value);
+      } catch (e) {
+        console.warn('予備欄のlocalStorageへの保存に失敗しました', e);
+      }
+    }
+    draftInput.addEventListener('input', saveDraftState);
 
     // デフォルトは3スペース固定インデント（オプション化されていないため上書き）。
     // ハイフンリストは2スペース、番号付きリストは4スペース固定でインデントする。
@@ -396,6 +441,7 @@ mark { background-color: #fff176; }
 
       // 入力欄はクリアして混乱を防ぐ
       input.value = '';
+      saveState();
       updateOutput();
     }
 
@@ -465,6 +511,8 @@ mark { background-color: #fff176; }
         // 右側にはMarkdownソースを文字列として表示する
         output.textContent = turndownService.turndown(input.value);
       }
+      // 入力内容が変わるたびにlocalStorageへ保存（タブを閉じても復元できるように）
+      saveState();
     }
 
     // ボタン押下時のタグ挿入関数
@@ -591,12 +639,51 @@ mark { background-color: #fff176; }
       // カーソル位置をいい感じに補正して戻す
       input.setSelectionRange(start + (action === 'add' ? 4 : (diff < 0 ? diff : 0)), end + diff);
     }
+
+    // --- 前回の内容を復元 ---
+    // ブラウザのタブをうっかり閉じてしまっても、次に開いた時に続きから編集できるようにする
+    (function restoreState() {
+      try {
+        const savedMode = localStorage.getItem(STORAGE_KEY_MODE);
+        const savedContent = localStorage.getItem(STORAGE_KEY_CONTENT);
+
+        // 保存されていたモードがhtml2mdだった場合のみUIを切り替える（クリアはしない）
+        if (savedMode === 'html2md') {
+          currentMode = 'html2md';
+          const isMd2Html = false;
+          switchKnob.style.left = KNOB_RIGHT_POS + 'px';
+          labelLeft.classList.toggle('active', isMd2Html);
+          labelRight.classList.toggle('active', !isMd2Html);
+          document.getElementById('tag-controls').style.display = 'none';
+          document.getElementById('settings-wrapper').style.display = 'none';
+          document.getElementById('preview-btn').style.display = 'none';
+          document.getElementById('page-title').textContent = 'HTMLをMarkdownに変換するにゃん';
+          input.placeholder = 'Input HTML...';
+          document.getElementById('copy-btn').textContent = 'Copy Markdown source';
+        }
+
+        if (savedContent !== null) {
+          input.value = savedContent;
+        }
+
+        const savedDraft = localStorage.getItem(STORAGE_KEY_DRAFT);
+        if (savedDraft !== null) {
+          draftInput.value = savedDraft;
+        }
+
+        updateOutput();
+      } catch (e) {
+        // localStorageが使えない環境（プライベートブラウジング等）では何もしない
+        console.warn('localStorageからの復元に失敗しました', e);
+      }
+    })();
   </script>
   <footer id="footer">
     <div class="footer-links">
       <a href="https://sasasakaz.github.io/" target="_blank">🏠 View Other Tools</a>
       <span class="separator">|</span>
-      <a href="https://github.com/sasasakaz/sasasakaz.github.io/blob/main/pages/markdown_converter.html" target="_blank">View source
+      <a href="https://github.com/sasasakaz/sasasakaz.github.io/blob/main/pages/markdown_converter.html"
+        target="_blank">View source
         on GitHub</a>
     </div>
     <p>Coded by sasasakaz 2022-2026</p>
