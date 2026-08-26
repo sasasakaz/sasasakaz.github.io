@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>機械学習の手法</title>
+  <link href='https://sasasakaz.github.io/pages/ml_for_structured_data.html' rel='canonical'>
+  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <meta name="description" content="構造化データにおける代表的な機械学習手法（XGBoost, LightGBM, CatBoostなど）を紹介します。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="機械学習の手法">
+  <meta property="og:description" content="構造化データにおける代表的な機械学習手法（XGBoost, LightGBM, CatBoostなど）を紹介します。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_for_structured_data.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+
+  <!-- Google Tag Manager -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script><!-- End Google Tag Manager -->
+
+  <link rel="stylesheet" href="page_common.css">
+  <style>
+  </style>
+</head>
+
+<body>
+  <header id="header">
+    <h1>構造化データにおける代表的な機械学習手法</h1>
+
+    <p>構造化データとは？</p>
+    <ul>
+      <li>データベースやExcelなどで扱われる、行と列からなる表形式のデータ</li>
+      <li>年齢、年収、購入有無など各列（変数、特徴量）に明確な意味がある</li>
+      <li>顧客データや購買履歴、Webサイトのアクセスログなど、企業で扱われるデータの多くがこれにあたる</li>
+      <li>対して、画像、音声、テキスト、動画などは非構造化データ</li>
+    </ul>
+    <br>
+
+
+    <p>以下は、構造化データを実務で扱う際によく使われる代表的な機械学習手法たち。なお、XGBoost/LightGBM/CatBoostはGBDTをベースにした手法。</p>
+    <div class="mdc-note-box">
+
+      <p>GBDT: Gradient Boosting Decision Tree 勾配ブースティング決定木</p>
+      <ul>
+        <li>決定木を1本ずつ順番に追加し、前までのモデルがうまく予測できなかった部分を次の木で補正していくアンサンブル学習の手法。</li>
+        <li>複数の決定木を組み合わせることで、複雑な非線形関係や特徴量同士の相互作用を捉えやすい。
+    </div>
+
+  </header>
+  </li>
+  </ul>
+  <h2>ロジスティック回帰</h2>
+  <p>シンプルで軽量なモデルで、分類問題のベースラインとしても重要な手法。Logistic Regression</p>
+  <div class="mdc-info-box">
+
+    <ul>
+      <li><strong>仕組み：</strong>特徴量の線形結合をシグモイド関数に通して、イベント発生確率をモデル化する。一般化線形モデル（GLM Generalized Linear Model）の一種。</li>
+      <li><strong>長所：</strong>各特徴量の影響を回帰係数やオッズ比として解釈しやすい。計算も軽く、ベースラインモデルとして使いやすい。</li>
+      <li><strong>短所：</strong>特徴量間の複雑な依存関係や非線形な関係を捉えるのが苦手。必要に応じて交互作用項や変換を手動で追加する必要がある。</li>
+      <li><strong>注意点：</strong>特徴量のスケールや多重共線性の影響を受けることがある。</li>
+    </ul>
+  </div>
+
+
+  <h2>Random Forest</h2>
+  <p>複数の決定木を組み合わせるアンサンブル学習。比較的扱いやすく、非線形な関係も捉えられる。</p>
+  <div class="mdc-info-box">
+
+    <ul>
+      <li><strong>仕組み：</strong>複数の決定木を独立に構築し、回帰では予測値の平均、分類では多数決によって最終的な予測をおこなう。代表的なバギング（Bagging）の手法。</li>
+      <li><strong>長所：</strong>木を独立して学習できるため並列化しやすく、比較的安定した予測性能を得やすい。初期設定でも一定の性能が期待できる。</li>
+      <li><strong>短所：</strong>木の本数や深さを増やすと、モデルサイズや推論時間が大きくなりやすい。GBDT系と比べて予測精度で劣る場合もある。</li>
+      <li><strong>特徴：</strong>複数の木を組み合わせて個々の木の予測のばらつきを抑えることで、過学習を抑えやすくしている。</li>
+    </ul>
+  </div>
+
+
+
+  <h2>XGBoost</h2>
+  <p>決定木を順番に追加していくGBDT（勾配ブースティング決定木）の代表的な実装。高い予測性能と汎用性を持つ。eXtreme Gradient Boosting</p>
+  <div class="mdc-info-box">
+
+    <ul>
+      <li><strong>仕組み：</strong>前の決定木の予測誤差をもとに次の木を追加していくGBDTをベースに、Level-wise方式による木の成長、正則化、計算の効率化など、さまざまな改良を加えている。</li>
+      <li><strong>長所：</strong>非線形な関係や特徴量同士の相互作用を捉えやすく、幅広いデータで高い予測性能を発揮しやすい。汎用性も高い。</li>
+      <li><strong>短所：</strong>LightGBMと比較すると、学習に時間やメモリを多く必要とする場合がある。</li>
+      <li><strong>特徴：</strong>L1/L2正則化などを組み込んでおり、過学習を抑えながら高い予測性能を狙える。</li>
+    </ul>
+  </div>
+
+  <p><span class='inline-gray'>Level-wise: 木を横に広げていく育て方。同じ深さにあるノードを優先して分割し、木を階層ごとに成長させていく方式。</span></p>
+  <h2>LightGBM</h2>
+  <p>高速な学習と省メモリ化を重視したGBDTの実装。大規模な表形式データを扱いやすい。</p>
+  <div class="mdc-info-box">
+
+    <ul>
+      <li><strong>仕組み：</strong>GBDTをベースに、Leaf-wise方式による木の成長やGOSS、EFBなどの工夫を取り入れ、学習を効率化している。</li>
+      <li><strong>長所：</strong>学習が高速でメモリ消費も抑えやすく、大規模なデータや高次元のデータを扱いやすい。</li>
+      <li><strong>短所：</strong>Leaf-wise方式によって一部の枝が深くなりやすく、データ量が少ない場合などには過学習に注意が必要。</li>
+      <li><strong>特徴：</strong>速度と予測性能のバランスに優れ、表形式データの機械学習で広く利用されている。</li>
+    </ul>
+  </div>
+
+  <p><span class='inline-gray'>Leaf-wise: 木を縦に伸ばしていく育て方。分割によって損失を最も大きく減らせそうな葉を選び、そこを優先して深くしていく方式。</span></p>
+  <p><span class='inline-gray'>GOSS: Gradient-based One-Side Sampling
+      勾配の大きいデータを優先的に残し、勾配の小さいデータを一部サンプリングすることで、分割探索に使うデータ量を減らす。</span></p>
+  <p><span class='inline-gray'>EFB: Exclusive Feature Bundling 同時に値を持つことが少ない特徴量をひとつにまとめ、特徴量の数を減らすことで計算を効率化する。</span></p>
+  <h2>CatBoost</h2>
+  <p>カテゴリ変数を含む表形式データを扱いやすくすることに重点を置いたGBDTの実装。Categorical Boosting</p>
+  <div class="mdc-info-box">
+
+    <ul>
+      <li><strong>仕組み：</strong>GBDTをベースに、カテゴリ変数を効率的に扱うための独自の仕組みを取り入れている。</li>
+      <li><strong>長所：</strong>カテゴリ変数をone-hot encodingだけに頼らず扱うことができ、カテゴリ数の多いデータでも利用しやすい。</li>
+      <li><strong>短所：</strong>データや問題によっては、XGBoostやLightGBMのほうが適している場合がある。</li>
+      <li><strong>特徴：</strong>カテゴリ特徴量の統計量を計算する際にtarget leakageを抑える仕組みなどを備えている。</li>
+    </ul>
+  </div>
+
+
+
+
+  <footer id="footer">
+    <div class="footer-links">
+      <a href="https://sasasakaz.github.io/">🏠 Home</a>
+      <span class="separator">|</span>
+      <a href="#header">Back to Top</a>
+    </div>
+    <p>Author: sasasakaz</p>
+  </footer>
+</body>
+
+</html>

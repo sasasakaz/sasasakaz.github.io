@@ -5,6 +5,14 @@
     <priority>1.0</priority>
   </url>
   <url>
+    <loc>https://sasasakaz.github.io/pages/ai_70_years.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://sasasakaz.github.io/pages/ml_for_structured_data.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://sasasakaz.github.io/pages/markdown_converter.html</loc>
     <priority>0.8</priority>
   </url>
