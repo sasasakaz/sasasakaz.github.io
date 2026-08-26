@@ -3,8 +3,8 @@
 <!-- 
 MarkdownをHTMLに変換するツール
 Created: 2026-04-25
-Updated: 2026-07-08
-Description: MarkdownをHTMLに変換する。HTMLソースをコピぺして使う。
+Updated: 2026-08-26
+Description: MarkdownをHTMLに変換する。逆も可能。
 Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自由に編集可能。hilight.js利用時はペースト先のHTMLにhighlight.jsとCSSの追加が必要。
 -->
 
@@ -125,6 +125,78 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
     #draft-input {
       height: 70vh;
       background: #fffdf5;
+    }
+
+    /* CSSプリセット切り替えボタン */
+    .css-preset-buttons {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .css-preset-btn {
+      background: #fff;
+      border: 1px solid #ddd;
+      color: #666;
+      font-size: 0.75rem;
+      padding: 0.3rem 0.6rem;
+    }
+
+    .css-preset-btn.active {
+      background: #0288d1;
+      border-color: #0288d1;
+      color: white;
+    }
+
+    .css-mode-hint {
+      font-size: 0.75rem;
+      color: #f57c00;
+      margin-bottom: 0.3rem;
+    }
+
+    .css-mode-hint.hidden {
+      display: none;
+    }
+
+    /* 他タブでの更新を知らせるバナー */
+    .sync-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      background: #fff3e0;
+      border: 1px solid #ff9800;
+      color: #7a4a00;
+      border-radius: 0.5rem;
+      padding: 0.6rem 1rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    .sync-banner.hidden {
+      display: none;
+    }
+
+    .sync-banner-buttons {
+      display: flex;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .sync-banner button {
+      font-size: 0.75rem;
+      padding: 0.35rem 0.7rem;
+    }
+
+    .btn-sync-reload {
+      background: #ff9800;
+      color: white;
+    }
+
+    .btn-sync-dismiss {
+      background: #fff;
+      border: 1px solid #ccc;
+      color: #666;
     }
 
     /* 変換方向のスライドスイッチ */
@@ -250,12 +322,17 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
 
 <body>
 
+  <div class="sync-banner hidden" id="sync-banner">
+    <span>⚠️ 別のタブでこの内容が更新されました。今の編集内容は保存すると上書きされます。</span>
+    <div class="sync-banner-buttons">
+      <button type="button" class="btn-sync-reload" onclick="reloadFromOtherTab()">最新を読み込む</button>
+      <button type="button" class="btn-sync-dismiss" onclick="dismissSyncBanner()">このまま続ける</button>
+    </div>
+  </div>
+
   <h2 id="page-title">MarkdownをHTMLに変換するにゃん</h2>
 
   <div class="controls" id="tag-controls">
-    <button class="btn-tag btn-md" onclick="insertTag('h2')" title="見出し H2">#</button>
-    <button class="btn-tag btn-md" onclick="insertTag('ul')" title="箇条書きリスト (•)">•</button>
-    <button class="btn-tag btn-md" onclick="insertTag('ol')" title="番号付きリスト (1.)">1.</button>
     <button class="btn-tag btn-md" onclick="changeIndent('add')" title="インデントを増やす（スペース4個追加）">➡️</button>
     <button class="btn-tag btn-md" onclick="changeIndent('remove')" title="インデントを減らす（スペース4個削除）">⬅️</button>
     <button class="btn-tag btn-md" onclick="insertTag('link')" title="リンク挿入 (🔗)">🔗</button>
@@ -266,10 +343,12 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
     <button class="btn-tag btn-md" onclick="insertTag('pre_quote')" title="等幅フォント改行維持引用：コード出力結果の貼付用などに (📋)">📋</button>
     <!-- <span style="margin: 0 2px; border-left: 1px solid #ccc; height: 1.5rem; align-self: center;"></span> -->
     <button class="btn-tag btn-html" onclick="insertTag('strong')" title="強調 (🅱️)">🅱️</button>
-    <button class="btn-tag btn-html" onclick="insertTag('mark')" title="ハイライト (🖍️)">🖍️</button>
+    <button class="btn-tag btn-html" onclick="insertTag('mark')" title="ハイライト 黄 (🖍️)">🖍️</button>
+    <button class="btn-tag btn-html" onclick="insertTag('pink')" title="ハイライト ピンク (🌸)">🌸</button>
     <button class="btn-tag btn-html" onclick="insertTag('info')" title="情報ボックス (✅)">✅</button>
     <button class="btn-tag btn-html" onclick="insertTag('warn')" title="注意ボックス (⚠️)">⚠️</button>
     <button class="btn-tag btn-html" onclick="insertTag('alert')" title="警告ボックス (🚫)">🚫</button>
+    <button class="btn-tag btn-html" onclick="insertTag('note')" title="注釈ボックス (🗒️)">🗒️</button>
     <button class="btn-tag btn-html" onclick="insertTag('br_hr')" title="改行＆区切り線 (➖)">➖</button>
   </div>
 
@@ -301,6 +380,13 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
       <div class="settings-wrapper" id="settings-wrapper">
         <div class="settings-area">
           <label>Preview画面に適用するCSS</label>
+          <div class="css-preset-buttons">
+            <button type="button" class="css-preset-btn active" id="preset-inline-btn"
+              onclick="applyCssPreset('inline')">🖊️ インライン入力</button>
+            <button type="button" class="css-preset-btn" id="preset-external-btn"
+              onclick="applyCssPreset('external')">🔗 外部ファイル参照</button>
+          </div>
+          <div class="css-mode-hint hidden" id="css-mode-hint"></div>
           <textarea id="css-input"></textarea>
         </div>
 
@@ -317,9 +403,13 @@ Notes: プレビュー用のHTMLとCSSは、下部のテキストエリアで自
 blockquote { border-left: 0.25rem solid #ccc; margin: 1.5rem 1.25rem; padding: 0.5rem 1.25rem; color: #666; background-color: #f9f9f9; }
 mark { background-color: #fff176; }
 .inline-note { background-color: #f0f0f0; color: #c7254e; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 90%; margin: 0 2px; }
+.inline-code { background-color: #f0f0f0; color: #c7254e; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 90%; margin: 0 2px; }
+.inline-mark { background-color: #fff176; padding: 0 2px; }
+.inline-pink { background-color: #f8bbd0; padding: 0 2px; }
 .mdc-info-box { background-color: #e8f5e9; border-left: 0.25rem solid #4caf50; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
 .mdc-warn-box { background-color: #fff3e0; border-left: 0.25rem solid #ff9800; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
 .mdc-alert-box { background-color: #ffebee; border-left: 0.25rem solid #f44336; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
+.mdc-note-box { background-color: #eceff1; border-left: 0.25rem solid #607d8b; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
 .post-body table { width: 100%; border-collapse: collapse; margin: 20px 0; line-height: 1.6; border: 1px solid #d0e7f5; }
 .post-body th, .post-body td { border: 1px solid #d0e7f5; }
 .post-body th { padding: 12px 8px; font-weight: bold; text-align: left; background-color: #e8f4fc; color: #2b5b84; white-space: nowrap; }
@@ -341,6 +431,22 @@ mark { background-color: #fff176; }
 </body>
 </html>`;
 
+    // 外部ファイル参照モード用テンプレート（{{css}}は使わず、<link>で直接読み込む）
+    // hrefはサンプルとして公開CSSを指定。実際使う時は自分のCSSファイルへのパス（相対/絶対どちらも可）に書き換えてOK
+    // インライン入力モードと違い、highlight.jsは含めない（Preview用途をシンプルに保つため。必要なら手動で足し戻してOK）
+    const defaultWrapperExternal = `<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Preview</title>
+    <link rel="stylesheet" href="https://sasasakaz.github.io/common.css">
+</head>
+<body>
+  <div class="post-body">
+    {{content}}
+  </div>
+</body>
+</html>`;
+
     const input = document.getElementById('markdown-input');
     const output = document.getElementById('html-output');
     const cssInput = document.getElementById('css-input');
@@ -351,6 +457,9 @@ mark { background-color: #fff176; }
     const STORAGE_KEY_CONTENT = 'mdConverter_content';
     const STORAGE_KEY_MODE = 'mdConverter_mode';
     const STORAGE_KEY_DRAFT = 'mdConverter_draft';
+    const STORAGE_KEY_CSS = 'mdConverter_css';
+    const STORAGE_KEY_WRAPPER = 'mdConverter_wrapper';
+    const STORAGE_KEY_CSS_PRESET = 'mdConverter_cssPreset';
 
     function saveState() {
       try {
@@ -360,6 +469,57 @@ mark { background-color: #fff176; }
         // プライベートブラウジング等でlocalStorageが使えない場合は何もしない
         console.warn('localStorageへの保存に失敗しました', e);
       }
+    }
+
+    // CSS欄・wrapper欄（プリセット選択含む）の保存
+    function saveCssSettings() {
+      try {
+        localStorage.setItem(STORAGE_KEY_CSS, cssInput.value);
+        localStorage.setItem(STORAGE_KEY_WRAPPER, wrapperInput.value);
+        localStorage.setItem(STORAGE_KEY_CSS_PRESET, currentCssPreset);
+      } catch (e) {
+        console.warn('CSS設定のlocalStorageへの保存に失敗しました', e);
+      }
+    }
+
+    // 現在選択中のCSSプリセット（'inline' or 'external'）
+    let currentCssPreset = 'inline';
+    const presetInlineBtn = document.getElementById('preset-inline-btn');
+    const presetExternalBtn = document.getElementById('preset-external-btn');
+    const cssModeHint = document.getElementById('css-mode-hint');
+
+    function applyCssPreset(preset, options = {}) {
+      currentCssPreset = preset;
+      // ボタンの見た目を切り替え
+      presetInlineBtn.classList.toggle('active', preset === 'inline');
+      presetExternalBtn.classList.toggle('active', preset === 'external');
+
+      // ボタンクリックによる明示的な切り替え時のみ、wrapper側のテンプレを差し替える
+      // （復元時は保存済みのwrapper内容をそのまま尊重したいので、ここではスキップできるようにしてある）
+      if (!options.skipTemplateSwap) {
+        wrapperInput.value = (preset === 'inline') ? defaultWrapper : defaultWrapperExternal;
+      }
+      updateCssModeHint();
+      saveCssSettings();
+    }
+
+    // 外部ファイル参照モードの時、wrapper-input内の<link>タグから参照先を検出して表示する
+    // （css-input欄が使われないことも併せて明示）
+    function updateCssModeHint() {
+      if (currentCssPreset !== 'external') {
+        cssModeHint.classList.add('hidden');
+        return;
+      }
+      cssModeHint.classList.remove('hidden');
+
+      // cdnjs（highlight.js用）以外のstylesheetリンクを「参照中のファイル」とみなす
+      const matches = [...wrapperInput.value.matchAll(/<link[^>]*href=["']([^"']+)["'][^>]*>/g)];
+      const hrefs = matches.map(m => m[1]).filter(h => !h.includes('cdnjs.cloudflare.com'));
+      const href = hrefs.length ? hrefs[hrefs.length - 1] : null;
+
+      cssModeHint.textContent = href
+        ? `🔗 参照中: ${href} （下のCSS欄の内容はPreviewに反映されません）`
+        : '⚠️ wrapper内に外部CSSの<link>タグが見つかりません（下のCSS欄の内容もPreviewに反映されません）';
     }
 
     // 予備欄（避難用メモ）はメイン欄・モードとは独立して保存する
@@ -372,6 +532,13 @@ mark { background-color: #fff176; }
       }
     }
     draftInput.addEventListener('input', saveDraftState);
+
+    // CSS欄・wrapper欄を手動で編集した場合も保存する
+    cssInput.addEventListener('input', saveCssSettings);
+    wrapperInput.addEventListener('input', () => {
+      updateCssModeHint();
+      saveCssSettings();
+    });
 
     // デフォルトは3スペース固定インデント（オプション化されていないため上書き）。
     // ハイフンリストは2スペース、番号付きリストは4スペース固定でインデントする。
@@ -547,20 +714,19 @@ mark { background-color: #fff176; }
           }
           break;
         // --- 他のケース（strong, link等） ---
-        case 'h2': insertText = '## ' + (selectedText); break;
-        case 'ul': insertText = '- ' + (selectedText); break;
-        case 'ol': insertText = '1. ' + (selectedText); break;
         case 'link': insertText = '[' + (selectedText || 'テキスト') + '](https://google.com)'; break;
         case 'quote': insertText = '\n> ' + (selectedText || '引用文') + '\n'; break;
         // case 'table': insertText = '| Header | Header | Header |\n| :--- | :--- | :--- |\n| Cell | Cell | Cell |\n| Cell | Cell | Cell |\n'; break;
-        case 'inline_code': insertText = "<span class='inline-note'>" + (selectedText || 'code') + "</span>"; break;
+        case 'inline_code': insertText = "<span class='inline-code'>" + (selectedText || 'code') + "</span>"; break;
         case 'code': insertText = '\n```\n' + (selectedText || '') + '\n```\n'; break;
         case 'pre_quote': insertText = '\n<blockquote><pre>\n' + (selectedText || 'ここにテキストをペースト') + '\n</pre></blockquote>\n'; break;
         case 'strong': insertText = '<strong>' + (selectedText || '強調') + '</strong>'; break;
-        case 'mark': insertText = '<mark>' + (selectedText || 'ハイライト') + '</mark>'; break;
+        case 'mark': insertText = "<span class='inline-mark'>" + (selectedText || 'mark') + "</span>"; break;
+        case 'pink': insertText = "<span class='inline-pink'>" + (selectedText || 'pink') + "</span>"; break;
         case 'info': insertText = '<div class="mdc-info-box">\n<strong>✅ 情報</strong>\n<ul>\n  <li>' + (selectedText || 'ないようを入力') + '</li>\n</ul>\n</div>\n'; break;
         case 'warn': insertText = '<div class="mdc-warn-box">\n<strong>⚠️ 注意</strong>\n<ul>\n  <li>' + (selectedText || 'ないようを入力') + '</li>\n</ul>\n</div>\n'; break;
         case 'alert': insertText = '<div class="mdc-alert-box">\n<strong>🚫 警告</strong>\n<ul>\n  <li>' + (selectedText || 'ないようを入力') + '</li>\n</ul>\n</div>\n'; break;
+        case 'note': insertText = '<div class="mdc-note-box">\n<strong>🗒️ 注釈</strong>\n<ul>\n  <li>' + (selectedText || 'ないようを入力') + '</li>\n</ul>\n</div>\n'; break;
         case 'br_hr': insertText = '\n<br>\n<hr>\n<br>\n'; break;
       }
 
@@ -642,7 +808,7 @@ mark { background-color: #fff176; }
 
     // --- 前回の内容を復元 ---
     // ブラウザのタブをうっかり閉じてしまっても、次に開いた時に続きから編集できるようにする
-    (function restoreState() {
+    function loadStateFromStorage() {
       try {
         const savedMode = localStorage.getItem(STORAGE_KEY_MODE);
         const savedContent = localStorage.getItem(STORAGE_KEY_CONTENT);
@@ -660,6 +826,19 @@ mark { background-color: #fff176; }
           document.getElementById('page-title').textContent = 'HTMLをMarkdownに変換するにゃん';
           input.placeholder = 'Input HTML...';
           document.getElementById('copy-btn').textContent = 'Copy Markdown source';
+        } else if (savedMode === 'md2html') {
+          // 他タブでhtml2md→md2htmlに戻された場合もちゃんと追従できるようにする
+          currentMode = 'md2html';
+          const isMd2Html = true;
+          switchKnob.style.left = KNOB_LEFT_POS + 'px';
+          labelLeft.classList.toggle('active', isMd2Html);
+          labelRight.classList.toggle('active', !isMd2Html);
+          document.getElementById('tag-controls').style.display = 'flex';
+          document.getElementById('settings-wrapper').style.display = 'flex';
+          document.getElementById('preview-btn').style.display = 'inline-block';
+          document.getElementById('page-title').textContent = 'MarkdownをHTMLに変換するにゃん';
+          input.placeholder = 'Input Markdown...';
+          document.getElementById('copy-btn').textContent = 'Copy HTML source';
         }
 
         if (savedContent !== null) {
@@ -671,12 +850,55 @@ mark { background-color: #fff176; }
           draftInput.value = savedDraft;
         }
 
+        // CSS欄・wrapper欄・プリセット選択の復元
+        const savedPreset = localStorage.getItem(STORAGE_KEY_CSS_PRESET);
+        const savedCss = localStorage.getItem(STORAGE_KEY_CSS);
+        const savedWrapper = localStorage.getItem(STORAGE_KEY_WRAPPER);
+
+        if (savedCss !== null) {
+          cssInput.value = savedCss;
+        }
+        if (savedWrapper !== null) {
+          wrapperInput.value = savedWrapper;
+        }
+        // ボタンの見た目・ヒント表示だけ復元し、wrapperの中身は保存されていたものをそのまま尊重する
+        // （skipTemplateSwap: trueで、テンプレの強制上書きを防ぐ）
+        applyCssPreset(savedPreset === 'external' ? 'external' : 'inline', { skipTemplateSwap: true });
+
         updateOutput();
       } catch (e) {
         // localStorageが使えない環境（プライベートブラウジング等）では何もしない
         console.warn('localStorageからの復元に失敗しました', e);
       }
-    })();
+    }
+    loadStateFromStorage();
+
+    // --- 他タブでの更新を検知する ---
+    // localStorageは同一オリジンで共有されるため、同じファイルを複数タブで開いて
+    // それぞれ編集すると、後から保存した方で上書きされてしまう。
+    // storageイベントは「自分以外のタブ」でlocalStorageが変更された時だけ発火するので、
+    // それを使って「他のタブで更新されたよ」と気づけるようにする（自動上書きはしない）。
+    const syncBanner = document.getElementById('sync-banner');
+    const watchedStorageKeys = [
+      STORAGE_KEY_CONTENT, STORAGE_KEY_MODE, STORAGE_KEY_DRAFT,
+      STORAGE_KEY_CSS, STORAGE_KEY_WRAPPER, STORAGE_KEY_CSS_PRESET
+    ];
+
+    window.addEventListener('storage', (e) => {
+      if (watchedStorageKeys.includes(e.key)) {
+        syncBanner.classList.remove('hidden');
+      }
+    });
+
+    function reloadFromOtherTab() {
+      loadStateFromStorage();
+      syncBanner.classList.add('hidden');
+    }
+
+    function dismissSyncBanner() {
+      // 今の編集内容を優先して続ける（バナーを閉じるだけで、保存自体はこれまで通り継続する）
+      syncBanner.classList.add('hidden');
+    }
   </script>
   <footer id="footer">
     <div class="footer-links">
