@@ -11,6 +11,9 @@ body {
   color: #333;
   /* 行間を少し広くする */
   /* line-height: 1.25;  */
+
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 /* 画像が親要素を突き抜けないように */
