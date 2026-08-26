@@ -434,14 +434,11 @@ mark { background-color: #fff176; }
     // 外部ファイル参照モード用テンプレート（{{css}}は使わず、<link>で直接読み込む）
     // hrefはサンプルとして公開CSSを指定。実際使う時は自分のCSSファイルへのパス（相対/絶対どちらも可）に書き換えてOK
     // インライン入力モードと違い、highlight.jsは含めない（Preview用途をシンプルに保つため。必要なら手動で足し戻してOK）
-    // common.cssはbodyがbackground:#f4f4f4なので、common.cssを使う場合は白背景に上書きしておく
-    // （自分の別CSSファイルに差し替える場合はこの<style>ごと消してOK）
     const defaultWrapperExternal = `<!DOCTYPE html>
 <html>
 <head>
     <title>HTML Preview</title>
-    <link rel="stylesheet" href="https://sasasakaz.github.io/common.css">
-    <style>body { background: #fff; }</style>
+    <link rel="stylesheet" href="https://sasasakaz.github.io/pages/page_common.css">
 </head>
 <body>
   <div class="post-body">
