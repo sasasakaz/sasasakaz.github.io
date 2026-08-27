@@ -9,6 +9,10 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://sasasakaz.github.io/pages/ml_history.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://sasasakaz.github.io/pages/ml_for_structured_data.html</loc>
     <priority>0.8</priority>
   </url>
