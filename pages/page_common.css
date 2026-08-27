@@ -71,6 +71,20 @@ a {
 }
 
 
+.btn-amzn {
+  display: inline-block;
+  padding: 0.6em 1.2em;
+  background: #f57c00;
+  color: #fff;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 0.3em;
+}
+
+.btn-amzn:hover {
+  opacity: 0.85;
+}
+
 
 blockquote {
   margin-left: 1.5em;
