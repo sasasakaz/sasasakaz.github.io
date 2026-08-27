@@ -71,8 +71,22 @@ a {
 }
 
 
+.book-promo {
+  width: 350px;
+  max-width: 100%;
+}
+
+.book-cover {
+  display: block;
+  width: 350px;
+  max-width: 100%;
+  height: auto;
+}
+
 .btn-amzn {
-  display: inline-block;
+  display: block;
+  width: fit-content;
+  margin: 1em auto 0;
   padding: 0.6em 1.2em;
   background: #f57c00;
   color: #fff;
