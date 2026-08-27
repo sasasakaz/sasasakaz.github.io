@@ -43,22 +43,11 @@ h4 {
   margin-bottom: 0.2em;
 }
 
-
-
 /* 画像が親要素を突き抜けないように */
 img {
   max-width: 100%;
   height: auto;
 }
-
-/* リンク要素 */
-a {
-  /* 親の文字色を引き継ぐ */
-  color: inherit;
-  /* 余計な装飾をしない（下線を消すなど） */
-  /* text-decoration: none; */
-}
-
 
 #footer {
   width: 100%;
