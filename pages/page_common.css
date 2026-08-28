@@ -61,16 +61,22 @@ img {
 
 
 .book-promo {
-  width: 350px;
+  width: 300px;
   max-width: 100%;
 }
 
 .book-cover {
   display: block;
-  width: 350px;
+  width: 300px;
   max-width: 100%;
   height: auto;
 }
+
+.affiliate-notice {
+  color: #666666;
+  font-size: 0.9em;
+}
+
 
 .btn-amzn {
   display: block;
