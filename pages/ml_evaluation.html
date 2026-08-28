@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>機械学習の評価手法</title>
+  <link href='https://sasasakaz.github.io/pages/ml_evaluation.html' rel='canonical'>
+  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <meta name="description"
+    content="機械学習の分類モデルをどう評価するかを解説。Accuracy、Precision、Recall、F1-score、MCC、ROC-AUC、PR-AUCなどの意味や違い、クラス不均衡データにおける使い分けを紹介します。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="機械学習の評価手法">
+  <meta property="og:description"
+    content="機械学習の分類モデルをどう評価するかを解説。Accuracy、Precision、Recall、F1-score、MCC、ROC-AUC、PR-AUCなどの意味や違い、クラス不均衡データにおける使い分けを紹介します。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_evaluation.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+
+  <!-- Google Tag Manager -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script><!-- End Google Tag Manager -->
+
+  <link rel="stylesheet" href="page_common.css">
+
+  <!-- syntax highlighter start -->
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css' rel='stylesheet' />
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'></script>
+  <script>hljs.highlightAll();</script>
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+</head>
+
+<body>
+  <header id="header">
+    <h1>機械学習の評価手法</h1>
+
+    <p>機械学習のモデルをどう評価するか。ここでは、2値分類を中心に、「分類性能の評価」「閾値によらない識別性能」について代表的な評価手法を。</p>
+    <div class="mdc-note-box">
+
+      <p>サンプル事例</p>
+      <ul>
+        <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
+        <li>誰がラテを購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
+        <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
+      </ul>
+      <blockquote>
+        <pre>
+Python 3.11.15
+OS macOS-26.5.1-arm64-arm-64bit
+pandas 3.0.2
+numpy 2.4.3
+matplotlib 3.10.9
+seaborn 0.13.2
+scikit-learn 1.8.0
+shap 0.51.0
+lightgbm 4.6.0
+</pre>
+      </blockquote>
+    </div>
+
+  </header>
+
+  <h2>分類性能の評価</h2>
+  <p>モデルが最終的に「1」か「0」かを予測した結果の評価。</p>
+  <p>分類問題においてモデルの予測精度をサッと知るには、実際結果と予測とを掛け合わせて一致度合いを見る。</p>
+  <p>2*2の4セルのヒートマップのうち、対角線上のセルが濃い色になっていれば、予測が当たった数が多かったということ。</p>
+  <table>
+    <thead>
+      <tr>
+        <th align="left"></th>
+        <th align="left">予測: 負例</th>
+        <th align="left">予測: 正例</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">実際: 負例</td>
+        <td align="left">TN（True Negative）</td>
+        <td align="left">FP（False Positive）</td>
+      </tr>
+      <tr>
+        <td align="left">実際: 正例</td>
+        <td align="left">FN（False Negative）</td>
+        <td align="left">TP（True Positive）</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>混同行列（Confusion Matrix）の各象限</p>
+  <ul>
+    <li>TP (True Positive 真陽性): 正例を正しく正例と予測したもの → 実際に買った人を、正しく買うと予測してた</li>
+    <li>FP (False Positive 偽陽性): 負例を誤って正例と予測したもの → 実際には買わなかった人を、誤って買うと予測してた</li>
+    <li>FN (False Negative 偽陰性): 正例を誤って負例と予測したもの → 実際に買った人を、誤って買わないと予測してた</li>
+    <li>TN (True Negative 真陰性): 負例を正しく負例と予測したもの → 実際には買わなかった人を、正しく買わないと予測してた</li>
+  </ul>
+  <div class="mdc-note-box">
+
+    <p>混同行列における配置は常に同じとは限らないので、場所で覚えちゃダメ</p>
+    <ul>
+      <li>True: 実際と予測が一致</li>
+      <li>False: 実際と予測が不一致</li>
+      <li>Positive: モデルが出力した予測ラベルが1</li>
+      <li>Negative: モデルが出力した予測ラベルが0</li>
+      <li>正例: ラベルが1（買った、買う）</li>
+      <li>負例: ラベルが1（買わなかった、買わない）
+  </div>
+  </li>
+  </ul>
+  <img src="../images/confusion_matrix.jpg" alt="サンプルデータでの混同行列">
+
+  <p>今回サンプルでの結果は、</p>
+  <blockquote>
+    <pre>
+TP (True Positive):  1053 件
+TN (True Negative):  2680 件
+FP (False Positive): 1264 件
+FN (False Negative): 665 件
+</pre>
+  </blockquote>
+
+  <p>合計5,662人のうち、実際の購入者は1,718人（出現率30%）、非購入者は3,944人。この4セルのどこに注目するか。</p>
+  <h3>Accuracy</h3>
+  <p>すべての予測対象のうち、正しく予測できた割合（正解率）。</p>
+  <p><span class='inline-code'>Accuracy = (TP + TN) / (TP + TN + FP + FN)</span></p>
+  <ul>
+    <li>意味が直感的に理解しやすい。少数派を無視するリスクを許容する。利用場面を選ぶ。</li>
+    <li>基本姿勢: 全体として正しく予測することを重視したい。</li>
+    <li>許容リスク: 状況次第では使いにくい（買う人の出現率低い場合は全員買わないと予測すれば高い値になる。だがあまり役には立たない）。</li>
+    <li>例: コイントスで表が出るかを予測（表裏の出現率はほぼ半々で、表を予測するのと裏を予測するのは同じ価値とみなしやすい）。</li>
+  </ul>
+  <p>Accuracyは数値の意味がわかりやすく、モデルの基本的な予測性能比較など有用な場面もある。</p>
+  <ul>
+    <li>だがビジネスにおいては正例の予測が重要なことが多い。</li>
+    <li>買わないと予測して実際に買わなかったことが予測できても、買うの予測ほどには利潤や事業成長に直結しにくいため。</li>
+    <li>また予測対象はクラス不均衡なことも多い（自社の特定商品購入者は市場のごく一部など、正例と負例の出現率は偏りがち）。</li>
+    <li>そんなときはPrecisionやRecallの出番。</li>
+  </ul>
+  <h3>Precision</h3>
+  <p>正例と予測した対象のうち、実際に正例だった割合（適合率）。</p>
+  <p><span class='inline-code'>Precision = TP / (TP + FP)</span></p>
+  <ul>
+    <li>効率優先。機会損失リスク許容。外したくない慎重さ。</li>
+    <li>基本姿勢: 正例を精度高く予想したい。買う（正例）の予測はなるべく外したくない。確度低い人へのアプローチは避けたい。</li>
+    <li>許容リスク: 正例と予測する数は少なくてもいい。買う期待値の低い人は切り捨てる。獲得数や売上最大化の逸失を許容。</li>
+    <li>例: コストがかさむDM送付施策など。徒労に終わりそうな100人のアプローチよりは確実に買いそうな10人を優先したい。</li>
+  </ul>
+  <h3>Recall</h3>
+  <p>実際は正例の対象のうち、正しく正例と予測できた割合（再現率）。</p>
+  <p><span class='inline-code'>Recall = TP / (TP + FN)</span></p>
+  <ul>
+    <li>網羅性優先。低効率リスク許容。取りこぼさない貪欲さ。</li>
+    <li>基本姿勢: 正例を取りこぼしなく予測したい。買う（正例）期待値が低くとも抜け漏れよりはマシ。確度が低い人でもアプローチしたい。</li>
+    <li>許容リスク: 無駄打ち増える。ROI低下を許容。買う（正例）の予測は外れてもよい。狼少年呼ばわりされるリスクを許容。</li>
+    <li>例: 低コストなプッシュ通知施策や病気の検診など。買う見込みが薄い100人にアプローチしてでも取りこぼさないことを優先したい。</li>
+  </ul>
+  <h3>PrecisionとRecallのトレードオフ</h3>
+  <p>2値分類モデルは、基本的に「正例である確率」を出力（0.0〜1.0）する。これを人間が判断しやすい二択のラベル（0/1）に振り分けてる。</p>
+  <p>しきい値（threshold）を0.5（一般的なデフォルト値）にするとは、すなわち、確率0.5以上は「1:購入する」と予測、確率0.5未満は「0:購入しない」と予測したものとみなす、という意味。</p>
+  <p>なお0.5とは、買う確率と買わない確率のどっちが高いとみなす？真ん中あたりで区切るのが納得感あるよね、という根拠に基づく。</p>
+  <p>しきい値を高くすると、かなり確信のある人だけを正例とするため、Precisionは高くなりやすい。そのぶん正例と予測する人数が減るので、Recallは低くなりやすい。</p>
+  <p>逆に、しきい値を低くすると、少しでも購入可能性があれば正例とするため、Recallは高くなりやすい。ただし実際には買わない人も多く含まれるため、Precisionは低くなりやすい。</p>
+  <ul>
+    <li>Precision：予測した正例をどれだけ確実に当てられるか</li>
+    <li>Recall：実際の正例をどれだけ取りこぼさず見つけられるか</li>
+  </ul>
+  <p>
+    例えば、予定しているクーポン配布施策の予算が潤沢にあるなどの理由で、買う確率が0.3ぐらいの人もクーポン配布対象にしたいなどのビジネス判断が先にある、検討余地がある場合には、しきい値を0.5ではなく0.3にして評価するという手もある（詳細後述）。
+  </p>
+  <p>つまり、<strong>しきい値を動かすことでもPrecisionとRecallの値は変わる</strong>ため、<span
+      class='inline-mark'>「何のための予測なのか」「何を重視したいのか」が明確になってないと、モデルの評価、判断もしにくい。</span></p>
+  <h3>F1-score</h3>
+  <p>PrecisionとRecallの両方を考慮したい場合に。</p>
+  <p><span class='inline-code'>F1 = 2 * (Precision * Recall) / (Precision + Recall)</span></p>
+  <ul>
+    <li>総合力優先。中庸リスク許容。慎重さと貪欲さのバランス。</li>
+    <li>基本姿勢: PrecisionもRecallも重視したい（トレードオフな両方のバランスをとりたい）。両方を1つの指標で評価したい。</li>
+    <li>許容リスク: 2指標いずれかに特化すれば得られたはずのハイパフォーマンスな効率性または網羅性には振り切らないことを許容。</li>
+    <li>例: 効率も網羅性もどちらも適度に両立したい。どちらかに極端に偏るのも、どちらかが極端に低くなるのも避けたい。</li>
+  </ul>
+  <p>PrecisionとRecallからF1へのつながり </p>
+  <ol>
+    <li>PrecisionとRecallはトレードオフの関係にある。</li>
+    <li>Precisionを1(100%)に近づけたいなら、予測確率の判定基準であるしきい値を1に極力近づけて、確実に買いそうな人だけを少数予測すればいい。代償として、Recallは低くなる。</li>
+    <li>逆に、Recallを1に近づけたいなら、しきい値を0側にレバー倒して、ほぼ全員買うと予測すればいい。ただしPrecisionはズタズタになる。</li>
+    <li>こういう極端なことなしに、どちらもほどほどに両立した状態を1つの指標で表せられたらいいのに。。。</li>
+  </ol>
+  <p>対処策1</p>
+  <ol>
+    <li>まず思いつくのは、PrecisionとRecallを<strong>足して2で割る</strong>、つまり平均化する発想。 <span class='inline-code'>(Precision + Recall) /
+        2</span></li>
+    <li>でもこれだと、<span class='inline-gray'>Precision0.95 Recall0.15</span>のときも、<span class='inline-gray'>Precision0.15
+        Recall0.95</span>のときも、平均は0.55となる。</li>
+    <li>片方が極端でもまあまあな数値に見えてしまう。足して2で割る発想自体はよくても、欲しい状態を的確に表す指標にはなってない。。。</li>
+  </ol>
+  <p>対処策2</p>
+  <ol>
+    <li>目指したいのは、両方の値のバランスが良いときは高得点になり、いずれかが極端な値のときはペナルティが大きくなるような仕組み。</li>
+    <li>どちらの値も0から1（0%から100%）の範囲内にある。であれば0に近いときは大きく減点すれば、欲しい状態を的確に表せるのではないか。</li>
+    <li>そこで2つの値それぞれの<strong>逆数をとってから平均化</strong>する発想。 <span class='inline-code'>(1/Precision + 1/Recall) / 2</span></li>
+    <li>これだと、<span class='inline-gray'>Precision0.95 Recall0.15</span>のときは、<span class='inline-code'>(1/0.95 + 1/0.15) /
+        2 = 3.68</span></li>
+    <li>逆数をとった値の平均値は元の単位と違ってて解釈しにくいので、改めて逆数をとって元の単位に戻す。<span class='inline-code'>1 / 3.68 = 0.27</span></li>
+    <li>同じ計算を<span class='inline-gray'>Precision0.75 Recall0.35</span>でやると、<span class='inline-code'>(1/0.75 + 1/0.35) /
+        2 = 2.10　の逆数で 0.48</span></li>
+    <li>同じ計算を<span class='inline-gray'>Precision0.65 Recall0.45</span>でやると、<span class='inline-code'>(1/0.65 + 1/0.45) /
+        2 = 1.88　の逆数で 0.53</span></li>
+    <li>同じ計算を<span class='inline-gray'>Precision0.60 Recall0.55</span>でやると、<span class='inline-code'>(1/0.60 + 1/0.55) /
+        2 = 1.74　の逆数で 0.57</span></li>
+  </ol>
+  <ul>
+    <li>欲しい状態を的確に表す指標になったっぽい。これがF1-score</li>
+    <li>数学でいう調和平均の計算方法を、機械学習の評価指標として使っている。</li>
+  </ul>
+  <pre><code class="language-python">F1 score = 1 / { (1/Precision + 1/Recall) / 2 }
+         = 2 / { (1/Precision) + (1/Recall) }
+         = 2 / { (Recall + Precision) / (Precision * Recall) }
+         = 2 * Precision * Recall / (Precision + Recall)
+</code></pre>
+  <h3>Fβ-score</h3>
+  <p>
+    なお、PrecisionとRecallのどちらをより重視したいかが明確なら、F1ではなく、RecallまたはPrecisionを重視した指標を使うこともできる。例えばFβ-scoreでは、βを変えることでRecallとPrecisionの重みを変えられる。
+  </p>
+  <h3>MCC</h3>
+  <p>「このモデルは、正例と負例を本当に区別できているのか？」を確認したいときに役立つ指標。</p>
+  <p>Precision, Recall, F1-scoreは主に正例に注目した指標。対してMCCは、混同行列の4セルすべてを使って、実際のクラスと予測クラスの一致関係を評価する指標（実際と予測の相関係数）。Matthews
+    Correlation Coefficient</p>
+  <p><span class='inline-code'>MCC = (TP × TN − FP × FN) / √{(TP + FP)(TP + FN)(TN + FP)(TN + FN)}
+    </span></p>
+  <pre><code class="language-python">mcc = (tp * tn - fp * fn) / math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+# 一気に計算する場合、4セルいずれかに0があったときに0除算でエラーになる
+
+# 分子の計算: (TP * TN) - (FP * FN)
+mcc_numerator = (tp * tn) - (fp * fn)
+# 分母の計算: sqrt((tp+fp) * (tp+fn) * (tn+fp) * (tn+fn))
+mcc_denominator = math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+# 分母が0の場合はMCCを0とする（慣例的な処理）
+if mcc_denominator == 0:
+    mcc = 0
+else:
+    mcc = mcc_numerator / mcc_denominator
+
+print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
+</code></pre>
+  <div class="mdc-note-box">
+
+    <ul>
+      <li>分母: 混同行列の4セルの合計を全部掛け合わせることで、正例と負例のバランスをとって（平方根をとることで値が大きくなりすぎないようにして）いる。</li>
+      <li>分子: 正解ペア (tp,tn)の積から不正解ペア (fp,fn)の積を引いている。正解ペアが多いほど分子が大きくなる。これにより実際と予測の相関が強いことを表現する。</li>
+      <li>正例と負例を完全に入れ替えても値が変わらない（対称性がある）。
+  </div>
+  </li>
+  </ul>
+  <p>MCCのとる範囲は-1から1の間。</p>
+  <ul>
+    <li>1に近い: うまく予測してる。</li>
+    <li>0に近い: デタラメ（ランダム）と同じ。</li>
+    <li>-1に近い: 全部逆に予測してる（ある意味すごい）。</li>
+  </ul>
+  <p>正例と負例の両方を考慮するため、クラス不均衡な場合にも、モデルの分類性能をシビアに評価しやすい（多数派のクラスで正答を稼いだ高Accuracyなモデルでも、MCCは高くなりにくい）。</p>
+  <h3>Balanced Accuracy</h3>
+  <p>均衡正解率。クラス不均衡でも、正解率をシンプルかつ公平に評価したい場合に。</p>
+  <p><span class='inline-code'>Balanced Accuracy = (Recall + Specificity) / 2</span></p>
+  <p>Specificity(特異度) : 実際は負例の対象のうち、正しく負例と予測できた割合（真陰性率） <span class='inline-gray'>Specificity = TN / (TN + FP)</span>
+  </p>
+  <p>つまり、正例についての正解率（Recall）と、負例についての正解率（Specificity）を、正例・負例の出現率に関係なく、正例と負例を同じ重みで評価している。</p>
+  <ul>
+    <li>クラス不均衡があるデータで「正例と負例を公平に評価したい」ときに便利。</li>
+    <li>正例と負例を同じ重みで評価したときの正解率です、と説明しやすいしわかりやすい。</li>
+  </ul>
+  <div class="mdc-note-box">
+
+    <p>同じ重みとは？　例えば正例の出現率が1%で、かつ正例のみに関心がある場合に、1%しかない大事な貴重な正例を半分見逃すのと、99%の負例（不要なもの）を半分拾いすぎるのを、同程度にダメ出しするようなこと。</p>
+    <p>逆に言えば、AccuracyはRecallとSpecificityを出現率で重み付けしている（がために正例・負例の出現率次第で、数値の見え方、評価の基準が変わってくる）。</p>
+  </div>
+
+  <pre><code>Accuracy = ( TP + TN ) / Total
+         = ( TP / Total ) + ( TN / Total )
+         = { TP / (TP+FN) * (TP+FN) / Total } + { TN / (TN+FP) * (TN+FP) / Total }
+         = (Recall * 正例出現率) + (Specificity * 負例出現率)
+</code></pre>
+  <h3>その他の指標</h3>
+  <p>4セルの組み合わせ次第で、他にもいろんな指標が算出可能。似たものにも見えるが、分母の捉え方がちょっとずつ異なる。</p>
+  <ul>
+    <li>Negative Predictive Value<ul>
+        <li>負例と予測した対象のうち、実際に負例だった割合（陰性的中率）</li>
+        <li>Negative Predictive Value = TN / (TN + FN)</li>
+        <li>Precisionの裏に相当。</li>
+        <li>負例にあまり関心がない場面では影が薄い。</li>
+        <li>精密機器の良品判定（不良品と予測して実際に不良品でした）などで有用。</li>
+      </ul>
+    </li>
+    <li>FDR(False Discovery Rate)<ul>
+        <li>正例と予測した対象のうち、実際は負例だった割合（偽発見率）</li>
+        <li>FDR = FP / (TP + FP) </li>
+        <li>分母はPrecisionと同じ。Precisionの余事象に相当（FDR = 1 - Precision）。</li>
+      </ul>
+    </li>
+    <li>Specificity(特異度)<ul>
+        <li>実際は負例の対象のうち、正しく負例と予測できた割合（真陰性率）。</li>
+        <li>Specificity = TN / (TN + FP)</li>
+        <li>Recallの裏に相当する。</li>
+        <li>スパム判定（大事なメールを間違えてゴミ箱に入れない）などで有用。</li>
+        <li>負例を精度高く予想したい、負例を正しく負例としたいときに。</li>
+      </ul>
+    </li>
+    <li>FPR(False Positive Rate)<ul>
+        <li>実際は負例の対象のうち、誤って正例と予測した割合（偽陽性率）</li>
+        <li>FPR = FP / (TN + FP) </li>
+        <li>分母はSpecificityと同じ。Specificityの余事象に相当（FPR = 1 - Specificity）</li>
+        <li>のちほど登場する指標<strong>ROC-AUC</strong>に関わってくる。</li>
+      </ul>
+    </li>
+    <li>FNR(False Negative Rate)<ul>
+        <li>実際は正例の対象のうち、誤って負例と予測した割合（偽陰性率）</li>
+        <li>FNR = FN / (TP + FN) </li>
+        <li>分母はRecallと同じ。Recallの余事象に相当（FNR = 1 - Recall）</li>
+        <li>見逃し（False Negative）がクリティカルに直結する（命に関わる）ような医療現場などで有用。</li>
+      </ul>
+    </li>
+    <li>Cohen&#39;s Kappa（カッパ係数）<ul>
+        <li>MCC同様に実際のクラスと予測クラスの一致度を評価する指標。違いは、偶然による一致を考慮する点。</li>
+        <li>実際と予測が一致したのは、モデルの実力なのか、それともたまたまなのか。たまたま当たったぶん（期待値）を全体から引いて、純粋な予測の重みを評価する。<ul>
+            <li>クラスの出現率割合と予測割合から「偶然でもこれくらいは一致しそう」という一致率を考え、その分を差し引いて評価する。</li>
+            <li>実測の一致率： 実際に予測が当たった割合（つまりAccuracy）。</li>
+            <li>偶然の一致率： 事実もモデルも、お互いデタラメに（でも出現率通りに）答えたときに、偶然重なっちゃう確率。</li>
+            <li>この2つを使って計算する。Kappa = (実際の一致率 − 偶然の一致率) / (1 − 偶然の一致率)</li>
+            <li>Cohen&#39;s Kappaのとる範囲は-1から1の間。</li>
+            <li>1: 完全な一致（予測が当たったのは全てモデルの実力）。</li>
+            <li>0: 偶然による一致と同程度（偶然当たってるだけ。目をつぶって選んでるのと変わらない）。</li>
+            <li>0未満：偶然よりも一致度が低い（偶然よりも当たってない。逆にすごい）。</li>
+          </ul>
+        </li>
+        <li>施策自体には活かしにくいのと、以下の問題点がある。</li>
+        <li>問題点: クラス不均衡ではモデルの性能を正しく評価できない場合がある。なので機械学習モデルの純粋な予測性能（不均衡データ）を評価したいなら、Kappaを見る必要性は薄い。</li>
+      </ul>
+    </li>
+  </ul>
+  <pre><code class="language-python"># 1. 数値をセット
+total = tp + tn + fp + fn
+
+# 2. po (実際の正解率)
+po = (tp + tn) / total
+
+# 3. pe (偶然当たっちゃう確率)
+# 「モデルの正例予測数 × 実際の正例数」 ＋ 「モデルの負例予測数 × 実際の負例数」 を Totalの2乗で割る
+pe = ((tp + fp) * (tp + fn) + (tn + fn) * (tn + fp)) / (total ** 2)
+
+# 4. Kappaの計算
+kappa = (po - pe) / (1 - pe)
+
+# これでもOK
+# from sklearn.metrics import cohen_kappa_score
+# kappa = cohen_kappa_score(y_val, y_class_pred)
+
+print(f&quot;Cohen&#39;s Kappa: {kappa:.3f}&quot;)
+</code></pre>
+  <h3>ここまでの指標をどう使い分けるか</h3>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">指標</th>
+        <th align="left">値</th>
+        <th align="left">何を見てるか</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">Accuracy</td>
+        <td align="left">0.659</td>
+        <td align="left">全体として、どれだけ正解したか</td>
+      </tr>
+      <tr>
+        <td align="left">Precision</td>
+        <td align="left">0.454</td>
+        <td align="left">正例と予測した人を、どれだけ確実に当てられたか</td>
+      </tr>
+      <tr>
+        <td align="left">Recall</td>
+        <td align="left">0.613</td>
+        <td align="left">実際の正例を、どれだけ取りこぼさずに拾えたか</td>
+      </tr>
+      <tr>
+        <td align="left">F1-score</td>
+        <td align="left">0.522</td>
+        <td align="left">PrecisionとRecallを両立できているか</td>
+      </tr>
+      <tr>
+        <td align="left">Balanced Accuracy</td>
+        <td align="left">0.646</td>
+        <td align="left">正例・負例を同じ重みで評価した正解率</td>
+      </tr>
+      <tr>
+        <td align="left">MCC</td>
+        <td align="left">0.273</td>
+        <td align="left">4セルの分類結果を総合した関連性</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>Recallの項で書いた通り、</p>
+  <blockquote>
+    <p>つまり、<strong>しきい値を動かすことでもPrecisionとRecallの値は変わる</strong>ため、<span
+        class='inline-mark'>「何のための予測なのか」「何を重視したいのか」が明確になってないと、モデルの評価、判断もしにくい。</span></p>
+  </blockquote>
+  <ul>
+    <li>「良いモデルかどうか」は指標を1つ見れば決まるわけではない。</li>
+    <li>何を重視するかによって、適切な評価指標も変わる。</li>
+  </ul>
+  <h2>しきい値によらない識別性能</h2>
+  <p>基本的な考え方</p>
+  <ul>
+    <li>機械学習モデル（2値分類）は、基本的には各インスタンスが1になる（正例になる、購入する）確率、正例らしさを表すスコアを算出する。</li>
+    <li>これを1または0に分類する（購入する/しないのどちらかに振り分ける）ための境界線（しきい値）が必要。</li>
+    <li>例えば、しきい値を0.5にする=確率50%以上なら1とみなす。例えばしきい値を0.9にする=ほぼ確実に買いそうな人だけ1とみなす。</li>
+    <li>だが前述の通り、しきい値を0.5にするのが常に適切とは限らない（連動して、しきい値次第で正解や間違い度合いは変わる）ため、モデルの識別性能の評価が難しくなる。</li>
+  </ul>
+  <p>そこで、しきい値をさまざまに動かしながら、モデルが正例と負例をどれくらいうまく順位付けできているかを評価する方法がある。</p>
+  <ul>
+    <li>しきい値を1.0から0.0まで少しずつ動かしたときに、正解と間違い度合いがどう変化するかをみればよいのでは。</li>
+    <li>しきい値に依存しないこの指標の曲線を、ROC曲線（Receiver Operating Characteristic Curve）と呼ぶ。</li>
+  </ul>
+  <p>前段のAccuracy, Precision, Recall, F1などは、しきい値0.5以上なら1で、未満なら0としきい値を決めた「後の」分類結果を評価している（＝一点の評価）。</p>
+  <p>対して、もともとモデルが出力していた値（確率、スコア）を使って、あらゆるしきい値（0.001から0.999まで全部）で試したときの結果をひっくるめた面積を足し算（積分）した指標は、AUCと呼ばれる。</p>
+  <p>AUC（Area Under the Curve）: しきい値を動かしながら、モデルが「正解をちゃんと上位に並べられているか」という、並び替え能力（識別能力）の全体像を評価している（＝面の評価）。</p>
+  <h3>ROC曲線</h3>
+  <p>ROC曲線は、分類のしきい値を変化させたときの、</p>
+  <ul>
+    <li>
+      <p>TPR（True Positive Rate）= Recall</p>
+    </li>
+    <li>
+      <p>FPR（False Positive Rate）= FP / (TN + FP)
+        の関係を表した曲線。これを2次元の平面に表現する。</p>
+    </li>
+    <li>
+      <p>縦軸 TPR: 実際は正例の対象のうち、正しく正例と予測できた割合（=Recall）</p>
+    </li>
+    <li>
+      <p>横軸 FPR: 実際は負例の対象のうち、誤って正例と予測した割合</p>
+    </li>
+  </ul>
+  <div class="term">ROC曲線のプロット手順</div>
+
+  <blockquote>
+    <pre>
+顧客 購入確率
+A 0.95（実際：1）
+B 0.88（実際：1）
+C 0.75（実際：0）※間違い、空振り
+D 0.60（実際：1）
+… …（以下、確率が低い順に続く。データ10人分での例）
+</pre>
+  </blockquote>
+
+  <ol>
+    <li>予測確率が高い順にデータを並べる。<ul>
+        <li>モデルが「この人は買いそう」と判定した確率が高い順に上から下へ並び替える。</li>
+      </ul>
+    </li>
+    <li>しきい値を上から下に「スライド」させる。<ul>
+        <li>並び替えたデータのすき間に、上から順番に「しきい値の線」を引いていく。</li>
+      </ul>
+      <ol>
+        <li>最初に、一番上に線を引く（しきい値1.0）</li>
+      </ol>
+      <ul>
+        <li>誰も「1」とは予測しない、超ドケチな設定。</li>
+        <li>TPR（真陽性率：見落とさず当てた割合）＝0 （誰も当ててない）</li>
+        <li>FPR（偽陽性率：間違えて空振りした割合）＝0 （誰も予測してないから空振りもゼロ） グラフの座標は (0, 0) からスタート！</li>
+      </ul>
+      <ol start="2">
+        <li>1番目のAの下に線を引く（しきい値0.90）</li>
+      </ol>
+      <ul>
+        <li>「Aだけを1、残りを全員0」と予測する設定。</li>
+        <li>Aは実際に1で、見落とさずに当てられたから、TPR（縦軸）が上にピョコッと1歩上がる。</li>
+        <li>空振り（実際は0なのに1と予測する）はしていないから、FPR（横軸）は動かない。</li>
+      </ul>
+      <ol start="3">
+        <li>3番目のCの下に線を引く（しきい値0.70）</li>
+      </ol>
+      <ul>
+        <li>「A、B、Cを1、残りを0」と予測する設定。</li>
+        <li>Cは実際には0（買わなかった）だから、モデルの予測はハズレ（空振り）。</li>
+        <li>このときは、FPR（横軸）が右にピョコッと1歩進む。（縦軸は動かない）</li>
+      </ul>
+    </li>
+    <li>最後まで繰り返して線を結ぶ<ul>
+        <li>これを一番下の「全員を1と予測する超ゆるゆる設定（しきい値0.0）」まで繰り返すと、最終的にグラフの右上 (1, 1) にゴールする。</li>
+        <li>この「本物が来たら上に1歩、空振りなら右に1歩」と動いていった足跡を繋いだのがROC曲線</li>
+      </ul>
+    </li>
+  </ol>
+  <p>良いモデルと悪いモデル</p>
+  <ul>
+    <li>優秀なモデルの場合<ul>
+        <li>確率が高い順に並べ替えたとき、上のほうに「本物の1」がズラッと並ぶ。</li>
+        <li>ということは、しきい値を下げていくとき、最初は「上にピョコピョコピョコ！」と連続で上がって、本物を全部回収しきってから、</li>
+        <li>最後に「右にトコトコ…」と進んでゴールに向かう。</li>
+        <li>結果として、グラフ左上に大きく膨らんだ、理想的な曲線（AUCが1に近づく）になる。</li>
+      </ul>
+    </li>
+    <li>完全にランダム（でたらめ）なモデルの場合：<ul>
+        <li>確率順に並べても、「1」と「0」がぐちゃぐちゃに混ざっている。</li>
+        <li>しきい値を下げていくと、「上、右、上、右、右、上…」と交互に進むことになるから、</li>
+        <li>グラフはおおむね左下から右上に向かって斜め45度の直線（AUC＝0.5）になっちゃう。</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="term">ROC曲線の特性</div>
+
+  <ul>
+    <li>人間がどこに境界線を引くべきか（実務上の都合でしきい値をいくつに設定するか）を決める前に、モデルが1と0をきれいに並び替える能力があるか、すなわち「1と0の識別能力」を視覚化したもの</li>
+    <li>縦軸は正例だけでの正解率、横軸は負例だけでの間違い率と、正例と負例を独立させた集計値をみている。したがって、目的変数1/0の比率（購入者の割合）が変わっても、ROC曲線の形状には影響しにくい。</li>
+  </ul>
+  <h3>ROC-AUC</h3>
+  <p>ROC曲線を描いて、その下の面積を全部足し算（積分）した値。</p>
+  <p>ROC-AUCは0から1の値をとり、</p>
+  <ul>
+    <li>1.0: 正例と負例を完全に識別できる</li>
+    <li>0.5: ランダム（でたらめ）な順位付けと同程度</li>
+    <li>0.5未満: 逆方向に順位付けしている
+      と解釈できる。</li>
+  </ul>
+  <p>以下のような解釈も成り立つ。</p>
+  <ul>
+    <li>ランダムに1人の正例と1人の負例をペアで選んだとき、モデルが「正例のほうが正例らしい」とモデルが正しく判定（順位付け）できる確率</li>
+    <li>例えばROC-AUCが0.70なら、ランダムに選んだ正例と負例のペアについて、前者（正例）の方が購入確率が高いとモデルが判定できる（前者のスコアを高くつける）確率は70% →
+      当てずっぽうよりは正しく見抜ける、それなりに役に立ちそうな予測モデルだろう</li>
+  </ul>
+  <p>過去に提案された教科書記載などから、AUCが 0.7以上なら実用的、0.8を超えたら優秀、といった目安はあるものの、機械的に適用するのは避けるべし。</p>
+  <p>なぜなら、どの程度の識別能力が必要なのかは、当然ながら用途やデータ、誤分類による損失によって変わるため。</p>
+  <p>ラテ購入などのように人間の気まぐれな行動に左右されやすい予測が困難な場面もあれば、品質管理や命に関わる場面などもある。</p>
+  <h3>ROC-AUCの強みと注意点</h3>
+  <ul>
+    <li>モデルそのものの純粋な識別能力を、データの偏り（クラス不均衡）に左右されにくい状態で評価できる頑健性の高さ。</li>
+    <li>正例と負例を独立させて等しく扱っているぶん、モデルの基本的な予測性能が理解しやすい。</li>
+  </ul>
+  <p>だがビジネス場面においては、ROC-AUCだけでは判断材料不足な場合もある。</p>
+  <p>ビジネス場面では、</p>
+  <ul>
+    <li>正例の予測が重要なことが多い（買わないと予測して正解だったとしても、買うとの予測ほどには利潤や事業成長に直結しにくい）。</li>
+    <li>予測対象はクラス不均衡なことも多い（自社の特定商品購入者は市場のごく一部など、正例と負例の出現率は偏りがち）。</li>
+    <li>負例が多すぎると、FPRは（分母が多すぎて）値が小さくなることで、ROC曲線が左上に張り付き、優秀なモデルに見えてしまう。</li>
+    <li>FPRの分子（FP: 買うと予測したが間違ってた数）が多いモデルをもとに施策をおこなうと、空振りのぶんだけコストがかさむ。</li>
+  </ul>
+  <p>そこで、</p>
+  <ul>
+    <li>確実に買いそうな人だけに絞ってコストを抑えたい施策もあることを考慮したい。</li>
+    <li>つまり、正例に注視したい。</li>
+  </ul>
+  <p>となると、Recallは据え置きつつ、正例を正確に予測したい→Precisionも重視したい、との観点が台頭してくる。</p>
+  <h3>PR曲線</h3>
+  <p>PR曲線（Precision-Recall Curve）は、分類のしきい値を変化させたときの、</p>
+  <ul>
+    <li>
+      <p>Precision: 正例と予測した対象のうち、実際に正例だった割合</p>
+    </li>
+    <li>
+      <p>Recall: 実際は正例の対象のうち、正しく正例と予測できた割合
+        の関係を表した曲線。これを2次元の平面に表現する。</p>
+    </li>
+    <li>
+      <p>Precision（縦軸）: 買う予測はなるべく外さないことでムダ打ちを少なくしたい</p>
+    </li>
+    <li>
+      <p>Recall（横軸）: 取りこぼしは少なくしたい</p>
+    </li>
+  </ul>
+  <div class="term">PR曲線の特性</div>
+  - 正例を対象とした施策を考える場合に、PrecisionとRecallのバランスを直接確認できる。
+  - 特にクラス不均衡が大きい分類問題では有用。
+
+
+  <h3>PR-AUC / Average Precision</h3>
+  <p>PR曲線を描いて、その下の面積を全部足し算（積分）した値。その代表的な方法がPR-AUCだけども、<strong>「PR-AUC」と「Average Precision（AP）」は同じものとは限らない</strong>ことに注意。
+  </p>
+  <p>
+    Precision-Recall曲線の面積を単純に台形公式などで計算する方法と、scikit-learnのaverage_precision_scoreのように、Recallの変化量を重みとしてPrecisionを平均する方法では、結果が異なる場合がある。
+  </p>
+  <p>なので、PR-AUCという言葉だけで済ませず、どの方法で曲線を要約した値なのかを示す、確認するのも大事。</p>
+  <h3>ROC-AUCとPR-AUCの使い分け</h3>
+  <p>どちらが優れているというものではなく、注目するポイントが異なる。</p>
+  <img src="../images/roc_pr_curve.jpg" alt="ROC曲線とPR曲線">
+
+
+  <table>
+    <thead>
+      <tr>
+        <th align="left"></th>
+        <th align="left">ROC-AUC</th>
+        <th align="left">PR-AUC</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">注目するもの</td>
+        <td align="left">正例と負例の識別能力</td>
+        <td align="left">正例をどれだけ正確に拾えるか</td>
+      </tr>
+      <tr>
+        <td align="left">縦軸</td>
+        <td align="left">Recall（TPR）</td>
+        <td align="left">Precision</td>
+      </tr>
+      <tr>
+        <td align="left">横軸</td>
+        <td align="left">FPR</td>
+        <td align="left">Recall</td>
+      </tr>
+      <tr>
+        <td align="left">クラス不均衡</td>
+        <td align="left">影響を受けにくい</td>
+        <td align="left">正例割合の影響を受ける</td>
+      </tr>
+      <tr>
+        <td align="left">向いている場面</td>
+        <td align="left">全体的な識別能力を確認したい</td>
+        <td align="left">正例が少なく、正例の予測精度を重視したい</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>今回のサンプル事例のように、「明日ラテを買う可能性が高い人を見つけ、その人たちに何らかの施策をおこなう」という用途なら、PrecisionとRecallのバランスは特に重要。</p>
+  <p>そのため、ROC-AUCだけで「このモデルは良い」と判断するのではなく、PR曲線やPR-AUCも確認する必要がある。</p>
+  <p>さらに実際の施策では、</p>
+  <ul>
+    <li>1人にアプローチするコスト</li>
+    <li>1人が購入した場合の利益</li>
+    <li>取りこぼしによる機会損失</li>
+    <li>どの程度の人数まで施策対象にできるか
+      なども考慮して、最終的なしきい値を決めることになる。</li>
+  </ul>
+  <p>評価指標は、モデルに「何点だったか」を付けるためだけのものではない。「このモデルを実際にどう使うのか」を考え、その目的に合った指標を選ぶことが重要。</p>
+  <footer id="footer">
+    <div class="footer-links">
+      <a href="https://sasasakaz.github.io/">🏠 Home</a>
+      <span class="separator">|</span>
+      <a href="#header">Back to Top</a>
+    </div>
+    <p>Author: sasasakaz</p>
+  </footer>
+</body>
+
+</html>
