@@ -221,6 +221,7 @@ FN (False Negative): 665 件
     </ul>
   </div>
 
+  <br>
   <div class="mdc-note-box">
 
     <p>PrecisionとRecallからF1へのつながり </p>
@@ -289,13 +290,13 @@ FN (False Negative): 665 件
   <p><span class='inline-code'>MCC = (TP × TN − FP × FN) / √{(TP + FP)(TP + FN)(TN + FP)(TN + FN)}
     </span></p>
   <pre><code class="language-python">mcc = (tp * tn - fp * fn) / math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
-# 一気に計算する場合、4セルいずれかに0があったときに0除算でエラーになる
+# 一気に計算する場合、モデルが全員を同じクラスに予測した時などに、分母が0になるケースがある
 
 # 分子の計算: (TP * TN) - (FP * FN)
 mcc_numerator = (tp * tn) - (fp * fn)
 # 分母の計算: sqrt((tp+fp) * (tp+fn) * (tn+fp) * (tn+fn))
 mcc_denominator = math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
-# 分母が0の場合はMCCを0とする（慣例的な処理）
+# 分母が0の場合はMCCを0とする（ライブラリ次第）
 if mcc_denominator == 0:
     mcc = 0
 else:
@@ -371,23 +372,23 @@ print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
         <td align="left">Precisionの裏に相当。負例にあまり関心がない場面では影が薄い。精密機器の良品判定（不良品と予測して実際に不良品でした）などで有用。</td>
       </tr>
       <tr>
-        <td align="left">FDR (False Discovery Rate)</td>
-        <td align="left">FP / (TP + FP)</td>
-        <td align="left">正例と予測した対象のうち、実際は負例だった割合（偽発見率）</td>
-        <td align="left">分母はPrecisionと同じ。Precisionの余事象に相当（FDR = 1 - Precision）。</td>
-      </tr>
-      <tr>
         <td align="left">Specificity</td>
         <td align="left">TN / (TN + FP)</td>
         <td align="left">実際は負例の対象のうち、正しく負例と予測できた割合（真陰性率）。</td>
         <td align="left">Recallの裏に相当する。スパム判定（大事なメールを間違えてゴミ箱に入れない）などで有用。負例を精度高く予想したい、負例を正しく負例としたいときに。</td>
       </tr>
       <tr>
+        <td align="left">FDR (False Discovery Rate)</td>
+        <td align="left">FP / (TP + FP)</td>
+        <td align="left">正例と予測した対象のうち、実際は負例だった割合（偽発見率）</td>
+        <td align="left">分母はPrecisionと同じ。Precisionの余事象に相当（FDR = 1 - Precision）。</td>
+      </tr>
+      <tr>
         <td align="left">FPR (False Positive Rate)</td>
         <td align="left">FP / (TN + FP)</td>
         <td align="left">実際は負例の対象のうち、誤って正例と予測した割合（偽陽性率）</td>
         <td align="left">分母はSpecificityと同じ。Specificityの余事象に相当（FPR = 1 -
-          Specificity）。のちほど登場する指標<strong>ROC-AUC</strong>に関わってくる。</td>
+          Specificity）。のちほど登場する指標<strong>ROC曲線、ROC-AUC</strong>に関わってくる。</td>
       </tr>
       <tr>
         <td align="left">FNR (False Negative Rate)</td>
@@ -401,66 +402,26 @@ print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
   </table>
 
 
+  <div class="term">Cohen's Kappa（カッパ係数）</div>
 
-
-
-
+  <p>
+    MCC同様に実際のクラスと予測クラスの一致度を評価する指標。違いは、偶然による一致を考慮する点。実際と予測が一致したのは、モデルの実力なのか、それともたまたまなのか。たまたま当たったぶん（期待値）を全体から引いて、純粋な予測の重みを評価する。
+  </p>
+  <p>クラスの出現率割合と予測割合から「偶然でもこれくらいは一致しそう」という一致率を考え、その分を差し引いて評価する。</p>
   <ul>
-    <li>Negative Predictive Value<ul>
-        <li>負例と予測した対象のうち、実際に負例だった割合（陰性的中率）</li>
-        <li>Negative Predictive Value = TN / (TN + FN)</li>
-        <li>Precisionの裏に相当。</li>
-        <li>負例にあまり関心がない場面では影が薄い。</li>
-        <li>精密機器の良品判定（不良品と予測して実際に不良品でした）などで有用。</li>
-      </ul>
-    </li>
-    <li>FDR(False Discovery Rate)<ul>
-        <li>正例と予測した対象のうち、実際は負例だった割合（偽発見率）</li>
-        <li>FDR = FP / (TP + FP) </li>
-        <li>分母はPrecisionと同じ。Precisionの余事象に相当（FDR = 1 - Precision）。</li>
-      </ul>
-    </li>
-    <li>Specificity(特異度)<ul>
-        <li>実際は負例の対象のうち、正しく負例と予測できた割合（真陰性率）。</li>
-        <li>Specificity = TN / (TN + FP)</li>
-        <li>Recallの裏に相当する。</li>
-        <li>スパム判定（大事なメールを間違えてゴミ箱に入れない）などで有用。</li>
-        <li>負例を精度高く予想したい、負例を正しく負例としたいときに。</li>
-      </ul>
-    </li>
-    <li>FPR(False Positive Rate)<ul>
-        <li>実際は負例の対象のうち、誤って正例と予測した割合（偽陽性率）</li>
-        <li>FPR = FP / (TN + FP) </li>
-        <li>分母はSpecificityと同じ。Specificityの余事象に相当（FPR = 1 - Specificity）</li>
-        <li>のちほど登場する指標<strong>ROC-AUC</strong>に関わってくる。</li>
-      </ul>
-    </li>
-    <li>FNR(False Negative Rate)<ul>
-        <li>実際は正例の対象のうち、誤って負例と予測した割合（偽陰性率）</li>
-        <li>FNR = FN / (TP + FN) </li>
-        <li>分母はRecallと同じ。Recallの余事象に相当（FNR = 1 - Recall）</li>
-        <li>見逃し（False Negative）がクリティカルに直結する（命に関わる）ような医療現場などで有用。</li>
-      </ul>
-    </li>
-    <li>Cohen&#39;s Kappa（カッパ係数）<ul>
-        <li>MCC同様に実際のクラスと予測クラスの一致度を評価する指標。違いは、偶然による一致を考慮する点。</li>
-        <li>実際と予測が一致したのは、モデルの実力なのか、それともたまたまなのか。たまたま当たったぶん（期待値）を全体から引いて、純粋な予測の重みを評価する。<ul>
-            <li>クラスの出現率割合と予測割合から「偶然でもこれくらいは一致しそう」という一致率を考え、その分を差し引いて評価する。</li>
-            <li>実測の一致率： 実際に予測が当たった割合（つまりAccuracy）。</li>
-            <li>偶然の一致率： 事実もモデルも、お互いデタラメに（でも出現率通りに）答えたときに、偶然重なっちゃう確率。</li>
-            <li>この2つを使って計算する。Kappa = (実際の一致率 − 偶然の一致率) / (1 − 偶然の一致率)</li>
-            <li>Cohen&#39;s Kappaのとる範囲は-1から1の間。</li>
-            <li>1: 完全な一致（予測が当たったのは全てモデルの実力）。</li>
-            <li>0: 偶然による一致と同程度（偶然当たってるだけ。目をつぶって選んでるのと変わらない）。</li>
-            <li>0未満：偶然よりも一致度が低い（偶然よりも当たってない。逆にすごい）。</li>
-          </ul>
-        </li>
-        <li>施策自体には活かしにくいのと、以下の問題点がある。</li>
-        <li>問題点: クラス不均衡やクラスの出現率によって値が影響を受ける場合がある。偶然一致率の補正が直感的に解釈しにくい。不均衡データの分類性能評価で万能な指標とは言いにくく、実務ではMCCやPrecision /
-          Recall系の指標と併せて確認することが多い。</li>
-      </ul>
-    </li>
+    <li>実測の一致率： 実際に予測が当たった割合（つまりAccuracy）。</li>
+    <li>偶然の一致率： 事実もモデルも、お互いデタラメに（でも出現率通りに）答えたときに、偶然重なっちゃう確率。</li>
+    <li>この2つを使って計算する。Kappa = (実際の一致率 − 偶然の一致率) / (1 − 偶然の一致率)</li>
   </ul>
+  <p>Cohen&#39;s Kappaのとる範囲は-1から1の間。</p>
+  <ul>
+    <li>1: 完全な一致（予測が当たったのは全てモデルの実力）。</li>
+    <li>0: 偶然による一致と同程度（偶然当たってるだけ。目をつぶって選んでるのと変わらない）。</li>
+    <li>0未満：偶然よりも一致度が低い（偶然よりも当たってない。逆にすごい）。</li>
+  </ul>
+  <p>ただし、クラスの偏りや予測割合によって値が影響を受ける場合があり、機械学習の分類性能評価では、MCCやBalanced Accuracy、Precision/Recall系の指標のほうが解釈しやすいことが多い。</p>
+
+
   <pre><code class="language-python"># 1. 数値をセット
 total = tp + tn + fp + fn
 
@@ -645,7 +606,7 @@ D 0.60（実際：1）
     <ul>
       <li>1.0: 正例と負例を完全に識別できる</li>
       <li>0.5: ランダム（でたらめ）な順位付けと同程度</li>
-      <li>0.5未満: 逆方向に順位付けしている と解釈できる。</li>
+      <li>0.5未満: 逆方向に順位付けしている傾向がある と解釈できる。</li>
     </ul>
     <p>以下のような解釈も成り立つ。</p>
     <ul>
@@ -690,14 +651,11 @@ D 0.60（実際：1）
 
   <p>PR曲線（Precision-Recall Curve）は、分類のしきい値を変化させたときの、</p>
   <ul>
-    <li>Precision: 正例と予測した対象のうち、実際に正例だった割合</li>
-    <li>Recall: 実際は正例の対象のうち、正しく正例と予測できた割合</li>
+    <li>Precision: 正例と予測した対象のうち、実際に正例だった割合（縦軸）</li>
+    <li>Recall: 実際は正例の対象のうち、正しく正例と予測できた割合（横軸）</li>
   </ul>
   <p>の関係を表した曲線。これを2次元の平面に表現する。</p>
-  <ul>
-    <li>Precision（縦軸）: 買う予測はなるべく外さないことでムダ打ちを少なくしたい</li>
-    <li>Recall（横軸）: 取りこぼしは少なくしたい</li>
-  </ul>
+  <p>上に行くほど、（買う予測はなるべく外さないことで）ムダ打ちが少なく、右に行くほど取りこぼしが少ない。</p>
 
   <div class="term">PR曲線の特性</div>
   <ul>
@@ -726,8 +684,8 @@ D 0.60（実際：1）
     <thead>
       <tr>
         <th align="left"></th>
-        <th style="width: 45%" align="left">ROC-AUC</th>
-        <th style="width: 45%" align="left">PR-AUC</th>
+        <th style="width: 40%" align="left">ROC-AUC</th>
+        <th style="width: 40%" align="left">PR-AUC</th>
       </tr>
     </thead>
     <tbody>
