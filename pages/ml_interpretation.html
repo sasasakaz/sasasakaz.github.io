@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>機械学習モデルの解釈</title>
+  <link href='https://sasasakaz.github.io/pages/ml_interpretation.html' rel='canonical'>
+  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <meta name="description"
+    content="機械学習モデルがどの特徴量をどのように判断に利用しているのかを解説。Feature Importance、SHAP、PDP、ICEなど、モデルの予測を解釈する代表的な手法を紹介します。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="機械学習モデルの解釈">
+  <meta property="og:description"
+    content="機械学習モデルがどの特徴量をどのように判断に利用しているのかを解説。Feature Importance、SHAP、PDP、ICEなど、モデルの予測を解釈する代表的な手法を紹介します。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_interpretation.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+
+  <!-- Google Tag Manager -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script><!-- End Google Tag Manager -->
+
+  <link rel="stylesheet" href="page_common.css">
+
+  <!-- syntax highlighter start -->
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css' rel='stylesheet' />
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'></script>
+  <script>hljs.highlightAll();</script>
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+</head>
+
+<body>
+  <header id="header">
+    <h1>機械学習モデルの解釈</h1>
+
+    <p>Accuracy, Precision, Recall,
+      F1,ROC曲線,PR曲線などは、モデルの予測精度、識別性能を評価する指標。だが、高い予測精度を求めて複雑なモデルを使うほど、「なぜその予測になったのか」「モデルがどのような特徴量を利用しているのか」がわかりにくくなってくる。ここでは、モデルの解釈をするための以下を紹介。
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th align="left"></th>
+          <th align="left">表すもの</th>
+          <th align="left">何のためか</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td align="left">PFI</td>
+          <td align="left">特徴量の値をシャッフルしたとき、モデルの予測精度がどれだけ低下するか</td>
+          <td align="left">特徴量の重要度を知る</td>
+        </tr>
+        <tr>
+          <td align="left">SHAP</td>
+          <td align="left">特徴量が予測をどの方向に、どれくらい動かしたか</td>
+          <td align="left">予測の理由を考える、理解する</td>
+        </tr>
+        <tr>
+          <td align="left">PDP / ICE</td>
+          <td align="left">ある特徴量を変化させると、平均的に予測がどう変化するか / その変化が個々のデータではどう異なるか</td>
+          <td align="left">特徴量と予測値の関係を知る</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>いずれも、モデルのチューニング、特徴量の見直し、その後の施策への提案、仮説の構築
+      などに役立てることができる。</p>
+    <pre><code>&lt;div class=&quot;mdc-note-box&quot;&gt;
+
+  &lt;p&gt;サンプル事例&lt;/p&gt;
+  &lt;ul&gt;
+    &lt;li&gt;カフェチェーンの顧客別購入データが約3ヶ月分ある。&lt;/li&gt;
+    &lt;li&gt;誰がラテを購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。&lt;/li&gt;
+    &lt;li&gt;予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;blockquote&gt;
+    &lt;pre&gt;
+</code></pre>
+    <p>Python 3.11.15
+      OS macOS-26.5.1-arm64-arm-64bit
+      pandas 3.0.2
+      numpy 2.4.3
+      matplotlib 3.10.9
+      seaborn 0.13.2
+      scikit-learn 1.8.0
+      shap 0.51.0
+      lightgbm 4.6.0
+      </pre>
+      </blockquote>
+      </div>
+    </p>
+  </header>
+
+
+  <h2>PFI（Permutation Feature Importance）</h2>
+  <p><strong>特徴量の重要度を知る</strong> </p>
+  <ul>
+    <li>
+      <p>特徴量が、モデルの予測にどの程度「重要な役割を果たしたか」を表す指標。</p>
+    </li>
+    <li>
+      <p>ある特徴量の値を<strong>シャッフル</strong>（してその特徴量が使いものにならない状態に）したときに、モデルの評価指標がどれだけ悪化するか、この悪化度合いを重要度とみなしている。</p>
+    </li>
+    <li>
+      <p>重要度の低い特徴量を削減する候補として検討したり、重要度の高い特徴量を後述の手法で重点的に確認したりするなど、モデルの改善や特徴量の見直しに役立つ。</p>
+    </li>
+    <li>
+      <p>特徴量の重要度がドメイン知識に沿っているかを確認することで、適切なモデルになっているかのチェックにもなる。</p>
+      <img src="../images/pfi.jpg" alt="pfiグラフ">
+    </li>
+  </ul>
+  <p>モデルの評価指標は、scoringで指定する。それに応じて「重要」の意味合いは変わる。</p>
+  <ul>
+    <li>roc-auc: 各特徴量をシャッフルすることで、正例と負例の識別能力がどれだけ低下するか（サンプル事例ではこれを採用）。</li>
+    <li>他にaverage_precision（PR-AUC）, neg_log_loss（LogLoss）, f1, precision, recall, neg_mean_squared_error（MSE）,
+      neg_root_mean_squared_error（RMSE）, r2などもある。</li>
+    <li>未指定時は、モデル（estimator）のスコア計算メソッド（.score()）が自動的に使用される（分類モデルではAccuracy 正解率が、回帰モデルではR2 決定係数が使われる）。</li>
+  </ul>
+  <h3>PFIの注意点</h3>
+  <p>特徴量が相関している場合に弱い: 特徴量同士に強い相関がある場合、片方をシャッフルしても、もう一方が補ってしまうため、どちらの特徴量も重要度が低く出ることがある（重要度を過小評価してしまう）。</p>
+  <p>非現実的なデータが生成される可能性: データをランダムにシャッフルするため、「雪が降っているのに気温35度」みたいな、現実にはあり得ないデータの組み合わせで評価してしまうことがある。</p>
+  <p>これらへの対処策の一つとして、強く相関する特徴量や、セットにした方が解釈しやすくなる特徴量をグループとしてまとめて、一緒にシャッフルして重要度を見る、Grouped Permutation Feature
+    Importanceという方法もある。</p>
+  <div class="mdc-note-box">
+
+    <p>Feature Importance（feature_importances_）について。</p>
+    <p>Random ForestやGBDT系の決定木モデルでは、分割に使われた回数や、分割による目的関数の改善度合いなどから、（PFIとは違う意味合いでの）モデル内部の特徴量重要度を算出できる。</p>
+    <p>便利な一方で、モデル内部の学習プロセスに依存した指標のため、必ずしも予測性能への寄与と一致しないという弱点が指摘されている。</p>
+  </div>
+
+
+  <h3>PFIではわからないこと</h3>
+  <p>PFIはモデルの全体像を把握するのに便利な一方で、わからないこともある。</p>
+  <ul>
+    <li>その特徴量の値が高いと、予測は上がるのか、下がるのか</li>
+    <li>その特徴量は、どの程度予測値を動かしているのか</li>
+    <li>その特徴量の影響度合いは、顧客Aと顧客Bでは同じなのか</li>
+    <li>各インスタンスの予測値は、なぜその結果になったのか</li>
+  </ul>
+  <p>これらに応えるのが次の指標。</p>
+  <h2>SHAP（SHapley Additive exPlanations）</h2>
+  <p><strong>予測の理由を考える、理解する</strong></p>
+  <ul>
+    <li>各特徴量が、予測にどれだけ影響を与えているか（寄与度）を表す指標。</li>
+    <li>平均的な予測値を出発点（ベースライン）として、各インスタンスの予測値がそこからどのように変化したかを、特徴量ごとに分解している（寄与度を各特徴量に割り当てる）。</li>
+    <li>なので、インスタンスごとの寄与度合いだけでなく、これを集約することでモデル全体の傾向も把握できる。</li>
+    <li>モデルがそのように予測した理由を説明したい、各特徴量が予測にどのように影響するかを理解したい場合に役立つ。</li>
+  </ul>
+  <h3>SHAP bar</h3>
+  <p>各特徴量の予測値への平均的な寄与度を表す。</p>
+  <ul>
+    <li>SHAP値の絶対値の平均 Mean Absolute SHAP Value）: モデルの出力への平均的な影響度（※）</li>
+    <li>並び順は寄与度の絶対値の平均値の大きさ順。その特徴量が予測値（サンプル事例の場合は購入する/しない）をどれだけ大きく動かしたか。</li>
+    <li>予測値にプラスに効くかマイナスに効くかはこのグラフではわからない。</li>
+  </ul>
+  <div class="mdc-note-box">
+
+    <p>※SHAP値が何をどの尺度で表しているかは、モデルやExplainerの設定によって異なる。二値分類モデルでは、設定によって予測確率そのものではなく、log-odds上の変化として表される場合がある。</p>
+    <p>サンプル事例では、特徴量の値の変化が、モデルの予測対数オッズ（log-odds 確率の対数比）に与える影響度合い。</p>
+  </div>
+
+  <img src="../images/shap_bar.jpg" alt="shap_barグラフ">
+
+  <p>PFIは予測誤差の悪化度合いを重要度としており、SHAP barは各観測値における予測への寄与の絶対値を集計したもの。見ているものが異なるため、特徴量の順位が一致するとは限らない。</p>
+  <h3>SHAP beeswarm</h3>
+  <p>各特徴量について、値が高い場合・低い場合に、予測がどちらの方向へ動きやすいか。また、その影響にどの程度ばらつきがあるか（SHAP値の分布）を表す。</p>
+  <ul>
+    <li>
+      <p>予測値への寄与度の方向性: 0より右はベースラインから予測を押し上げ、左は押し下げている。</p>
+    </li>
+    <li>
+      <p>寄与度の大きさ: 色で表す。一般的な表示では、赤は特徴量の値が高い、青は低い。</p>
+      <img src="../images/shap_beeswarm.jpg" alt="shap_beeswarmグラフ">
+    </li>
+  </ul>
+  <h3>SHAP waterfall</h3>
+  <p>ある顧客が「ラテを購入する確率が高い」と予測されたのは、どの特徴量が予測を押し上げ、どの特徴量が押し下げたのかを表す。</p>
+  <p>下図の場合は「赤が長いほど買う確率を大きく上げ、青が長いほど下げる」と読む。</p>
+  <img src="../images/shap_waterfall.jpg" alt="shap_waterfallグラフ">
+
+
+
+  <h3>SHAP Dependence Plot</h3>
+  <p>特徴量の値とSHAP値の関係を散布図（scatter）で表す。</p>
+  <ul>
+    <li>
+      <p>指定した特徴量について、横軸に特徴量の値、縦軸にSHAP値をプロットする。</p>
+    </li>
+    <li>
+      <p>後述のPDPが「特徴量の値を仮想的に変化させたときの予測値」を見るのに対し、SHAP Dependence
+        Plotは「実際の観測値において、その特徴量が予測にどれだけ寄与したか」を散布図で見る。そして、個々のデータのバラツキが見える」ので、例えばある値を超えるとその特徴量の寄与がプラス側に大きく変わる、といった非線形な動きが見えやすい。
+      </p>
+    </li>
+    <li>
+      <p>基本的にはもっとも交互作用の強い特徴量を探して色付けしてくれる。そのため、予期せぬ発見がある（設定やデータの素性次第では一番強いものが選ばれない場合があったり、直接指定もできる）。</p>
+      <img src="../images/shap_scatter.jpg" alt="shap_scatterグラフ">
+    </li>
+  </ul>
+  <h3>SHAPの注意点</h3>
+  <ul>
+    <li>因果関係ではない</li>
+    <li>相関した特徴量がある場合、寄与度の解釈に注意</li>
+    <li>計算方法や背景データによって解釈が変わり得る</li>
+  </ul>
+  <p>では、もしもその特徴量の値を変化させたら、モデルの予測はどう変わるのか？これに応えるのが次の指標。</p>
+  <h2>PDPとICE</h2>
+  <p><strong>特徴量と予測値の関係を知る</strong></p>
+  <ul>
+    <li>特定の特徴量の値を変化させたとき、予測がどう変わる（動く）かを表す指標。<ul>
+        <li>PDP（Partial Dependence Plot）: 「平均的な」推移。</li>
+        <li>ICE（Individual Conditional Expectation）: 個人単位の反応曲線。</li>
+      </ul>
+      <ol>
+        <li>あるインスタンスを取り出して、hoge以外の特徴量は固定して、hogeの値を変化させながらモデルに予測させる。</li>
+        <li>予測値の推移を線でつなげる。これがICE（kind=&#39;individual&#39;）。</li>
+        <li>多数のインスタンスについて繰り返し、その平均を取ったものがPDP（kind=&#39;average&#39;）。</li>
+        <li>kind=&#39;both&#39; を指定すると、ICEとPDPを同じグラフに重ねて表示できる。</li>
+      </ol>
+    </li>
+    <li>例えば「来店回数が一定以上になると、購入確率が急激に上昇する」といった非線形な関係が把握しやすい。</li>
+    <li>「hogeの値がfuga以上だと予測値（購入確率）が上がりやすそう」といった直感的な説明、具体的な提案に向いている。</li>
+  </ul>
+  <table>
+    <thead>
+      <tr>
+        <th align="left"></th>
+        <th align="left">SHAP</th>
+        <th align="left">PDP</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">基本的な問い</td>
+        <td align="left">この予測に何がどれだけ寄与したか</td>
+        <td align="left">この特徴量を変えると予測はどう変わるか</td>
+      </tr>
+      <tr>
+        <td align="left">見るもの</td>
+        <td align="left">実際の観測値における予測への寄与度</td>
+        <td align="left">モデルの仮想的な反応（シミュレーション）</td>
+      </tr>
+      <tr>
+        <td align="left">基本単位</td>
+        <td align="left">各インスタンスの観測値</td>
+        <td align="left">特徴量の値</td>
+      </tr>
+      <tr>
+        <td align="left">全体を見る方法</td>
+        <td align="left">SHAP値を集約</td>
+        <td align="left">全観測値の予測を平均</td>
+      </tr>
+      <tr>
+        <td align="left">個別を見る方法</td>
+        <td align="left">Waterfallなど</td>
+        <td align="left">ICE</td>
+      </tr>
+    </tbody>
+  </table>
+  <h3>PDPの注意点</h3>
+  <p>PDPは、他の特徴量は各観測値の値をそのまま維持したまま、注目する特徴量だけを「仮想的に」変更している（その予測値を平均化している）。</p>
+  <p>これにより、特徴量間に強い相関がある場合には、特に特徴量の分布の端やデータ密度の低い領域では、現実にはほとんど存在しない特徴量の組み合わせに基づく予測が含まれる可能性がある。</p>
+  <p>つまり、実際にはインスタンスが数件しか存在しない、データ密度が低く、実際の観測データによる裏付けが弱い領域があっても、PDPは1本の線で表現してしまう。</p>
+  <p>→ グラフ下部のRug plot（データの密度を表すヒゲ）も参照しながら解釈する。</p>
+  <p>また、平均化によって個体差が消える。例えば、若年層とシニア層で反応が真逆になるような重要な交互作用（不均一性）は見えない。</p>
+  <p>→ SHAPの散布図（Dependence Plot）で縦の広がりがないかを見たり、後述のICEを見るなどで回避する。</p>
+  <p>この平均的な変化は、すべてのインスタンスに共通しているのか？を把握するにはICEを見る。</p>
+  <h3>ICEを眺める意義</h3>
+  <ul>
+    <li>インスタンス1つ1つの予測の動きを細い線で表す。</li>
+    <li>平均的な傾向だけでは見えない違いを確認するため。</li>
+  </ul>
+  <p>以下の3つの重要な異常やインサイトを見抜くために使う。</p>
+  <ol>
+    <li>インスタンスによって反応が異なるかどうかを確認する<ul>
+        <li>PDP（平均）は平坦で、その特徴量は効いていないように見えても、あるグループでは上昇、別のグループでは下降ということがあり得る。</li>
+        <li>例えば、ICEのほとんどがPDP（平均）と似た形状であれば、その特徴量は、このデータの範囲では、他の特徴量による影響の違いが比較的小さいモデルだと解釈しやすい。</li>
+        <li>逆に、線が上下に散らばっているようなら、他の特徴量との相互作用や、個体ごとの条件によってモデルの反応が異なる可能性がある（なにか複雑な非線形関係がありそう）と、モデルの判断の複雑さをつかみやすい。</li>
+      </ul>
+    </li>
+    <li>特徴量間の相互作用の可能性を見る<ul>
+        <li>ICEの線の形がインスタンスによって大きく異なる場合、他の特徴量によって、その特徴量の影響が変化している可能性がある。</li>
+        <li>
+          例えば、特徴量（会員登録からの日数）でプロットしたときに、右肩上がりICEと右肩下がりICEの二手に分かれているとする。これはひょっとすると、会員ランク（ヘビーorライトユーザーか）でモデルの判断が真逆になってるのでは？といったセグメンテーションのヒントに気づきやすい。
+        </li>
+      </ul>
+    </li>
+    <li>局所的な不自然な挙動を発見する<ul>
+        <li>一部のデータだけが極端な変化をする場合、「データが少ない領域」「木による局所的な分割」「過学習の可能性」などを確認するきっかけになる。</li>
+        <li>例えば、99%の人は平らなのに、たった2〜3本の線だけが特定の数値のところで不自然にカクンと絶壁のように跳ね上がっているような局所的なバグ（過学習のスパイク）が視覚的に見つけやすい。</li>
+      </ul>
+    </li>
+  </ol>
+  <h3>PDPとICEの使い分け</h3>
+  <ol>
+    <li>まずは、SHAP上位hoge個について、PDPで全体の傾向を見る。</li>
+    <li>次に、気になる特徴量はICEを重ねて、インスタンスごとの差や相互作用の可能性を確認する。</li>
+  </ol>
+  <footer id="footer">
+    <div class="footer-links">
+      <a href="https://sasasakaz.github.io/">🏠 Home</a>
+      <span class="separator">|</span>
+      <a href="#header">Back to Top</a>
+    </div>
+    <p>Author: sasasakaz</p>
+  </footer>
+</body>
+
+</html>
