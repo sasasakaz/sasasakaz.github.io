@@ -60,6 +60,13 @@ img {
 }
 
 
+.toc {
+  border: 1px solid #ddd;
+  border-radius: 0.5em;
+  padding: 1em 1.5em;
+  margin: 2em 0;
+}
+
 .book-promo {
   width: 300px;
   max-width: 100%;
