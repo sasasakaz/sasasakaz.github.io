@@ -61,11 +61,20 @@ img {
 
 
 .toc {
-  border: 1px solid #ddd;
+  border: 1px solid #d0e7f5;
   border-radius: 0.5em;
   padding: 1em 1.5em;
   margin: 2em 0;
 }
+
+.toc h2 {
+  margin-top: 0;
+}
+
+.toc ul {
+  margin-bottom: 0;
+}
+
 
 .book-promo {
   width: 300px;

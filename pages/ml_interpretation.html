@@ -101,14 +101,13 @@ lightgbm 4.6.0
   </header>
 
 <nav class="toc">
+<h2>目次</h2>
   <ul>
     <li><a href="#pfi">PFI（Permutation Feature Importance）</a></li>
     <li><a href="#shap">SHAP（SHapley Additive exPlanations）</a></li>
     <li><a href="#pdp-ice">PDPとICE</a></li>
   </ul>
 </nav>
-
-
 
 
   <h2 id="pfi">PFI（Permutation Feature Importance）</h2>
@@ -132,8 +131,8 @@ lightgbm 4.6.0
 
 
   <h3>PFIの注意点</h3>
-  <p>**特徴量が相関している場合に弱い:** 特徴量同士に強い相関がある場合、片方をシャッフルしても、もう一方が補ってしまうため、どちらの特徴量も重要度が低く出ることがある（重要度を過小評価してしまう）。</p>
-  <p>**非現実的なデータが生成される可能性:** データをランダムにシャッフルするため、「雪が降っているのに気温35度」みたいな、現実にはあり得ないデータの組み合わせで評価してしまうことがある。</p>
+  <p><strong>特徴量が相関している場合に弱い:</strong> 特徴量同士に強い相関がある場合、片方をシャッフルしても、もう一方が補ってしまうため、どちらの特徴量も重要度が低く出ることがある（重要度を過小評価してしまう）。</p>
+  <p><strong>非現実的なデータが生成される可能性:</strong> データをランダムにシャッフルするため、「雪が降っているのに気温35度」みたいな、現実にはあり得ないデータの組み合わせで評価してしまうことがある。</p>
   <p>これらへの対処策の一つとして、強く相関する特徴量や、セットにした方が解釈しやすくなる特徴量をグループとしてまとめて、一緒にシャッフルして重要度を見る、Grouped Permutation Feature
     Importanceという方法もある。</p>
   <div class="mdc-note-box">
