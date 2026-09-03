@@ -67,6 +67,7 @@
         <li><a href="#roc-auc">ROC-AUC</a></li>
         <li><a href="#roc-auc-caution">ROC-AUCの強みと注意点</a></li>
         <li><a href="#pr-curve">PR曲線</a></li>
+        <li><a href="#pr-auc">PR-AUC</a></li>
         <li><a href="#auc-metric-usage">ROC-AUCとPR-AUCの使い分け</a></li>
       </ul>
     </ul>
@@ -648,7 +649,7 @@ D 0.60（実際：1）
 
   <h3 id="roc-auc-caution">ROC-AUCの強みと注意点</h3>
   <ul>
-    <li>正例と負例を独立させて等しく扱っているぶん、モデルの基本的な予測性能（純粋な識別能力）が理解しやすい。</li>
+    <li>正例と負例を独立させて等しく扱っているぶん、<span class="inline-mark">モデルの基本的な予測性能（純粋な識別能力）</span>が理解しやすい。</li>
     <li>正例・負例それぞれの割合ではなく、両クラスをどれだけ区別できるかを見るため、クラス比率そのものの影響を受けにくい。</li>
   </ul>
   <p>だがビジネス場面においては、ROC-AUCだけでは判断材料不足な場合もある。</p>
@@ -673,7 +674,6 @@ D 0.60（実際：1）
 
 
   <h3 id="pr-curve">PR曲線</h3>
-
   <p>PR曲線（Precision-Recall Curve）は、分類のしきい値を変化させたときの、</p>
   <ul>
     <li>Precision: 正例と予測した対象のうち、実際に正例だった割合（縦軸）</li>
@@ -687,6 +687,32 @@ D 0.60（実際：1）
     <li>特にクラス不均衡が大きい分類問題では有用。</li>
   </ul>
 
+
+  <h3 id="pr-auc">PR-AUC</h3>
+  <p>ROC曲線を描いて、その下の面積を全部足し算（積分）した値。<span class="inline-mark">正例を見つける能力に焦点を当てた識別性能</span>を表す指標。</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th align="left">指標</th>
+        <th align="left">意味</th>
+        <th align="left">サンプル事例</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">ROC-AUC</td>
+        <td align="left">モデルの基本的な予測性能（純粋な識別能力）</td>
+        <td align="left">購入者と非購入者を全体としてどれだけうまく識別できるか</td>
+      </tr>
+      <tr>
+        <td align="left">PR-AUC</td>
+        <td align="left">正例を見つける能力に焦点を当てた識別性能</td>
+        <td align="left">購入者を見つけるときに、どれだけ効率よく購入者を拾えるか</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>※効率よく＝正例を多く見つけながら、誤検出をどれだけ抑えられるか</p>
 
   <div class="mdc-note-box">
 
