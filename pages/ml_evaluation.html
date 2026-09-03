@@ -43,35 +43,60 @@
 <body>
   <header id="header">
     <h1>機械学習の評価指標</h1>
-
-    <p>機械学習のモデルをどう評価するか。ここでは2値分類を中心に「分類性能の評価」「閾値によらない識別性能」について代表的な評価指標を。</p>
-    <div class="mdc-note-box">
-
-      <p>サンプル事例</p>
-      <ul>
-        <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
-        <li>誰がラテを購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
-        <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
-      </ul>
-      <blockquote>
-        <pre>
-Python 3.11.15
-OS macOS-26.5.1-arm64-arm-64bit
-pandas 3.0.2
-numpy 2.4.3
-matplotlib 3.10.9
-seaborn 0.13.2
-scikit-learn 1.8.0
-shap 0.51.0
-lightgbm 4.6.0
-</pre>
-      </blockquote>
-    </div>
-
+    <p>機械学習のモデルをどう評価するか。ここでは2値分類を中心に「分類性能の評価」「閾値によらない識別性能」について代表的な評価指標を紹介。</p>
   </header>
 
+  <nav class="toc">
+    <h2>目次</h2>
+    <ul>
+      <li><a href="#classification">分類性能の評価</a></li>
+      <ul>
+        <li><a href="#accuracy">Accuracy</a></li>
+        <li><a href="#precision">Precision</a></li>
+        <li><a href="#recall">Recall</a></li>
+        <li><a href="#pr-tradeoff">PrecisionとRecallのトレードオフ</a></li>
+        <li><a href="#f1-score">F1-score</a></li>
+        <li><a href="#mcc">MCC</a></li>
+        <li><a href="#balanced-accuracy">Balanced Accuracy</a></li>
+        <li><a href="#other-metrics">その他の指標</a></li>
+        <li><a href="#metric-usage">ここまでの指標をどう使い分けるか</a></li>
+      </ul>
+      <li><a href="#identification">閾値によらない識別性能</a></li>
+      <ul>
+        <li><a href="#roc-curve">ROC曲線</a></li>
+        <li><a href="#roc-auc">ROC-AUC</a></li>
+        <li><a href="#roc-auc-caution">ROC-AUCの強みと注意点</a></li>
+        <li><a href="#pr-curve">PR曲線</a></li>
+        <li><a href="#auc-metric-usage">ROC-AUCとPR-AUCの使い分け</a></li>
+      </ul>
+    </ul>
+  </nav>
 
-  <h2>分類性能の評価</h2>
+  <div class="mdc-note-box">
+
+    <p>サンプル事例</p>
+    <ul>
+      <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
+      <li>誰がラテを購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
+      <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
+    </ul>
+    <blockquote>
+      <pre>
+    Python 3.11.15
+    OS macOS-26.5.1-arm64-arm-64bit
+    pandas 3.0.2
+    numpy 2.4.3
+    matplotlib 3.10.9
+    seaborn 0.13.2
+    scikit-learn 1.8.0
+    shap 0.51.0
+    lightgbm 4.6.0
+    </pre>
+    </blockquote>
+  </div>
+
+
+  <h2 id="classification">分類性能の評価</h2>
   <p>
     モデルが最終的に「1」か「0」かを予測した結果を評価する。実際の結果と予測結果を組み合わせると、2×2の混同行列として整理できる。対角線上のセルが多いほど、正しく分類できた件数が多い。
   </p>
@@ -140,7 +165,7 @@ FN (False Negative): 665 件
   </blockquote>
 
 
-  <h3>Accuracy</h3>
+  <h3 id="accuracy">Accuracy</h3>
   <p>すべての予測対象のうち、正しく予測できた割合（正解率）。</p>
   <p><span class='inline-code'>Accuracy = (TP + TN) / (TP + TN + FP + FN)</span></p>
 
@@ -162,7 +187,7 @@ FN (False Negative): 665 件
   </ul>
 
 
-  <h3>Precision</h3>
+  <h3 id="precision">Precision</h3>
   <p>正例と予測した対象のうち、実際に正例だった割合（適合率）。</p>
   <p><span class='inline-code'>Precision = TP / (TP + FP)</span></p>
 
@@ -176,7 +201,7 @@ FN (False Negative): 665 件
   </div>
 
 
-  <h3>Recall</h3>
+  <h3 id="recall">Recall</h3>
   <p>実際は正例の対象のうち、正しく正例と予測できた割合（再現率）。</p>
   <p><span class='inline-code'>Recall = TP / (TP + FN)</span></p>
 
@@ -190,7 +215,7 @@ FN (False Negative): 665 件
   </div>
 
 
-  <h3>PrecisionとRecallのトレードオフ</h3>
+  <h3 id="pr-tradeoff">PrecisionとRecallのトレードオフ</h3>
   <p>2値分類モデルは基本的に、正例である確率（0.0〜1.0）を出力する。これを人間が判断しやすい二択のラベル（0/1）に振り分けてる。</p>
   <p>
     しきい値（threshold）を0.5（一般的なデフォルト値）にするとは、すなわち、確率0.5以上は「1:購入する」と予測、確率0.5未満は「0:購入しない」と予測したものとみなす、という意味。なお0.5は「正例と予測する確率が半分以上」という直感的な（自然な）基準であり、常に最適なしきい値というわけではない。
@@ -208,7 +233,7 @@ FN (False Negative): 665 件
       class='inline-mark'>「何のための予測なのか」「何を重視したいのか」が明確になってないと、モデルの評価、判断もしにくい。</span></p>
 
 
-  <h3>F1-score</h3>
+  <h3 id="f1-score">F1-score</h3>
   <p>PrecisionとRecallの両方を考慮したい場合に。</p>
   <p><span class='inline-code'>F1 = 2 * (Precision * Recall) / (Precision + Recall)</span></p>
 
@@ -283,7 +308,7 @@ FN (False Negative): 665 件
   </div>
 
 
-  <h3>MCC</h3>
+  <h3 id="mcc">MCC</h3>
   <p>「このモデルは、正例と負例を本当に区別できているのか？」を確認したいときに役立つ指標。</p>
   <p>Precision, Recall, F1-scoreは主に正例に注目した指標。対してMCCは、混同行列の4セルすべてを使って、実際のクラスと予測クラスの一致関係を評価する指標（実際と予測の相関係数）。Matthews
     Correlation Coefficient</p>
@@ -326,7 +351,7 @@ print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
   <p>正例と負例の両方を考慮するため、クラス不均衡な場合にも、モデルの分類性能をシビアに評価しやすい（多数派のクラスで正答を稼いだ高Accuracyなモデルでも、MCCは高くなりにくい）。</p>
 
 
-  <h3>Balanced Accuracy</h3>
+  <h3 id="balanced-accuracy">Balanced Accuracy</h3>
   <p>クラス不均衡でも、正解率をシンプルかつ公平に評価したい場合に（均衡正解率）。</p>
   <p><span class='inline-code'>Balanced Accuracy = (Recall + Specificity) / 2</span></p>
   <p>Specificity(特異度) : 実際は負例の対象のうち、正しく負例と予測できた割合（真陰性率） <span class='inline-gray'>Specificity = TN / (TN + FP)</span>
@@ -352,7 +377,7 @@ print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
   つまりAccuracyは、データに多く存在するクラスの正解率ほど強く反映される。
 
 
-  <h3>その他の指標</h3>
+  <h3 id="other-metrics">その他の指標</h3>
   <p>4セルの組み合わせ次第で、他にもいろんな指標が算出可能。似たものにも見えるが、分母の捉え方がちょっとずつ異なる。</p>
 
   <table>
@@ -443,7 +468,7 @@ print(f&quot;Cohen&#39;s Kappa: {kappa:.3f}&quot;)
 </code></pre>
 
 
-  <h3>ここまでの指標をどう使い分けるか</h3>
+  <h3 id="metric-usage">ここまでの指標をどう使い分けるか</h3>
   <table>
     <thead>
       <tr>
@@ -498,7 +523,7 @@ print(f&quot;Cohen&#39;s Kappa: {kappa:.3f}&quot;)
 
 
 
-  <h2>しきい値によらない識別性能</h2>
+  <h2 id="identification">しきい値によらない識別性能</h2>
 
   <ul>
     <li>Accuracy, Precision, Recall, F1などは、ある1つのしきい値で0/1に分類した結果を評価する指標である。</li>
@@ -506,7 +531,7 @@ print(f&quot;Cohen&#39;s Kappa: {kappa:.3f}&quot;)
     <li>そこで、しきい値を固定せずに動かしながら、正例と負例をどれだけうまく順位付けできているか（識別できているか）を評価する方法がROC曲線やPR曲線である。</li>
   </ul>
 
-  <h3>ROC曲線</h3>
+  <h3 id="roc-curve">ROC曲線</h3>
   <p>ROC曲線は、分類のしきい値を変化させたときの、</p>
   <ul>
     <li>TPR（True Positive Rate）= Recall</li>
@@ -597,7 +622,7 @@ D 0.60（実際：1）
   </ul>
 
 
-  <h3>ROC-AUC</h3>
+  <h3 id="roc-auc">ROC-AUC</h3>
   <p>ROC曲線を描いて、その下の面積を全部足し算（積分）した値。AUC（Area Under the Curve）</p>
 
   <div class="mdc-note-box">
@@ -621,7 +646,7 @@ D 0.60（実際：1）
   <p>ラテ購入などのように人間の気まぐれな行動に左右されやすい予測が困難な場面もあれば、品質管理や命に関わる場面などもある。</p>
 
 
-  <h3>ROC-AUCの強みと注意点</h3>
+  <h3 id="roc-auc-caution">ROC-AUCの強みと注意点</h3>
   <ul>
     <li>正例と負例を独立させて等しく扱っているぶん、モデルの基本的な予測性能（純粋な識別能力）が理解しやすい。</li>
     <li>正例・負例それぞれの割合ではなく、両クラスをどれだけ区別できるかを見るため、クラス比率そのものの影響を受けにくい。</li>
@@ -647,7 +672,7 @@ D 0.60（実際：1）
   <p>となると、Recallは据え置きつつ、正例を正確に予測したい→Precisionも重視したい、との観点が台頭してくる。</p>
 
 
-  <h3>PR曲線</h3>
+  <h3 id="pr-curve">PR曲線</h3>
 
   <p>PR曲線（Precision-Recall Curve）は、分類のしきい値を変化させたときの、</p>
   <ul>
@@ -674,7 +699,7 @@ D 0.60（実際：1）
     <p>なので、PR-AUCという言葉だけで済ませず、どの方法で曲線を要約した値なのかを示す、確認するのも大事。</p>
   </div>
 
-  <h3>ROC-AUCとPR-AUCの使い分け</h3>
+  <h3 id="auc-metric-usage">ROC-AUCとPR-AUCの使い分け</h3>
   <p>どちらが優れているというものではなく、注目するポイントが異なる。</p>
   <img src="../images/roc_pr_curve.jpg" alt="ROC曲線とPR曲線">
 

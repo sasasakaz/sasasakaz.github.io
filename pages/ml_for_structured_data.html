@@ -34,30 +34,42 @@
 <body>
   <header id="header">
     <h1>構造化データにおける代表的な機械学習手法</h1>
-
-    <p>構造化データとは？</p>
-    <ul>
-      <li>データベースやExcelなどで扱われる、行と列からなる表形式のデータ</li>
-      <li>年齢、年収、購入有無など各列（変数、特徴量）に明確な意味がある</li>
-      <li>顧客データや購買履歴、Webサイトのアクセスログなど、企業で扱われるデータの多くがこれにあたる</li>
-      <li>対して、画像、音声、テキスト、動画などは非構造化データ</li>
-    </ul>
-    <br>
-
-
-    <p>以下は、構造化データを実務で扱う際によく使われる代表的な機械学習手法たち。なお、XGBoost, LightGBM, CatBoostはGBDTをベースにした手法。</p>
-    <div class="mdc-note-box">
-
-      <p>GBDT: Gradient Boosting Decision Tree 勾配ブースティング決定木</p>
-      <ul>
-        <li>決定木を1本ずつ順番に追加し、前までの木がうまく予測できなかった部分を次の木で補正していくアンサンブル学習の手法。</li>
-        <li>複数の決定木を組み合わせることで、複雑な非線形関係や特徴量同士の相互作用を捉えやすい。</li>
-      </ul>
-    </div>
-
+    <p>構造化データを実務で扱う際によく使われる代表的な機械学習手法を紹介。</p>
   </header>
 
-  <h2>ロジスティック回帰</h2>
+  <nav class="toc">
+    <h2>目次</h2>
+    <ul>
+      <li><a href="#logistic-regression">ロジスティック回帰</a></li>
+      <li><a href="#random-forest">Random Forest</a></li>
+      <li><a href="#xgboost">XGBoost</a></li>
+      <li><a href="#lightgbm">LightGBM</a></li>
+      <li><a href="#catboost">CatBoost</a></li>
+      <li><a href="#pycaret">PyCaret</a></li>
+    </ul>
+  </nav>
+
+  <p>構造化データとは？</p>
+  <ul>
+    <li>データベースやExcelなどで扱われる、行と列からなる表形式のデータ</li>
+    <li>年齢、年収、購入有無など各列（変数、特徴量）に明確な意味がある</li>
+    <li>顧客データや購買履歴、Webサイトのアクセスログなど、企業で扱われるデータの多くがこれにあたる</li>
+    <li>対して、画像、音声、テキスト、動画などは非構造化データ</li>
+  </ul>
+  <br>
+
+  <p>XGBoost, LightGBM, CatBoostはGBDTをベースにした手法。</p>
+  <div class="mdc-note-box">
+
+    <p>GBDT: Gradient Boosting Decision Tree 勾配ブースティング決定木</p>
+    <ul>
+      <li>決定木を1本ずつ順番に追加し、前までの木がうまく予測できなかった部分を次の木で補正していくアンサンブル学習の手法。</li>
+      <li>複数の決定木を組み合わせることで、複雑な非線形関係や特徴量同士の相互作用を捉えやすい。</li>
+    </ul>
+  </div>
+
+
+  <h2 id="logistic-regression">ロジスティック回帰</h2>
   <p>シンプルで軽量なモデルで、分類問題のベースラインとしても重要な手法。Logistic Regression</p>
   <div class="mdc-info-box">
 
@@ -70,7 +82,7 @@
   </div>
 
 
-  <h2>Random Forest</h2>
+  <h2 id="random-forest">Random Forest</h2>
   <p>複数の決定木を組み合わせるアンサンブル学習。比較的扱いやすく、非線形な関係も捉えられる。</p>
   <div class="mdc-info-box">
 
@@ -83,7 +95,7 @@
   </div>
 
 
-  <h2>XGBoost</h2>
+  <h2 id="xgboost">XGBoost</h2>
   <p>決定木を順番に追加していくGBDT（勾配ブースティング決定木）の代表的な実装。高い予測性能と汎用性を持つ。eXtreme Gradient Boosting</p>
   <div class="mdc-info-box">
 
@@ -96,7 +108,9 @@
   </div>
 
   <p><span class='inline-gray'>Level-wise: 木を横に広げていく育て方。同じ深さにあるノードを優先して分割し、木を階層ごとに成長させていく方式。</span></p>
-  <h2>LightGBM</h2>
+
+
+  <h2 id="lightgbm">LightGBM</h2>
   <p>高速な学習と省メモリ化を重視したGBDTの実装。大規模な表形式データを扱いやすい。</p>
   <div class="mdc-info-box">
 
@@ -113,8 +127,8 @@
       勾配の大きいデータを優先的に残し、勾配の小さいデータを一部サンプリングすることで、分割探索に使うデータ量を減らす。</span></p>
   <p><span class='inline-gray'>EFB: Exclusive Feature Bundling 同時に値を持つことが少ない特徴量をひとつにまとめ、特徴量の数を減らすことで計算を効率化する。</span></p>
 
-  
-  <h2>CatBoost</h2>
+
+  <h2 id="catboost">CatBoost</h2>
   <p>カテゴリ変数を含む表形式データを扱いやすくすることに重点を置いたGBDTの実装。Categorical Boosting</p>
   <div class="mdc-info-box">
 
@@ -127,169 +141,169 @@
   </div>
 
 
-<h2>PyCaret</h2>
-<p>PyCaretの分類モジュールには、さまざまな機械学習アルゴリズムが用意されている。ここでは、その中から代表的な手法を（version 3.0.4の場合）。</p>
-<p>大きく分けると、ツリー系、線形・統計系、近傍・確率系に分類できる。</p>
+  <h2 id="pycaret">PyCaret</h2>
+  <p>PyCaretの分類モジュールには、さまざまな機械学習アルゴリズムが用意されている。ここでは、その中から代表的な手法を（version 3.0.4の場合）。</p>
+  <p>大きく分けると、ツリー系、線形・統計系、近傍・確率系に分類できる。</p>
 
-<h3>1. ツリー・アンサンブル系</h3>
-<p>複雑な非線形ルールを学習するのが得意なグループ。 </p>
-<table>
-  <thead>
-    <tr>
-      <th align="left">ID</th>
-      <th align="left">名称</th>
-      <th align="left">特徴</th>
-      <th align="left">長所</th>
-      <th align="left">短所</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left"><strong>gbc</strong></td>
-      <td align="left">Gradient Boosting</td>
-      <td align="left">決定木を順番に追加し、前のモデルの弱点を補う</td>
-      <td align="left">高い予測性能を得やすい</td>
-      <td align="left">学習を完全には並列化しにくい</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>lightgbm</strong></td>
-      <td align="left">LightGBM</td>
-      <td align="left">Leaf-wise方式などで学習を高速化</td>
-      <td align="left">高速で大規模データに向く</td>
-      <td align="left">少ないデータでは過学習に注意</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>xgboost</strong></td>
-      <td align="left">XGBoost</td>
-      <td align="left">GBDTに計算効率化や正則化などを加えた</td>
-      <td align="left">高い予測性能と汎用性</td>
-      <td align="left">パラメータ調整がやや複雑</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>rf</strong></td>
-      <td align="left">Random Forest</td>
-      <td align="left">多数の決定木を独立に学習して予測を組み合わせる</td>
-      <td align="left">安定した予測を得やすい</td>
-      <td align="left">木の数が増えるとモデルが大きくなる</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>et</strong></td>
-      <td align="left">Extra Trees</td>
-      <td align="left">決定木の分割をさらにランダム化</td>
-      <td align="left">高速で、RFとは異なる多様なモデルを作れる</td>
-      <td align="left">ランダム化によって予測性能が下がる場合もある</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>ada</strong></td>
-      <td align="left">AdaBoost</td>
-      <td align="left">誤分類されたデータを重視して次のモデルを作る</td>
-      <td align="left">比較的単純なモデルでも高い性能を狙える</td>
-      <td align="left">ノイズや外れ値の影響を受けやすい</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>dt</strong></td>
-      <td align="left">Decision Tree</td>
-      <td align="left">条件分岐を繰り返して分類する</td>
-      <td align="left">可視化しやすく、比較的解釈しやすい</td>
-      <td align="left">複雑にすると過学習しやすい</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>catboost</strong></td>
-      <td align="left">CatBoost</td>
-      <td align="left">カテゴリ変数を扱いやすいGBDT</td>
-      <td align="left">カテゴリ変数を多く含むデータに強い</td>
-      <td align="left">学習や推論が重くなる場合がある</td>
-    </tr>
-  </tbody>
-</table>
+  <h3>1. ツリー・アンサンブル系</h3>
+  <p>複雑な非線形ルールを学習するのが得意なグループ。 </p>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">ID</th>
+        <th align="left">名称</th>
+        <th align="left">特徴</th>
+        <th align="left">長所</th>
+        <th align="left">短所</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left"><strong>gbc</strong></td>
+        <td align="left">Gradient Boosting</td>
+        <td align="left">決定木を順番に追加し、前のモデルの弱点を補う</td>
+        <td align="left">高い予測性能を得やすい</td>
+        <td align="left">学習を完全には並列化しにくい</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>lightgbm</strong></td>
+        <td align="left">LightGBM</td>
+        <td align="left">Leaf-wise方式などで学習を高速化</td>
+        <td align="left">高速で大規模データに向く</td>
+        <td align="left">少ないデータでは過学習に注意</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>xgboost</strong></td>
+        <td align="left">XGBoost</td>
+        <td align="left">GBDTに計算効率化や正則化などを加えた</td>
+        <td align="left">高い予測性能と汎用性</td>
+        <td align="left">パラメータ調整がやや複雑</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>rf</strong></td>
+        <td align="left">Random Forest</td>
+        <td align="left">多数の決定木を独立に学習して予測を組み合わせる</td>
+        <td align="left">安定した予測を得やすい</td>
+        <td align="left">木の数が増えるとモデルが大きくなる</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>et</strong></td>
+        <td align="left">Extra Trees</td>
+        <td align="left">決定木の分割をさらにランダム化</td>
+        <td align="left">高速で、RFとは異なる多様なモデルを作れる</td>
+        <td align="left">ランダム化によって予測性能が下がる場合もある</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>ada</strong></td>
+        <td align="left">AdaBoost</td>
+        <td align="left">誤分類されたデータを重視して次のモデルを作る</td>
+        <td align="left">比較的単純なモデルでも高い性能を狙える</td>
+        <td align="left">ノイズや外れ値の影響を受けやすい</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>dt</strong></td>
+        <td align="left">Decision Tree</td>
+        <td align="left">条件分岐を繰り返して分類する</td>
+        <td align="left">可視化しやすく、比較的解釈しやすい</td>
+        <td align="left">複雑にすると過学習しやすい</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>catboost</strong></td>
+        <td align="left">CatBoost</td>
+        <td align="left">カテゴリ変数を扱いやすいGBDT</td>
+        <td align="left">カテゴリ変数を多く含むデータに強い</td>
+        <td align="left">学習や推論が重くなる場合がある</td>
+      </tr>
+    </tbody>
+  </table>
 
-<h3>2. 線形・統計系（ベースライン・安定志向）</h3>
-<p>データが直線的（または超平面）に分かれると仮定するグループ。 </p>
-<table>
-  <thead>
-    <tr>
-      <th align="left">ID</th>
-      <th align="left">名称</th>
-      <th align="left">特徴</th>
-      <th align="left">長所</th>
-      <th align="left">短所</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left"><strong>lr</strong></td>
-      <td align="left">Logistic Regression</td>
-      <td align="left">線形結合をもとにクラスの確率を予測</td>
-      <td align="left">軽量で解釈しやすく、ベースラインに向く</td>
-      <td align="left">複雑な非線形関係を捉えにくい</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>ridge</strong></td>
-      <td align="left">Ridge Classifier</td>
-      <td align="left">L2正則化を加えた線形分類</td>
-      <td align="left">特徴量が多い場合にも比較的安定</td>
-      <td align="left">非線形な関係を捉えにくい（クラスを直接予測するためAUCは0になる）</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>lda</strong></td>
-      <td align="left">Linear Discriminant Analysis</td>
-      <td align="left">クラス間の分離とクラス内のばらつきを考慮して分類</td>
-      <td align="left">高速で比較的シンプル</td>
-      <td align="left">分布について一定の仮定がある</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>qda</strong></td>
-      <td align="left">Quadratic Discriminant Analysis</td>
-      <td align="left">クラスごとの分布の違いを考慮して曲線的な境界を作る</td>
-      <td align="left">非線形な境界にも対応できる</td>
-      <td align="left">データ量が少ないと不安定になりやすい</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>svm</strong></td>
-      <td align="left">SVM（Linear Kernel）</td>
-      <td align="left">クラス間の境界のマージンを最大化</td>
-      <td align="left">高次元データに比較的強い</td>
-      <td align="left">スケーリングの影響を受けやすい</td>
-    </tr>
-  </tbody>
-</table>
+  <h3>2. 線形・統計系（ベースライン・安定志向）</h3>
+  <p>データが直線的（または超平面）に分かれると仮定するグループ。 </p>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">ID</th>
+        <th align="left">名称</th>
+        <th align="left">特徴</th>
+        <th align="left">長所</th>
+        <th align="left">短所</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left"><strong>lr</strong></td>
+        <td align="left">Logistic Regression</td>
+        <td align="left">線形結合をもとにクラスの確率を予測</td>
+        <td align="left">軽量で解釈しやすく、ベースラインに向く</td>
+        <td align="left">複雑な非線形関係を捉えにくい</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>ridge</strong></td>
+        <td align="left">Ridge Classifier</td>
+        <td align="left">L2正則化を加えた線形分類</td>
+        <td align="left">特徴量が多い場合にも比較的安定</td>
+        <td align="left">非線形な関係を捉えにくい（クラスを直接予測するためAUCは0になる）</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>lda</strong></td>
+        <td align="left">Linear Discriminant Analysis</td>
+        <td align="left">クラス間の分離とクラス内のばらつきを考慮して分類</td>
+        <td align="left">高速で比較的シンプル</td>
+        <td align="left">分布について一定の仮定がある</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>qda</strong></td>
+        <td align="left">Quadratic Discriminant Analysis</td>
+        <td align="left">クラスごとの分布の違いを考慮して曲線的な境界を作る</td>
+        <td align="left">非線形な境界にも対応できる</td>
+        <td align="left">データ量が少ないと不安定になりやすい</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>svm</strong></td>
+        <td align="left">SVM（Linear Kernel）</td>
+        <td align="left">クラス間の境界のマージンを最大化</td>
+        <td align="left">高次元データに比較的強い</td>
+        <td align="left">スケーリングの影響を受けやすい</td>
+      </tr>
+    </tbody>
+  </table>
 
-<h3>3. 近傍・確率・その他（特殊枠）</h3>
-<p>似たもの探しや確率で判断するグループ。 </p>
-<table>
-  <thead>
-    <tr>
-      <th align="left">ID</th>
-      <th align="left">名称</th>
-      <th align="left">特徴</th>
-      <th align="left">長所</th>
-      <th align="left">短所</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left"><strong>knn</strong></td>
-      <td align="left">K Neighbors</td>
-      <td align="left">近くにあるデータのクラスをもとに予測</td>
-      <td align="left">直感的で局所的なパターンを捉えやすい</td>
-      <td align="left">予測時の計算量が大きくなりやすい</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>nb</strong></td>
-      <td align="left">Naive Bayes</td>
-      <td align="left">特徴量が独立と仮定して確率を計算</td>
-      <td align="left">高速で、テキスト分類などに向く</td>
-      <td align="left">特徴量の独立という仮定が現実と合わない場合がある</td>
-    </tr>
-    <tr>
-      <td align="left"><strong>dummy</strong></td>
-      <td align="left">Dummy Classifier</td>
-      <td align="left">単純なルールで予測する（最頻値など）</td>
-      <td align="left">モデルの最低ラインを確認できる</td>
-      <td align="left">学習による予測能力を持たない</td>
-    </tr>
-  </tbody>
-</table>
+  <h3>3. 近傍・確率・その他（特殊枠）</h3>
+  <p>似たもの探しや確率で判断するグループ。 </p>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">ID</th>
+        <th align="left">名称</th>
+        <th align="left">特徴</th>
+        <th align="left">長所</th>
+        <th align="left">短所</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left"><strong>knn</strong></td>
+        <td align="left">K Neighbors</td>
+        <td align="left">近くにあるデータのクラスをもとに予測</td>
+        <td align="left">直感的で局所的なパターンを捉えやすい</td>
+        <td align="left">予測時の計算量が大きくなりやすい</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>nb</strong></td>
+        <td align="left">Naive Bayes</td>
+        <td align="left">特徴量が独立と仮定して確率を計算</td>
+        <td align="left">高速で、テキスト分類などに向く</td>
+        <td align="left">特徴量の独立という仮定が現実と合わない場合がある</td>
+      </tr>
+      <tr>
+        <td align="left"><strong>dummy</strong></td>
+        <td align="left">Dummy Classifier</td>
+        <td align="left">単純なルールで予測する（最頻値など）</td>
+        <td align="left">モデルの最低ラインを確認できる</td>
+        <td align="left">学習による予測能力を持たない</td>
+      </tr>
+    </tbody>
+  </table>
 
 
   <footer id="footer">
