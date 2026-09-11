@@ -49,6 +49,7 @@
   <nav class="toc">
     <h2>目次</h2>
     <ul>
+      <li><a href="#data-split">データの分割</a></li>
       <li><a href="#classification">分類性能の評価</a></li>
       <ul>
         <li><a href="#accuracy">Accuracy</a></li>
@@ -95,6 +96,59 @@
     </pre>
     </blockquote>
   </div>
+
+
+  <h2 id="data-split">データの分割</h2>
+  <p>機械学習では、データを役割に応じて3つに分けて使うことがある。</p>
+  <ul>
+    <li><strong>Train（学習用）: </strong>モデルの学習に直接使う。</li>
+    <li><strong>Validation（検証用）: </strong>学習中のモデルの性能を確認し、Early Stoppingやパラメータ調整などに使う。</li>
+    <li><strong>Test（評価用）: </strong>すべての調整が終わった後、初見のデータに対してどのくらい性能を発揮できるか、最後に確認するために使う。</li>
+  </ul>
+  <p>例えば、70, 15, 15に分けたり、まず80と20（Test用）に分けて、その80をさらにTrain 80, Validation 20に分けたりする。</p>
+
+  <div class="term">Validation（検証用）を設ける意義とは？</div>
+  <ul>
+    <li>Early Stopping<ul>
+        <li>LightGBMなどでは、学習を繰り返すほど学習データに対する性能は向上しますが、学習しすぎると過学習が起こり、未知のデータに対する性能が低下することがある。</li>
+        <li>そこで、Validationデータに対する性能が改善しなくなったところで学習を止めることで、過学習を抑えながら、適切な学習状態でモデルを止めることができる。</li>
+      </ul>
+    </li>
+    <li>Testデータへの「カンニング」を防ぐ<ul>
+        <li>もしTestデータを使って学習を止めるタイミングやパラメータを決めてしまうと、知らず知らずのうちにTestデータに都合のよいモデルを作ってしまう。</li>
+        <li>そのため、モデルの調整に使うValidationと、最後までできるだけ触れずに取っておくTestを分けておく。</li>
+      </ul>
+    </li>
+    <li>未知のデータに対する性能を確認する<ul>
+        <li>時系列データでは、単純にランダムに分割するのではなく、時間の順序を保ってTrain/Validation/Testを分けることがある。</li>
+        <li>例えば、TrainとTestの期間が隣接していると、特定の期間の傾向に適合したモデルになってしまい、その後の期間では性能が低下する可能性がある。</li>
+        <li>そこで、TrainとValidation、ValidationとTestの間に一定の期間を設けることで、より未来に近い条件でモデルの性能を確認する方法もある。</li>
+      </ul>
+    </li>
+  </ul>
+  <p>このように、ValidationやTestを適切に分けることで、学習に使っていない未知のデータに対してもモデルがどの程度通用するのかを確認できる。</p>
+
+  <div class="term">Validationを設けない場合もある</div>
+  <ul>
+    <li>Validationは必ず独立したデータとして用意しなければならないわけではない。</li>
+    <li>モデルの調整をおこなわず、学習用データとTestデータだけで構成する場合もある。</li>
+    <li>また、Cross Validationを使う場合は、データを複数の組み合わせに分け、それぞれの検証用データを入れ替えながらモデルを評価できる。この場合、固定したValidationデータを別途用意する必要はない。</li>
+    <li>一方、モデルのパラメータ調整やEarly Stoppingなどをおこなう場合は、その判断に使うValidationデータと、最終評価に使うTestデータを分けておくことが重要。</li>
+  </ul>
+
+  <div class="term">評価指標を計算するデータ</div>
+  <p>モデルの調整中に評価指標を見る場合は、基本的にはValidationデータを用いる。</p>
+  <pre><code># 検証データで評価
+y_pred_val = model.predict_proba(X_val)[:, 1]
+
+# モデルの調整がすべて終わり最終的な性能を確認するときはTestデータで評価
+y_pred_test = model.predict_proba(X_test)[:, 1]
+
+# 学習データ（Train）についても評価指標を計算することはできる
+y_pred_train = model.predict_proba(X_train)[:, 1]
+</code></pre>
+  <p>ただし、学習データでの評価結果は、モデルが実際に学習したデータに対する性能。未知のデータに対する性能を見るValidationやTestとは意味が異なる。</p>
+  <p>Trainの評価結果を見てモデルをチューニングすることは通常ない。学習データに対して良い結果になるよう調整してしまうと、過学習を見逃す可能性があるため。</p>
 
 
   <h2 id="classification">分類性能の評価</h2>
