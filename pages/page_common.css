@@ -249,7 +249,7 @@ td {
 
 /* 用語集の先頭の絵文字 */
 .term::before {
-  content: "🐾";
+  content: "🦊";
   margin-right: 0.4em; /* アイコンと文字の間の隙間 */
   font-size: 0.9em;
   vertical-align: 0.05em;
