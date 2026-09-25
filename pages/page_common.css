@@ -239,7 +239,8 @@ td {
 /* 用語集の見出し */
 .term {
   /* font-weight: bold; */
-  /* font-size: 1.1em; */
+  font-size: 1.1em;
+  color: #2d3748;
   margin: 1.2em 0 .2em;
 
   /* 左線の装飾 */
