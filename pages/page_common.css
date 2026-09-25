@@ -29,17 +29,17 @@ h1 {
 }
 
 h2 {
-  margin-top: 1.8em;
+  margin-top: 3.0em;
   margin-bottom: 0.6em;
 }
 
 h3 {
-  margin-top: 1.5em;
+  margin-top: 2.5em;
   margin-bottom: 0.4em;
 }
 
 h4 {
-  margin-top: 1.3em;
+  margin-top: 1.8em;
   margin-bottom: 0.2em;
 }
 
@@ -113,7 +113,7 @@ img {
 blockquote {
   margin: 1em 0;
   padding: 0.5em 1em;
-  /* border-left: 0.25em solid #ccc; */
+  border-left: 0.25em solid #ccc;
   background-color: #f9f9f9;
   color: #666;
 }
@@ -236,6 +236,29 @@ td {
 
 
 
+/* 用語集の見出し */
+.term {
+  /* font-weight: bold; */
+  /* font-size: 1.1em; */
+  margin: 1.2em 0 .2em;
+
+  /* 左線の装飾 */
+  border-left: 3.5px solid #4a5568;
+  /* ブランドカラーや控えめなグレー・ブルー等 */
+  padding-left: 0.6em;
+  /* 線と文字の間の余白 */
+
+}
+
+/* 用語集の見出しの直後のulは少し上に詰める */
+.term+ul,
+.term+ol,
+.term+p {
+  margin-top: .2em;
+}
+
+
+
 /* 日付エリア全体（控えめな薄いグレー＆小ぶりなフォント） */
 .entry-meta {
   display: flex;
@@ -276,27 +299,6 @@ td {
 
 
 
-
-
-
-
-
-
-
-/* 用語集の見出し */
-.term {
-  font-weight: bold;
-  /* font-size: 1.1em; */
-  margin: 1.2em 0 .2em;
-}
-
-/* 用語集の見出しの直後のulは少し上に詰める */
-.term+ul,
-.term+ol,
-.term+p {
-  margin-top: .2em;
-  /* .2からもう少し大きくしてみる */
-}
 
 .references p {
   font-size: 0.9em;
