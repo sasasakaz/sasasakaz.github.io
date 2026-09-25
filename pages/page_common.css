@@ -113,7 +113,7 @@ img {
 blockquote {
   margin: 1em 0;
   padding: 0.5em 1em;
-  border-left: 0.25em solid #ccc;
+  /* border-left: 0.25em solid #ccc; */
   background-color: #f9f9f9;
   color: #666;
 }
@@ -232,6 +232,54 @@ td {
   text-align: left;
   vertical-align: top;
 }
+
+
+
+
+/* 日付エリア全体（控えめな薄いグレー＆小ぶりなフォント） */
+.entry-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.875rem;
+  /* 約14px（少し小さめ） */
+  color: #666666;
+  /* 主張しすぎないグレー */
+  margin-bottom: 24px;
+  /* 本文との間の余白 */
+}
+
+/* 個々の要素 */
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* 絵文字アイコンの大きさと余白 */
+.meta-icon {
+  margin-right: 4px;
+  font-size: 0.9em;
+}
+
+/* 区切り線のスラッシュ */
+.meta-divider {
+  color: #ccc;
+  margin: 0 2px;
+}
+
+/* timeタグ内の数字 */
+.entry-meta time {
+  font-family: inherit;
+}
+
+
+
+
+
+
+
+
 
 
 

@@ -43,6 +43,20 @@
 <body>
   <header id="header">
     <h1>機械学習の評価指標</h1>
+
+    <!-- 投稿日・更新日メタ情報 -->
+    <div class="entry-meta">
+      <span class="meta-item published">
+        <span class="meta-icon" aria-hidden="true">🕒</span>
+        <span class="meta-label">公開：</span><time datetime="2026-08-25">2026.08.25</time>
+      </span>
+      <span class="meta-divider" aria-hidden="true">/</span>
+      <span class="meta-item updated">
+        <span class="meta-icon" aria-hidden="true">🔄</span>
+        <span class="meta-label">更新：</span><time datetime="2026-09-25">2026.09.25</time>
+      </span>
+    </div>
+
     <p>機械学習のモデルをどう評価するか。ここでは2値分類を中心に「分類性能の評価」「閾値によらない識別性能」について代表的な評価指標を紹介。</p>
   </header>
 
@@ -105,7 +119,7 @@
     <li><strong>Validation（検証用）: </strong>学習中のモデルの性能を確認し、Early Stoppingやパラメータ調整などに使う。</li>
     <li><strong>Test（評価用）: </strong>すべての調整が終わった後、初見のデータに対してどのくらい性能を発揮できるか、最後に確認するために使う。</li>
   </ul>
-  <p>例えば、70, 15, 15に分けたり、まず80と20（Test用）に分けて、その80をさらにTrain 80, Validation 20に分けたりする。</p>
+  <p>例えば、70, 15, 15に分けたり、まず80と20（Test用）に分けて、その80をさらにTrain 80, Validation 20（つまりTrain64, Val16, Test20）に分けたりする。</p>
 
   <div class="term">Validation（検証用）を設ける意義とは？</div>
   <ul>
@@ -131,7 +145,7 @@
   <div class="term">Validationを設けない場合もある</div>
   <ul>
     <li>Validationは必ず独立したデータとして用意しなければならないわけではない。</li>
-    <li>モデルの調整をおこなわず、学習用データとTestデータだけで構成する場合もある。</li>
+    <li>モデルの調整をおこなわず、TrainデータとTestデータだけで構成する場合もある。</li>
     <li>また、Cross Validationを使う場合は、データを複数の組み合わせに分け、それぞれの検証用データを入れ替えながらモデルを評価できる。この場合、固定したValidationデータを別途用意する必要はない。</li>
     <li>一方、モデルのパラメータ調整やEarly Stoppingなどをおこなう場合は、その判断に使うValidationデータと、最終評価に使うTestデータを分けておくことが重要。</li>
   </ul>
@@ -207,15 +221,15 @@ y_pred_train = model.predict_proba(X_train)[:, 1]
     </ul>
 
   </div>
-  <img src="../images/confusion_matrix.jpg" alt="サンプルデータでの混同行列">
+  <img src="../images/ml_evaluation_confusion_matrix.jpg" alt="サンプルデータでの混同行列">
 
   <p>サンプル事例での結果は、合計5,662人のうち実際の購入者は1,718人（出現率30%）、非購入者は3,944人。この4セルのどこに注目するか。</p>
   <blockquote>
     <pre>
-TP (True Positive):  1053 件
-TN (True Negative):  2680 件
-FP (False Positive): 1264 件
-FN (False Negative): 665 件
+TP (True Positive):  1005 件
+TN (True Negative):  2800 件
+FP (False Positive): 1144 件
+FN (False Negative): 713 件
 </pre>
   </blockquote>
 
@@ -535,33 +549,33 @@ print(f&quot;Cohen&#39;s Kappa: {kappa:.3f}&quot;)
     <tbody>
       <tr>
         <td align="left">Accuracy</td>
-        <td align="left">0.659</td>
+        <td align="left">0.672</td>
         <td align="left">全体として、どれだけ正解したか</td>
       </tr>
       <tr>
         <td align="left">Precision</td>
-        <td align="left">0.454</td>
+        <td align="left">0.468</td>
         <td align="left">正例と予測した人を、どれだけ確実に当てられたか</td>
       </tr>
       <tr>
         <td align="left">Recall</td>
-        <td align="left">0.613</td>
+        <td align="left">0.585</td>
         <td align="left">実際の正例を、どれだけ取りこぼさずに拾えたか</td>
       </tr>
       <tr>
         <td align="left">F1-score</td>
-        <td align="left">0.522</td>
+        <td align="left">0.520</td>
         <td align="left">PrecisionとRecallを両立できているか</td>
       </tr>
       <tr>
-        <td align="left">Balanced Accuracy</td>
-        <td align="left">0.646</td>
-        <td align="left">正例・負例を同じ重みで評価した正解率</td>
+        <td align="left">MCC</td>
+        <td align="left">0.279</td>
+        <td align="left">正例・負例を含め、分類が全体としてどれだけ正しく対応しているか</td>
       </tr>
       <tr>
-        <td align="left">MCC</td>
-        <td align="left">0.273</td>
-        <td align="left">正例・負例を含め、分類が全体としてどれだけ正しく対応しているか</td>
+        <td align="left">Balanced Accuracy</td>
+        <td align="left">0.647</td>
+        <td align="left">正例・負例を同じ重みで評価した正解率</td>
       </tr>
     </tbody>
   </table>
@@ -608,7 +622,13 @@ A 0.95（実際：1）
 B 0.88（実際：1）
 C 0.75（実際：0）※間違い、空振り
 D 0.60（実際：1）
-… …（以下、確率が低い順に続く。データ10人分での例）
+E 0.55（実際：1）
+F 0.42（実際：0）※間違い、空振り
+G 0.38（実際：1）
+H 0.30（実際：0）※間違い、空振り
+I 0.20（実際：1）
+J 0.10（実際：0）※間違い、空振り
+（データ10人分での例）
 </pre>
   </blockquote>
 
@@ -781,7 +801,7 @@ D 0.60（実際：1）
 
   <h3 id="auc-metric-usage">ROC-AUCとPR-AUCの使い分け</h3>
   <p>どちらが優れているというものではなく、注目するポイントが異なる。</p>
-  <img src="../images/roc_pr_curve.jpg" alt="ROC曲線とPR曲線">
+  <img src="../images/ml_evaluation_roc_pr_curve.jpg" alt="ROC曲線とPR曲線">
 
 
   <table>
