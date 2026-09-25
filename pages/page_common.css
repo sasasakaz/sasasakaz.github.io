@@ -243,12 +243,18 @@ td {
   margin: 1.2em 0 .2em;
 
   /* 左線の装飾 */
-  border-left: 3.5px solid #4a5568;
-  /* ブランドカラーや控えめなグレー・ブルー等 */
-  padding-left: 0.6em;
-  /* 線と文字の間の余白 */
-
+  /* border-left: 3.5px solid #4a5568;
+  padding-left: 0.6em; */
 }
+
+/* 用語集の先頭の絵文字 */
+.term::before {
+  content: "🐾";
+  margin-right: 0.4em; /* アイコンと文字の間の隙間 */
+  font-size: 0.9em;
+  vertical-align: 0.05em;
+}
+
 
 /* 用語集の見出しの直後のulは少し上に詰める */
 .term+ul,
