@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>アップリフトモデリング（基礎）</title>
+  <link href='https://sasasakaz.github.io/pages/uplift_basic.html' rel='canonical'>
+  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <meta name="description" content="アップリフトモデリングの基礎情報。歴史やS/T/X-Learnerなどに加えて、傾向スコアやIPWについても紹介します。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="アップリフトモデリング（基礎）">
+  <meta property="og:description" content="アップリフトモデリングの基礎情報。歴史やS/T/X-Learnerなどに加えて、傾向スコアやIPWについても紹介します。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/uplift_basic.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+
+  <!-- Google Tag Manager -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script><!-- End Google Tag Manager -->
+
+  <link rel="stylesheet" href="page_common.css">
+
+  <!-- syntax highlighter start -->
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css' rel='stylesheet' />
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'></script>
+  <script>hljs.highlightAll();</script>
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+</head>
+
+<body>
+  <header id="header">
+    <h1>アップリフトモデリング（基礎）</h1>
+
+    <!-- 投稿日・更新日メタ情報 -->
+    <div class="entry-meta">
+      <span class="meta-item published">
+        <span class="meta-icon" aria-hidden="true">🕒</span>
+        <span class="meta-label">公開：</span><time datetime="2026-10-03">2026.10.03</time>
+      </span>
+      <span class="meta-divider" aria-hidden="true">/</span>
+      <span class="meta-item updated">
+        <span class="meta-icon" aria-hidden="true">🔄</span>
+        <span class="meta-label">更新：</span><time datetime="2026-10-03">2026.10.03</time>
+      </span>
+    </div>
+
+    <p>マーケティング施策においては、オーソドックスな機械学習モデルで「誰が商品を買いそうか」を予測するだけでは十分ではないことがある。</p>
+  </header>
+
+  <nav class="toc">
+    <h2>目次</h2>
+    <ul>
+      <li><a href="#what-is-uplift-modeling">アップリフトモデリングとは</a></li>
+      <ul>
+        <li><a href="#customer-types">顧客タイプ</a></li>
+        <li><a href="#what-is-uplift">アップリフトとは</a></li>
+        <li><a href="#counterfactual">反実仮想</a></li>
+        <li><a href="#basic-concept">アップリフトモデリングの基本的な考え方</a></li>
+      </ul>
+      <li><a href="#meta-learner">Meta-Learner</a></li>
+      <ul>
+        <li><a href="#s-learner">S-Learner</a></li>
+        <li><a href="#t-learner">T-Learner</a></li>
+        <li><a href="#x-learner">X-Learner</a></li>
+        <li><a href="#differences">S/T/X-Learnerの違い</a></li>
+      </ul>
+      <li><a href="#propensity-score-and-ipw">傾向スコアとIPW</a></li>
+      <ul>
+        <li><a href="#propensity-score">傾向スコアとは</a></li>
+        <li><a href="#why-propensity-score">なぜ傾向スコアが必要なのか</a></li>
+        <li><a href="#ipw">IPW（逆確率重み付け）</a></li>
+        <li><a href="#propensity-score-in-uplift">アップリフトモデリングにおける傾向スコア</a></li>
+      </ul>
+      <li><a href="#history">アップリフトモデリングの歴史</a></li>
+      <ul>
+        <li><a href="#concept-development">概念の発展（2000年代初頭）</a></li>
+        <li><a href="#causal-inference-and-ml">因果推論・機械学習との融合（2010年代〜）</a></li>
+        <li><a href="#practical-adoption">実務への広がり（2010年代後半〜）</a></li>
+        <li><a href="#primary-sources">一次情報</a></li>
+      </ul>
+    </ul>
+  </nav>
+
+  <h2 id="what-is-uplift-modeling">アップリフトモデリングとは</h2>
+
+  <p>とあるカフェチェーンの例。</p>
+  <ol>
+    <li>「ラテ」の売上を伸ばすために、アプリでクーポンを配るキャンペーンを企画している。</li>
+    <li>ラテを購入する可能性が高い人を機械学習モデルで予測し、その人たちにクーポンを配る方法が考えられる。</li>
+    <li>だが、その人はクーポンがなくても購入するかもしれない。</li>
+    <li>この場合、クーポン配布する費用のぶん利益が減ることになる。</li>
+  </ol>
+  <p>つまり、施策をより効果的、効率的におこなうためには、<span class='inline-mark'>クーポンがないと買わなそうだが、クーポンがあると買いやすそう</span>な人を選びたい。</p>
+  <p>クーポンを配ることで、購入する確率がどれだけ変化する人なのかが知りたい。このような施策による上積み効果（incremental effect）を予測するための方法がアップリフトモデリング。</p>
+
+
+  <h3 id="customer-types">顧客タイプ</h3>
+  <p>例えば、ある顧客について2つの可能性を考える。</p>
+  <ul>
+    <li>顧客A: クーポンを配った場合 → 購入する　クーポンを配らなかった場合 → 購入する</li>
+    <li>顧客B: クーポンを配った場合 → 購入する　クーポンを配らなかった場合 → 購入しない</li>
+  </ul>
+  <p>顧客Aは購入する確率は高いが、クーポンが購入を後押ししたわけではなさそう。顧客Bには<strong>クーポンが購入を促す効果</strong>がありそう。つまり「購入確率が高い人」と「施策の効果が高い人」は同じではない。</p>
+  <p>アップリフトモデリングでは後者を見つけて、優先的に施策対象とすることを目指している（通常の購入予測モデルではAとBを判別しにくい）。</p>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">顧客</th>
+        <th align="left">クーポン配布しない</th>
+        <th align="left">クーポン配布する</th>
+        <th align="left">特徴</th>
+        <th align="left">俗称</th>
+        <th align="left">日本語（諸説あり）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">A</td>
+        <td align="left">買う</td>
+        <td align="left">買う</td>
+        <td align="left">処置をしてもしなくても購入する</td>
+        <td align="left">Sure Things</td>
+        <td align="left">鉄板、確実反応層</td>
+      </tr>
+      <tr>
+        <td align="left">B</td>
+        <td align="left">買わない</td>
+        <td align="left">買う</td>
+        <td align="left">処置をすると購入する</td>
+        <td align="left">Persuadables</td>
+        <td align="left">説得可能、施策反応層</td>
+      </tr>
+      <tr>
+        <td align="left">C</td>
+        <td align="left">買わない</td>
+        <td align="left">買わない</td>
+        <td align="left">処置をしてもしなくても購入しない</td>
+        <td align="left">Lost Causes</td>
+        <td align="left">無駄打ち、非反応層</td>
+      </tr>
+      <tr>
+        <td align="left">D</td>
+        <td align="left">買う</td>
+        <td align="left">買わない</td>
+        <td align="left">処置によりむしろ購入しなくなる</td>
+        <td align="left">Sleeping Dogs</td>
+        <td align="left">天邪鬼、逆効果層</td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <h3 id="what-is-uplift">アップリフトとは</h3>
+  <p>ある顧客について、クーポン配布した場合の購入確率と、クーポン配布しなかった場合の購入確率をそれぞれ予測できたとする。</p>
+  <p>クーポンあり: 購入確率 70%　クーポンなし: 購入確率 30%なら、その差である40pointsが、この顧客に対するアップリフト。</p>
+  <ul>
+    <li>uplift = prob_t - prob_c</li>
+    <li>prob_t: 処置ありの場合の予測確率</li>
+    <li>prob_c: 処置なしの場合の予測確率<ul>
+        <li>Probability if Treated もしもこの人にクーポン配布したら何％の確率で購入するかという予測値（期待値）</li>
+        <li>Probability if Control もしもこの人に配布しなかったら何％の確率で購入するかという予測値（期待値）</li>
+      </ul>
+    </li>
+  </ul>
+  <p>アップリフトの値が大きい顧客ほど、<strong>施策によって購入確率が上昇する</strong>と考えられる。</p>
+
+
+  <h3 id="counterfactual">反実仮想</h3>
+  <p>アップリフトモデリングには特有の難しさがある。現実世界では、ある同じ顧客に対して、クーポンを配った場合の結果と、配らなかった場合の結果を同時に観測することはできない。</p>
+  <p>
+    クーポンを配った顧客が「クーポンを配らなかった場合に購入したか？」は分からない。同様に、クーポンを配らなかった顧客が「クーポンを配っていたら購入したか？」も分からない。<strong>実際には観測できない結果を反実仮想（counterfactual）</strong>と呼ぶ。
+  </p>
+  <p>アップリフトモデリングでは、観測されたデータから処置ありの場合と処置なしの場合の結果を推定し、その差から顧客ごとの施策効果を推定する。</p>
+
+
+  <h3 id="basic-concept">アップリフトモデリングの基本的な考え方</h3>
+  <p>通常の分類モデルでは、特徴量Xからyを予測する。</p>
+  <ul>
+    <li>特徴量 X：顧客の属性や過去の行動など</li>
+    <li>処置変数 T：施策（クーポン配布）をおこなったかどうか（1/0）</li>
+    <li>目的変数 y：施策後に購入したかどうかなど（1/0）</li>
+  </ul>
+  <p>アップリフトモデリングでは、処置変数も考慮する。</p>
+  <ul>
+    <li>特徴量 X + 施策あり → prob_t</li>
+    <li>特徴量 X + 施策なし → prob_c</li>
+    <li>prob_t - prob_c → uplift という形で施策あり/なしの場合をそれぞれ予測し、比較する。</li>
+  </ul>
+  <p>そしてアップリフトの大きい顧客を優先的に施策対象とする。<span class='inline-mark'>クーポン配布効果をより期待しやすい顧客を選定</span>することで、効果的で効率的な施策実施を目指す。</p>
+
+
+
+  <h2 id="meta-learner">Meta-Learner</h2>
+  <p>アップリフトを直接予測する専用の機械学習アルゴリズムを一から作る代わりに、通常の機械学習モデルを組み合わせて処置効果を推定する方法。代表的なのが以下3つ。</p>
+
+
+  <h3 id="s-learner">S-Learner</h3>
+  <p><span class='inline-mark'>処置の有無も特徴量の1つとして扱い</span>、1つのモデルで学習させる（Single-Learner）。</p>
+  <ol>
+    <li>特徴量X + 処置変数Tから、目的変数y（購入する/しない）を学習させる（2値分類問題）。</li>
+    <li>学習後、顧客全員の処置変数Tを1（クーポン配布）とした場合の購入確率を予測させる（prob_tを得る）。</li>
+    <li>同じモデルで、顧客全員のTを0（配布しない）とした場合の購入確率を予測させる（prob_cを得る）。</li>
+    <li>同じ<strong>1つのモデル</strong>から得られた予測値の差分をアップリフトとする。uplift = prob_t - prob_cとして、<strong>条件付き平均処置効果（CATE: Conditional
+        Average Treatment Effect）</strong>を推定している。</li>
+  </ol>
+  <p>S-Learnerは構造がシンプルで、通常の予測モデルを比較的そのまま利用できる。</p>
+  <p>
+    一方で、<strong>処置変数Tを他の特徴量と同じように扱う</strong>構造であるがゆえに、処置効果が小さい場合などには、その効果を十分に捉えられないことがある（処置変数Tの目的変数yへの影響が他の特徴量に比べて小さいと、処置効果はゼロに向かってバイアスがかかる可能性がある）。
+  </p>
+
+
+  <h3 id="t-learner">T-Learner</h3>
+  <p>処置の有無によってデータを分け、<span class='inline-mark'>2つのモデルを別々に学習させる</span>（Two-Learner）。</p>
+  <ol>
+    <li>データを処置あり/なしで物理的に分け、処置群と対照群を用意。</li>
+    <li>処置群だけでTreatモデルを作成、処置をした場合の購入確率を予測（prob_t）。</li>
+    <li>対照群だけでControlモデルを作成、処置しなかった場合の購入確率を予測（prob_c）。</li>
+    <li>同じ顧客をそれぞれのモデルに入力し、<strong>2つのモデル</strong>から得られた予測値の差分をアップリフトとする。uplift = prob_t - prob_c
+      として<strong>CATE</strong>を推定。</li>
+  </ol>
+  <p>T-Learnerも構造はシンプル。そしてS-Learner同様に、正則化バイアス（偏り）が発生する場合がある。</p>
+  <ul>
+    <li>TreatモデルとControlモデルは別々に学習させる。<ul>
+        <li>そのため正則化の効き具合が独立に決まる（片方では強く抑制され、もう片方では弱く抑制されるなどバラバラ）。</li>
+        <li>すると差分をとったときにバイアスが残ったり増幅されるリスクがある（アップリフトの分散が大きくなりがち）。</li>
+      </ul>
+    </li>
+    <li>TreatとControlに分割する。<ul>
+        <li>そのためサンプルサイズは小さく、分散は大きくなり、データが疎の領域が出現。</li>
+        <li>そこに正則化がかかると、データ不足の未知領域においてモデルは安全策として予測値を平均値やゼロに近づけようとする。</li>
+        <li>するとTreatとControlの両方のモデルが、よくわからないからゼロ（または平均）と予測し、結果的にその差分であるアップリフトもゼロに。</li>
+      </ul>
+    </li>
+  </ul>
+  <p>以上から、<strong>2モデルに分割する</strong>構造であるがゆえに、バイアス発生の懸念がある。</p>
+
+
+  <h3 id="x-learner">X-Learner</h3>
+  <p>T-Learnerをベースにしたうえで、反実仮想から疑似ITEを作り、回帰モデルで学習させる（Cross-Learner）。</p>
+  <ol>
+    <li>データを処置あり/なしで物理的に分け、2モデルをそれぞれ別々に学習（T-Learnerと同じ）。</li>
+    <li>観測された実際の結果と、上記2モデルが反実仮想として予測した結果との差分から、疑似ITE（Individual Treatment Effect 個別単位の処置効果）をそれぞれ算出。<ul>
+        <li>処置群では、 実際の結果 - 「処置を受けなかった場合」の予測 を計算。</li>
+        <li>対照群では、 「処置を受けた場合」の予測 - 実際の結果 を計算。</li>
+      </ul>
+    </li>
+    <li>擬似ITEを目的変数にして、2つの回帰モデルを学習。</li>
+    <li>2パターンの処置効果（処置により購入確率が何points変動するか）の予測値を得る。<ul>
+        <li>処置群の疑似ITEを学習した回帰モデルから得られた予測値（tau_t）</li>
+        <li>対照群の疑似ITEを学習した回帰モデルから得られた予測値（tau_c）</li>
+      </ul>
+    </li>
+    <li>2つの予測値を、後述する傾向スコアpsで重み付けして、uplift = ps * tau_c + (1 - ps) * tau_t としてCATEを推定。</li>
+  </ol>
+  <p>各群の観測結果と反対側のモデルによる予測を組み合わせることで、処置群・対照群の両方の情報を処置効果の推定に利用する。</p>
+  <p>X-Learnerは、購入する/しないという結果ではなく、段階を踏んで最終的には<span
+      class='inline-mark'>施策によってどれだけ結果が変動するかを直接モデル化</span>する点が、S-LearnerやT-Learnerとの大きな違い。</p>
+
+
+  <h3 id="differences">S/T/X-Learnerの違い</h3>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">方法</th>
+        <th align="left">モデル数</th>
+        <th align="left">考え方</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">S-Learner</td>
+        <td align="left">1</td>
+        <td align="left">処置変数も特徴量と一緒に扱って、購入確率を学習</td>
+      </tr>
+      <tr>
+        <td align="left">T-Learner</td>
+        <td align="left">2</td>
+        <td align="left">処置群 / 対照群を分けて、別々に購入確率を学習</td>
+      </tr>
+      <tr>
+        <td align="left">X-Learner</td>
+        <td align="left">複数</td>
+        <td align="left">疑似的なITEを経由して、処置効果を直接学習</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>どの方法が常に優れているというわけではなく、データの量や処置有無の均衡性（バランス）、特徴量と処置効果の関係などによって適した方法は変わる。</p>
+
+
+
+  <h2 id="propensity-score-and-ipw">傾向スコアとIPW</h2>
+  <p>観測データにおいて処置をどのようにおこなっていたかがポイントになる。</p>
+  <ol>
+    <li>例えばクーポンをランダムに配布していれば、（RCTとみなしやすいので）処置群と対照群を比較しやすい。</li>
+    <li>しかし現実世界では、ラテをあまり買わない人にクーポンを配るなど、顧客の特性に応じて処置することがある（ランダムではない）。</li>
+    <li>この場合、処置群と対照群では顧客構成が異なってしまう。</li>
+    <li>そこで<strong>傾向スコア（Propensity Score）</strong>が登場する。</li>
+  </ol>
+
+
+  <h3 id="propensity-score">傾向スコアとは</h3>
+  <p>簡単には、<span class='inline-mark'>その人が処置を受ける確率</span>。</p>
+  <p>顧客の特徴量をXとすると、<em>P(Treatment = 1 | X)</em> を推定したものが傾向スコア。顧客A: 傾向スコア 0.8　顧客B: 傾向スコア
+    0.3　であれば、顧客Aは特徴量から見ると処置を受ける可能性が高く、顧客Bは低かったと想定している。</p>
+
+
+  <h3 id="why-propensity-score">なぜ傾向スコアが必要なのか</h3>
+  <p>仮に、処置群には「もともとラテをよく買う人」が多く、対照群には少なかったとする。この状態で単純に「処置群の購入率 -
+    対照群の購入率」を計算すると、購入率の違いは、クーポンの効果なのか、もともとの顧客特性の違いなのかが判別しにくい。傾向スコアは、こうした<strong>処置を受ける確率の違いを考慮するために利用</strong>する。</p>
+
+
+  <h3 id="ipw">IPW（逆確率重み付け）</h3>
+  <p>傾向スコアを利用した代表的な方法の1つが、IPW（Inverse Probability Weighting: 逆確率重み付け）。<span
+      class='inline-mark'>実際に処置を受ける確率が低かった人ほど、大きな重みを与える</span>という考え方。</p>
+  <ol>
+    <li>処置を受ける確率が0.8だった人と、0.2だった人が、どちらも実際に処置を受けていたとする。</li>
+    <li>後者は、本来なら処置を受けにくかった人なので、IPWではより大きな重みを与える。</li>
+    <li>こうすることで、処置を受ける確率に偏りがあるデータを、あたかも処置がよりランダムに割り当てられたような状態に近づけて比較することを目指す。</li>
+  </ol>
+
+
+  <h3 id="propensity-score-in-uplift">アップリフトモデリングにおける傾向スコア</h3>
+  <p>傾向スコアやIPWは、アップリフトモデリングに固有の手法ではない。因果推論では、処置群と対照群を比較するときの重要な考え方として広く使われている。</p>
+  <p>サンプル事例では以下で登場する</p>
+  <ul>
+    <li>処置を受ける確率を推定する</li>
+    <li>処置群 / 対照群の偏りを確認する</li>
+    <li>IPWによって重み付けする</li>
+    <li>X-Learnerで処置効果を組み合わせる</li>
+    <li>Qiniなどの評価</li>
+  </ul>
+
+
+
+  <h2 id="history">アップリフトモデリングの歴史</h2>
+  <h3 id="concept-development">概念の発展（2000年代初頭）</h3>
+  <p>現在のアップリフトモデリングにつながる考え方は、1990年代末から2000年代初頭にかけて、ダイレクトマーケティングの分野で発展した。</p>
+  <p>従来の応答予測モデルでは、「広告やキャンペーンに反応しそうな人」を予測する。しかし、その中には、施策がなくても自発的に購入する顧客も含まれている。そこで、施策によって生じる**増分価値（Incremental
+    Value）**を予測しようという考え方が登場した。</p>
+  <p>Hansotia &amp; Rukstales (2002) は、マーケティング施策による増分価値を扱う Incremental Value Modeling を提案した。</p>
+  <p>その後、Nicholas J. Radcliffeらによって、処置群と対照群の反応の差を利用してマーケティング施策の対象者を選ぶ考え方が整理され、Uplift Model / Uplift Modeling
+    という呼び方が広まっていった。Radcliffe (2007) は、アップリフトモデルの構築方法だけでなく、モデルの評価方法や実際のマーケティングへの適用についても整理している。</p>
+
+
+  <h3 id="causal-inference-and-ml">因果推論・機械学習との融合（2010年代〜）</h3>
+  <p>2010年代になると、統計的な因果推論と機械学習を組み合わせ、顧客ごと・サブグループごとに異なる処置効果（heterogeneous treatment effects）を推定する研究が発展した。</p>
+  <p>アップリフトモデリングも、マーケティングにおける「増分を予測する手法」という位置付けから、個別処置効果（ITE）や条件付き平均処置効果（CATE）を推定する問題として捉えられるようになった。</p>
+  <p>こうした流れの中で、既存の機械学習モデルを組み合わせて処置効果を推定するMeta-Learnerという考え方が発展した。2019年にはKünzel et
+    al.がS-Learner、T-Learner、X-Learnerなどを体系的に整理し、機械学習による異質な処置効果の推定を一般化した。</p>
+
+
+  <h3 id="practical-adoption">実務への広がり（2010年代後半〜）</h3>
+  <p>2010年代後半には、オンラインサービスや広告・マーケティングの分野でも、A/Bテストなどの実験データを利用して、顧客ごとの処置効果を推定し、施策対象を最適化する取り組みが広がった。</p>
+  <p>Uberの研究チームもuplift modelingを研究・実務に取り入れており、2017年には複数の施策に対応したUplift Modelingの手法を発表している。</p>
+  <p>さらに2019年には、複数の施策についてそれぞれのコストまで考慮して施策を最適化する手法も発表された。</p>
+  <p>
+    こうした研究成果を含むさまざまな手法をPythonから利用できるようにしたのが、Uberが公開しているCausalMLなどのオープンソースライブラリである。CausalMLは、S/T/X-Learnerを含むMeta-LearnerやUplift
+    Tree、各種の因果推論手法を提供している。</p>
+
+
+  <h3 id="primary-sources">一次情報</h3>
+  <ul>
+    <li>増分モデルの先駆論文（Hansotia &amp; Rukstales, 2002） <ul>
+        <li><a href="https://journals.sagepub.com/doi/10.1002/dir.10035">Incremental value modeling</a> </li>
+        <li>概要: ダイレクトマーケティングにおいて、通常の応答予測ではなく、マーケティング施策による「増分価値（Incremental Value）」をモデル化する考え方を提示。</li>
+      </ul>
+    </li>
+    <li>初期の体系化論文（Radcliffe &amp; Surry, 2011） <ul>
+        <li><a href="https://stochasticsolutions.com/pdf/sig-based-up-trees.pdf">Real-World Uplift Modelling with
+            Significance-Based Uplift Trees</a> </li>
+        <li>概要: アップリフトモデリングの実務的な考え方、Significance-Based Uplift Trees, モデル構築・評価・施策後の検証などを体系的に解説。1999年には著者らが「Differential
+          Response Modelling」という名称で先行研究を発表している。</li>
+      </ul>
+    </li>
+    <li>Meta-Learnerの体系化・X-Learner提案論文（Künzel et al., 2019） <ul>
+        <li><a href="https://doi.org/10.1073/pnas.1804597116">Metalearners for estimating heterogeneous treatment
+            effects
+            using machine learning</a> </li>
+        <li>概要: 機械学習による異質な処置効果（heterogeneous treatment effects）の推定を統一的に整理し、S-Learner,
+          T-LearnerなどのMeta-Learnerを扱うとともに、X-Learnerを提案。</li>
+      </ul>
+    </li>
+    <li>Uberによるアップリフトモデリング研究（Zhao, Fang &amp; Simchi-Levi, 2017） <ul>
+        <li><a href="https://arxiv.org/abs/1705.08492">Uplift Modeling with Multiple Treatments and General Response
+            Types</a> </li>
+        <li>概要: 複数のTreatmentと一般的なアウトカムに対応するアップリフトモデリングを扱い、アップリフトを直接最適化するRandomized Treesを提案。実データを用いた評価もおこなっている。</li>
+      </ul>
+    </li>
+    <li>CausalML論文（Chen et al., 2020） <ul>
+        <li><a href="https://arxiv.org/abs/2002.11631">CausalML: Python Package for Causal Machine Learning</a> </li>
+        <li>概要: アップリフトモデリングや因果推論の手法をPythonから利用できるようにしたオープンソースライブラリCausalMLを紹介。</li>
+      </ul>
+    </li>
+    <li>CausalML（Uber GitHub） <ul>
+        <li><a href="https://github.com/uber/causalml">CausalML: Python Package for Causal Machine Learning and Uplift
+            Modeling</a> </li>
+        <li>概要: S/T/X-Learnerを含むMeta-Learner, Uplift Tree, 各種の因果推論手法を提供するPythonライブラリ。実験データ・観測データからCATEを推定できる。</li>
+      </ul>
+    </li>
+  </ul>
+
+  <footer id="footer">
+    <div class="footer-links">
+      <a href="https://sasasakaz.github.io/">🏠 Home</a>
+      <span class="separator">|</span>
+      <a href="#header">Back to Top</a>
+    </div>
+    <p>Author: sasasakaz</p>
+  </footer>
+</body>
+
+</html>
