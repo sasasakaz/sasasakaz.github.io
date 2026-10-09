@@ -95,7 +95,7 @@ img {
   font-weight: bold;
   color: #1a365d;
   margin-top: 0; /* デフォルトの大きな余白を全部消す */
-  margin-bottom: 0.6em;  /* 下のリスト（ul）との間のスキマだけ少し開ける */
+  margin-bottom: 0.2em;  /* 下のリスト（ul）との間のスキマだけ少し開ける */
 
   /* h2の装飾（左線や背景帯など）が引き継がれないようにクリア */
   border: none;
@@ -104,6 +104,7 @@ img {
 }
 
 .toc ul {
+  margin-top: 0;
   margin-bottom: 0;
 }
 
