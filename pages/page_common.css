@@ -84,15 +84,14 @@ img {
 .toc {
   border: 1px solid #d0e7f5;
   border-radius: 0.5em;
-  padding: 1.2em 1.5em;
-  /* 枠線と中の余白 */
+  padding: 1em 1.5em;  /* 枠線と中の余白 */
   margin: 2em 0;
   background-color: #f8fafc;  /* うっすら背景を入れるとカード感が出る */
 }
 
 /* 目次のタイトル */
 .toc h2 {
-  font-size: 1.1em;  /* 本文より少しだけ大きめ＆主張しすぎないサイズ */
+  font-size: 1.05em;
   font-weight: bold;
   color: #1a365d;
   margin-top: 0; /* デフォルトの大きな余白を全部消す */
@@ -104,21 +103,8 @@ img {
   padding: 0;
 }
 
-/* 目次リスト側のデフォルト余白も綺麗にリセット */
 .toc ul {
-  margin-top: 0;
   margin-bottom: 0;
-  padding-left: 1.2em;  /* リストのぽっち（・）の分だけ左余白を残す */
-}
-
-.toc li {
-  margin-bottom: 0.4em;
-  /* 各目次アイテム同士の間隔 */
-}
-
-.toc li:last-child {
-  margin-bottom: 0;
-  /* 一番最後のアイテムの下余白はゼロに */
 }
 
 
