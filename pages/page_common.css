@@ -29,19 +29,40 @@ h1 {
 }
 
 h2 {
+  color: #1a365d;  /* 濃いネイビー */
+  border-left: 6px solid #2b5b84;  /* 太い左線 */
+  background-color: #f0f4f8;  /* うすい背景色 */
+  padding: 0.4em 0.7em;
+  border-radius: 0 4px 4px 0;
   margin-top: 3.0em;
   margin-bottom: 0.6em;
 }
 
 h3 {
+  color: #2b5b84;
+  border-left: 4px solid #3182ce;  /* 中太左線、少し明るい青、背景なし */
+  padding-left: 0.6em;
   margin-top: 2.5em;
   margin-bottom: 0.4em;
 }
 
 h4 {
+  font-size: 1.05em;
+  color: #2d3748;  /* 落ち着いた色 */
+  border-left: 2.5px solid #a0aec0;  /* 細線、グレー */
+  padding-left: 0.5em;
+  line-height: 1.2;  /* 線の上下の長さをキュッと引き締める */
   margin-top: 1.8em;
-  margin-bottom: 0.2em;
+  margin-bottom: 0;  /* 下はゼロにする */
 }
+
+/* h4の直後は少し上に詰める */
+.h4+ul,
+.h4+ol,
+.h4+p {
+  margin-top: .2em;
+}
+
 
 /* 画像が親要素を突き抜けないように */
 img {
