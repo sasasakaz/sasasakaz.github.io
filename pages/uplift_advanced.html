@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>アップリフトモデリング（応用）</title>
+  <link href='https://sasasakaz.github.io/pages/uplift_advanced.html' rel='canonical'>
+  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <meta name="description" content="アップリフトモデリングの応用情報。キャリブレーション、推定値の妥当性、Qini曲線やAUUCなどモデル評価、期待純利益シミュレーションなどについて紹介します。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="アップリフトモデリング（応用）">
+  <meta property="og:description" content="アップリフトモデリングの応用情報。キャリブレーション、推定値の妥当性、Qini曲線やAUUCなどモデル評価、期待純利益シミュレーションなどについて紹介します。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/uplift_advanced.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+
+  <!-- Google Tag Manager -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script><!-- End Google Tag Manager -->
+
+  <link rel="stylesheet" href="page_common.css">
+
+  <!-- syntax highlighter start -->
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css' rel='stylesheet' />
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js'></script>
+  <script>hljs.highlightAll();</script>
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+</head>
+
+<body>
+  <header id="header">
+    <h1>アップリフトモデリング（応用）</h1>
+
+    <!-- 投稿日・更新日メタ情報 -->
+    <div class="entry-meta">
+      <span class="meta-item published">
+        <span class="meta-icon" aria-hidden="true">🕒</span>
+        <span class="meta-label">公開：</span><time datetime="2026-10-13">2026.10.13</time>
+      </span>
+      <span class="meta-divider" aria-hidden="true">/</span>
+      <span class="meta-item updated">
+        <span class="meta-icon" aria-hidden="true">🔄</span>
+        <span class="meta-label">更新：</span><time datetime="2026-10-13">2026.10.13</time>
+      </span>
+    </div>
+
+    <p>サンプル事例のコードをもとに、実践しながらアップリフトモデリングの評価方法などを解説。</p>
+  </header>
+
+  <nav class="toc">
+    <h2>目次</h2>
+    <ul>
+      <li><a href="#calibration">キャリブレーション</a></li>
+      <ul>
+        <li><a href="#why-important-in-uplift">なぜアップリフトモデリングで重要なのか</a></li>
+        <li><a href="#calibration-methods">キャリブレーションの手法</a></li>
+        <li><a href="#preparing-calibration-data">キャリブレーション用データの用意</a></li>
+        <li><a href="#caution-about-calibration">キャリブレーションの注意点</a></li>
+      </ul>
+      <li><a href="#get-uplift">アップリフトの取得</a></li>
+      <li><a href="#sanity">Sanity</a></li>
+      <ul>
+        <li><a href="#calibration-before-after">Calibration before/after</a></li>
+        <li><a href="#prob-distribution">Prob Distribution</a></li>
+        <li><a href="#propensity-score-overlap">Propensity Score Overlap</a></li>
+        <li><a href="#covariate-balance">Covariate Balance</a></li>
+      </ul>
+      <li><a href="#evaluation">Evaluation</a></li>
+      <ul>
+        <li><a href="#qini-curve-auuc">Qini Curve, AUUC</a></li>
+        <li><a href="#bootstrap-auuc">Bootstrap AUUC</a></li>
+        <li><a href="#overfitting-check">Overfitting Check</a></li>
+        <li><a href="#predicted-score-vs-actual">Predicted Score vs Actual</a></li>
+      </ul>
+      <li><a href="#profiling">Profiling</a></li>
+      <ul>
+        <li><a href="#score-quantiles">Score Quantiles</a></li>
+        <li><a href="#between-learner">Between Learner</a></li>
+        <li><a href="#expected-net-profit">Expected Net Profit</a></li>
+      </ul>
+    </ul>
+  </nav>
+
+<p>サンプル事例</p>
+<ul>
+  <li>カフェチェーンで「ラテ」の売上を伸ばすために、クーポンを配るキャンペーンを企画中。</li>
+  <li>全員に配る予算はない。クーポンをあげなくても買う「鉄板層」に配ると損をする。</li>
+  <li>クーポンがないと買わなそうだが、クーポンがあると買いやすそうな人を優先して施策対象としたい。</li>
+</ul>
+<p>実践内容</p>
+<ul>
+  <li>アップリフトモデリングをLightGBMで、S,T,X-Learnerを同時進行する。</li>
+  <li>X-Learnerでは、傾向スコアを用いて2つの処置効果推定値を重み付けして推定する。</li>
+  <li>モデル評価時には、IPW（逆確率重み付け）による重みも利用する。</li>
+  <li>会計時に一定確率でクーポンを配布した、28日間の来店データを使用。1行は顧客の1回の来店に対応し、同じ顧客が複数日に来店する場合もある。</li>
+  <li>データは日付で分割する（Train: 最初の2週間 / Val: 次の1週間 / Test: 最後の1週間）。</li>
+  <li>Trainでモデルを学習し、ValでEarly Stoppingにより木の本数を決定した後、その本数でTrainを使って再学習する。分類器は、学習済みモデルを固定したうえでValを使って確率を較正する。</li>
+  <li>Valはモデルの調整や選定にも使用するため、最終的な評価には使用せず、Testで評価する。</li>
+  <li>モデルの健全性チェック、評価、分析と、モデルの解釈（PFI, SHAP, PDP, ICE）をおこなう。解釈工程についてはここでは触れない。</li>
+</ul>
+<blockquote>
+  <pre>
+Python 3.11.15
+OS macOS-27.0.1-arm64-arm-64bit
+pandas 3.0.2
+numpy 2.4.3
+matplotlib 3.10.9
+seaborn 0.13.2
+scikit-learn 1.8.0
+shap 0.51.0
+lightgbm 4.6.0
+</pre>
+</blockquote>
+
+
+
+<h2 id="calibration">キャリブレーション</h2>
+<p>サンプル事例では、S-LearnerやT-Learnerで使用する分類モデルの予測確率などをキャリブレーション（較正: こうせい）している。</p>
+<p>分類モデルの predict_proba() が出力する確率は、実際の発生率と一致するとは限らない。予測確率が実際の発生率を適切に表しているかを確認し、必要に応じて確率を調整する。</p>
+<ol>
+  <li>例えば、モデルが1,000人ぶんの予測確率を出力する。</li>
+  <li>そこから予測購入確率が80%前後のグループを100人取り出す。</li>
+  <li>100人のうち実際に80人程度が購入していれば、予測確率と実際の発生率は、よく対応しているといえる。</li>
+  <li>実際の購入者は50人だった場合、予測確率は実際とズレている状態にある。</li>
+  <li>このとき、<span class='inline-mark'>モデルが出力した予測確率と、実際の発生率が対応するように調整する</span>ことを、キャリブレーションと呼ぶ。</li>
+</ol>
+
+
+<h3 id="why-important-in-uplift">なぜアップリフトモデリングで重要なのか</h3>
+<p>予測確率そのものを意思決定に使う場合には、通常の分類問題でもキャリブレーションを利用することはある。アップリフトモデリングでは、確率の適切さがより重要になりやすい。</p>
+<p>S, T-Learnerでは、処置ありでの予測確率と処置なしでの予測確率の差からアップリフトを推定する。</p>
+<ol>
+  <li>例えばあるグループにおいて、処置ありの場合の購入確率を80%、処置なしの場合を50%と予測したとする。このとき、推定したアップリフトは30pointsとなる。</li>
+  <li>仮に実際の購入確率は処置あり70%、処置なし60%だったとする。この場合、真のアップリフトは10pointsであり、推定値は20points過大になっている。</li>
+  <li>つまり、<span class='inline-mark'>処置あり/なしそれぞれの確率のズレ</span>がアップリフトの推定値にも影響しやすい。</li>
+</ol>
+<p>
+  だからといって、アップリフトモデリングでは必ずキャリブレーションしなければならないわけではない。キャリブレーションなしでも十分な順位付け性能が得られる場合はある。サンプル事例では<strong>分類モデルの予測確率を実際の発生率により対応させる</strong>ことを目的として、キャリブレーションをおこなう。
+</p>
+
+
+<h3 id="calibration-methods">キャリブレーションの手法</h3>
+<p>分類器（モデル）とは別に、モデルが出力した確率やスコアを、実際の発生率に対応するように変換する<strong>較正器（キャリブレーター）</strong>を追加する。</p>
+<p>キャリブレーションには複数の手法がある。ここでは、scikit-learnのCalibratedClassifierCVで利用できる手法のうち2つを取り上げる。</p>
+<ul>
+  <li>Sigmoid（Platt Scaling）<ul>
+      <li>シグモイド関数を使って、モデルの出力を確率に変換する方法。</li>
+      <li>Isotonicよりも較正器の自由度が低く、較正用データが少ない場合にも選びやすい。</li>
+      <li>確率のズレが、この関数で十分に表現できる場合に適している。</li>
+    </ul>
+  </li>
+  <li>Isotonic（等調回帰）<ul>
+      <li>データから単調な変換関数を学習する方法。</li>
+      <li>特定の関数の形を仮定せず、データに合わせて柔軟に確率を調整できる。</li>
+      <li>較正用データが少ないと過学習しやすいため、十分なデータを確保できる場合に検討する。</li>
+    </ul>
+  </li>
+</ul>
+
+
+<h3 id="preparing-calibration-data">キャリブレーション用データの用意</h3>
+<p>分類器の学習に使ったデータを、そのままキャリブレーションに使わない。</p>
+<p>
+  分類器は、学習に使ったデータに対して、未知のデータに対する場合よりも良い予測を示すことがある。そのため、学習データに対する予測を使って較正器を学習すると、未知のデータでの予測確率を適切に較正できない可能性がある。原則として、分類器の学習には使っていないデータを用いて較正する。
+</p>
+<p><strong>FrozenEstimator</strong>: すでに学習済みの分類器を固定して、別データでキャリブレーションする方法。</p>
+<pre><code>base_model = lgb.LGBMClassifier(**{**params_clf, &#39;n_estimators&#39;: n_trees}).fit(X_tr, y_tr)
+model = CalibratedClassifierCV(FrozenEstimator(base_model), method=&#39;sigmoid&#39;)
+model.fit(X_va, y_va)
+</code></pre>
+<ol>
+  <li>Trainで分類器を学習（木の本数はValでのEarly Stoppingで決める）</li>
+  <li>学習済み分類器を<code>FrozenEstimator</code>で固定</li>
+  <li><strong>Valだけを使って</strong>較正器を作る</li>
+</ol>
+<p>こうする理由</p>
+<ul>
+  <li>まず分類器を学習させて、次に別のデータを使って予測確率だけを調整する、という処理の構造が分かりやすい。</li>
+  <li>後述のクロスバリデーションでは、時点データの場合に「新しい期間で学習して、古い期間で較正する」ことが起きうる。</li>
+  <li>Trainよりも時点が新しいValを較正に使うことで、過去のデータで学習した分類器を、より新しい期間のデータで較正するという時間の順序を保てる。</li>
+</ul>
+<div class="mdc-note-box">
+
+  <p><strong>クロスバリデーションで、分類器の学習と較正器を分離する方法</strong></p>
+  <ul>
+    <li>データが少なく、キャリブレーション用のデータを別に取るともったいない場合などには有用。</li>
+    <li>どんな処理をしているかがコードを見ただけではわかりにくい。</li>
+  </ul>
+  <pre><code>base_model = lgb.LGBMClassifier(**params_clf)
+model = CalibratedClassifierCV(base_model, cv=3, method=&#39;sigmoid&#39;, ensemble=False)
+model.fit(X, y)
+</code></pre>
+  <p><strong>ensemble=True（デフォルト値）の場合</strong></p>
+  <ol>
+    <li>分類器を学習: cv=3なのでデータセットを3分割し、そのうち2つのfoldを使って分類器を学習。</li>
+    <li>較正用の予測を作成: 学習に使っていない残り1つのfoldについて、分類器で予測確率を出力する。</li>
+    <li>較正器を学習: 予測確率と実際の結果を使い、確率を調整するための変換関数を学習。</li>
+    <li>これを3foldぶん繰り返し、3組の「分類器＋較正器」を作る。</li>
+    <li>予測時には、3組のモデルがそれぞれ出力した予測確率を平均する。</li>
+  </ol>
+  <p>3-foldの場合、予測時には3組の「分類器＋較正器」の予測確率を平均する。複数のモデルを組み合わせることで、予測性能や確率の安定性が改善する場合がある。一方、複数の分類器を学習するため、計算量が増える。</p>
+  <p><strong>ensemble=Falseの場合</strong></p>
+  <ol>
+    <li>データセットを3分割し、各foldについて、残りのデータで学習した分類器から予測確率を得る。</li>
+    <li>すべてのfoldの予測確率を集め、実際の発生結果と組み合わせて較正器を1つ学習する。</li>
+    <li>全データを使って、改めて分類器を学習。</li>
+    <li>全データで学習した分類器と、手順2で学習させた較正器を組み合わせて使用する。</li>
+  </ol>
+  <p>3foldなら3回のクロスバリデーションをおこなったうえで、1つの「分類器＋較正器」が作られ、予測時にはこれのみを使用する。そのため、ensemble=True よりも計算量やモデルサイズを抑えやすい。</p>
+  <p>ただし、較正器の学習に使った予測が、全データで再学習した分類器の予測と完全に同じ性質を持つとは限らない。全データで学習させた分類器は、各foldで学習させた分類器より多くのデータを使っているため。</p>
+</div>
+
+
+<h3 id="caution-about-calibration">キャリブレーションの注意点</h3>
+<ul>
+  <li>キャリブレーションは、分類モデルの識別能力や順位付け能力を直接改善することを目的とした処理ではない。</li>
+  <li>予測確率と実際の発生率の対応を整える処理であり、アップリフトモデリングの評価指標として後ほど登場するQiniやAUUCを必ず改善するわけではない。</li>
+  <li>時系列データでは、クロスバリデーションの分割方法にも注意が必要。通常のcv=3では、必ずしも過去のデータだけで学習し、未来のデータで予測する構造にはならない。</li>
+  <li>時系列の順序を守りたい場合には、学習データよりも新しい期間のデータを較正に使う方法などを検討する。ただし、クロスバリデーションを使う場合も、データの時間的な順序を考慮した分割方法を選ぶ必要がある。</li>
+  <li>キャリブレーションを実施したら、予測確率と実際の発生率がどの程度対応しているかを確認する。<span
+      class='inline-mark'>較正器を適用しただけで、確率が適切に較正されたと判断できるわけではない</span>。そして確認するのは分類器の予測確率の較正であり、個人ごとの処置効果の推定精度そのものではない。
+  </li>
+</ul>
+
+
+
+<h2>アップリフトの取得</h2>
+<p>モデルのチェックや評価、分析をするために、予測値などを取得しておく。サンプル事例では各Learnerによる予測値を元のデータセットとともにdataframe化している。</p>
+<table>
+  <thead>
+    <tr>
+      <th align="left">Learner</th>
+      <th align="left">カラム名</th>
+      <th align="left">意味</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">S-Learner</td>
+      <td align="left">prob_t_s</td>
+      <td align="left">処置した場合の購入確率</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">prob_c_s</td>
+      <td align="left">処置しなかった場合の購入確率</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">score_s</td>
+      <td align="left">CATEの推定値（処置による購入確率の差。0.10なら10points差に相当）</td>
+    </tr>
+    <tr>
+      <td align="left">T-Learner</td>
+      <td align="left">prob_t_t</td>
+      <td align="left">処置した場合の購入確率</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">prob_c_t</td>
+      <td align="left">処置しなかった場合の購入確率</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">score_t</td>
+      <td align="left">CATEの推定値（処置による購入確率の差）</td>
+    </tr>
+    <tr>
+      <td align="left">X-Learner</td>
+      <td align="left">tau_t_x</td>
+      <td align="left">処置群の疑似ITEから学習させたCATEの推定値</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">tau_c_x</td>
+      <td align="left">対照群の疑似ITEから学習させたCATEの推定値</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">score_x</td>
+      <td align="left">tau_t_xとtau_c_xを傾向スコアで統合したCATEの推定値（処置による購入確率の差）</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">propensity_score</td>
+      <td align="left">傾向スコア（処置を受ける確率の推定値）</td>
+    </tr>
+    <tr>
+      <td align="left"></td>
+      <td align="left">ipw_weight</td>
+      <td align="left">傾向スコアから計算したIPW重み</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Sanity</h2>
+<h3>Calibration before/after</h3>
+<h3>Prob Distribution</h3>
+<h3>Propensity Score Overlap</h3>
+<h3>Covariate Balance</h3>
+
+<h2>Evaluation</h2>
+<h3>Qini Curve, AUUC</h3>
+<h3>Bootstrap AUUC</h3>
+<h3>Overfitting Check</h3>
+<h3>Predicted Score vs Actual</h3>
+
+<h2>Profiling</h2>
+<h3>Score Quantiles</h3>
+<h3>Between Learner</h3>
+<h3>Expected Net Profit</h3>
+
+
+  <footer id="footer">
+    <div class="footer-links">
+      <a href="https://sasasakaz.github.io/">🏠 Home</a>
+      <span class="separator">|</span>
+      <a href="#header">Back to Top</a>
+    </div>
+    <p>Author: sasasakaz</p>
+  </footer>
+</body>
+
+</html>
