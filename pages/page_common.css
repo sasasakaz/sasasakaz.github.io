@@ -23,6 +23,22 @@ html {
 }
 
 
+/* pとulをひとかたまりで見せたいとき用 */
+/* ul のすぐ上にある p（導入文）の下余白をキュッと詰める */
+p:has(+ ul) {
+  margin-top: 1.6em;
+  /* 上とは開ける */
+  margin-bottom: 0.3em;
+  /* 下のulに引き寄せる */
+}
+
+/* その直後の ul の上余白もゼロにする */
+p+ul {
+  margin-top: 0;
+}
+
+
+
 h1 {
   /* margin-top: 0; */
   margin-bottom: 0.8em;
@@ -56,26 +72,13 @@ h4 {
   margin-bottom: 0;  /* 下はゼロにする */
 }
 
+
 /* h4の直後は少し上に詰める */
 h4+ul,
 h4+ol,
 h4+p {
   margin-top: .2em;
 }
-
-
-/* pとulをひとかたまりで見せたいとき用 */
-/* ul のすぐ上にある p（導入文）の下余白をキュッと詰める */
-p:has(+ ul) {
-  margin-top: 1.6em;  /* 上とは開ける */
-  margin-bottom: 0.3em;  /* 下のulに引き寄せる */
-}
-/* その直後の ul の上余白もゼロにする */
-p+ul {
-  margin-top: 0;
-}
-
-
 
 
 
