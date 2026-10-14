@@ -57,9 +57,9 @@ h4 {
 }
 
 /* h4の直後は少し上に詰める */
-.h4+ul,
-.h4+ol,
-.h4+p {
+h4+ul,
+h4+ol,
+h4+p {
   margin-top: .2em;
 }
 
