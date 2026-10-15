@@ -28,6 +28,11 @@
   </script><!-- End Google Tag Manager -->
 
   <link rel="stylesheet" href="page_common.css">
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
+  <script src="page_layout.js" defer></script>
 
   <!-- syntax highlighter start -->
   <link href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css' rel='stylesheet' />
@@ -39,79 +44,58 @@
   </style>
 </head>
 
-<body>
-  <header id="header">
-    <h1>アップリフトモデリング（実践）</h1>
+<body class="layout-3col">
+  <div class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true">📚
+      ページ一覧</button>
+    <span id="topbar-title" class="topbar-title"></span>
+    <button type="button" id="btn-right" class="topbar-btn" aria-controls="page-toc" aria-expanded="true">📑 目次</button>
+  </div>
+  <div id="side-backdrop" class="side-backdrop"></div>
 
-    <!-- 投稿日・更新日メタ情報 -->
-    <div class="entry-meta">
-      <span class="meta-item published">
-        <span class="meta-icon" aria-hidden="true">🕒</span>
-        <span class="meta-label">公開：</span><time datetime="2026-10-13">2026.10.13</time>
-      </span>
-      <span class="meta-divider" aria-hidden="true">/</span>
-      <span class="meta-item updated">
-        <span class="meta-icon" aria-hidden="true">🔄</span>
-        <span class="meta-label">更新：</span><time datetime="2026-10-13">2026.10.13</time>
-      </span>
-    </div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
-    <p>サンプル事例をもとにアップリフトモデリングの評価方法などを実践しながら解説。</p>
-  </header>
+    <main id="content">
+      <header id="header">
+        <h1>アップリフトモデリング（実践）</h1>
 
-  <nav class="toc">
-    <h2>目次</h2>
-    <ul>
-      <li><a href="#calibration">キャリブレーション</a></li>
-      <ul>
-        <li><a href="#why-important-in-uplift">なぜアップリフトモデリングで重要なのか</a></li>
-        <li><a href="#calibration-methods">キャリブレーションの手法</a></li>
-        <li><a href="#preparing-calibration-data">キャリブレーション用データの用意</a></li>
-        <li><a href="#caution-about-calibration">キャリブレーションの注意点</a></li>
-      </ul>
-      <li><a href="#get-uplift">アップリフトの取得</a></li>
-      <li><a href="#sanity">Sanity</a></li>
-      <ul>
-        <li><a href="#calibration-before-after">Calibration before/after</a></li>
-        <li><a href="#prob-distribution">Prob Distribution</a></li>
-        <li><a href="#propensity-score-overlap">Propensity Score Overlap</a></li>
-        <li><a href="#covariate-balance">Covariate Balance</a></li>
-      </ul>
-      <li><a href="#evaluation">Evaluation</a></li>
-      <ul>
-        <li><a href="#qini-curve-auuc">Qini Curve, AUUC</a></li>
-        <li><a href="#bootstrap-auuc">Bootstrap AUUC</a></li>
-        <li><a href="#overfitting-check">Overfitting Check</a></li>
-        <li><a href="#predicted-score-vs-actual">Predicted Score vs Actual</a></li>
-      </ul>
-      <li><a href="#profiling">Profiling</a></li>
-      <ul>
-        <li><a href="#score-quantiles">Score Quantiles</a></li>
-        <li><a href="#between-learner">Between Learner</a></li>
-        <li><a href="#expected-net-profit">Expected Net Profit</a></li>
-      </ul>
-    </ul>
-  </nav>
+        <!-- 投稿日・更新日メタ情報 -->
+        <div class="entry-meta">
+          <span class="meta-item published">
+            <span class="meta-icon" aria-hidden="true">🕒</span>
+            <span class="meta-label">公開：</span><time datetime="2026-10-13">2026.10.13</time>
+          </span>
+          <span class="meta-divider" aria-hidden="true">/</span>
+          <span class="meta-item updated">
+            <span class="meta-icon" aria-hidden="true">🔄</span>
+            <span class="meta-label">更新：</span><time datetime="2026-10-13">2026.10.13</time>
+          </span>
+        </div>
 
-  <p>サンプル事例</p>
-  <ul>
-    <li>カフェチェーンで「ラテ」の売上を伸ばすために、クーポンを配るキャンペーンを企画中。</li>
-    <li>全員に配る予算はない。クーポンをあげなくても買う「鉄板層」に配ると損をする。</li>
-    <li><span class='inline-mark'>クーポンがないと買わなそうだが、クーポンがあると買いやすそう</span>な人を優先して施策対象としたい。</li>
-  </ul>
-  <p>実践内容</p>
-  <ul>
-    <li>アップリフトモデリングをLightGBMで、S,T,X-Learnerを同時進行する。</li>
-    <li>X-Learnerでは、傾向スコアを用いて2つの処置効果推定値を重み付けして推定する。</li>
-    <li>モデル評価時には、IPW（逆確率重み付け）による重みも利用する。</li>
-    <li>会計時に一定確率でクーポンを配布した、28日間の来店データを使用。1行は顧客の1回の来店に対応し、同じ顧客が複数日に来店する場合もある。</li>
-    <li>データは日付で分割する（Train: 最初の2週間 / Val: 次の1週間 / Test: 最後の1週間）。</li>
-    <li>Trainでモデルを学習し、ValでEarly Stoppingにより木の本数を決定した後、その本数でTrainを使って再学習する。分類器は、学習済みモデルを固定したうえでValを使って確率を較正する。</li>
-    <li>Valはモデルの調整や選定にも使用するため、最終的な評価には使用せず、Testで評価する。</li>
-    <li>モデルの健全性チェック、評価、分析と、モデルの解釈（PFI, SHAP, PDP, ICE）をおこなう。解釈工程についてはここでは触れない。</li>
-  </ul>
-  <blockquote>
-    <pre>
+        <p>サンプル事例をもとにアップリフトモデリングの評価方法などを実践しながら解説。</p>
+      </header>
+
+
+      <p>サンプル事例</p>
+      <ul>
+        <li>カフェチェーンで「ラテ」の売上を伸ばすために、クーポンを配るキャンペーンを企画中。</li>
+        <li>全員に配る予算はない。クーポンをあげなくても買う「鉄板層」に配ると損をする。</li>
+        <li><span class='inline-mark'>クーポンがないと買わなそうだが、クーポンがあると買いやすそう</span>な人を優先して施策対象としたい。</li>
+      </ul>
+      <p>実践内容</p>
+      <ul>
+        <li>アップリフトモデリングをLightGBMで、S,T,X-Learnerを同時進行する。</li>
+        <li>X-Learnerでは、傾向スコアを用いて2つの処置効果推定値を重み付けして推定する。</li>
+        <li>モデル評価時には、IPW（逆確率重み付け）による重みも利用する。</li>
+        <li>会計時に一定確率でクーポンを配布した、28日間の来店データを使用。1行は顧客の1回の来店に対応し、同じ顧客が複数日に来店する場合もある。</li>
+        <li>データは日付で分割する（Train: 最初の2週間 / Val: 次の1週間 / Test: 最後の1週間）。</li>
+        <li>Trainでモデルを学習し、ValでEarly Stoppingにより木の本数を決定した後、その本数でTrainを使って再学習する。分類器は、学習済みモデルを固定したうえでValを使って確率を較正する。</li>
+        <li>Valはモデルの調整や選定にも使用するため、最終的な評価には使用せず、Testで評価する。</li>
+        <li>モデルの健全性チェック、評価、分析と、モデルの解釈（PFI, SHAP, PDP, ICE）をおこなう。解釈工程についてはここでは触れない。</li>
+      </ul>
+      <blockquote>
+        <pre>
 Python 3.11.15
 OS macOS-27.0.1-arm64-arm-64bit
 pandas 3.0.2
@@ -122,594 +106,607 @@ scikit-learn 1.8.0
 shap 0.51.0
 lightgbm 4.6.0
 </pre>
-  </blockquote>
+      </blockquote>
 
 
 
-  <h2 id="calibration">キャリブレーション</h2>
-  <p>サンプル事例では、S-LearnerやT-Learnerで使用する分類モデルの予測確率などをキャリブレーション（較正: こうせい）している。</p>
-  <p>分類モデルの<code>Fpredict_proba()</code>が出力する確率は、実際の発生率（購入率など）と一致するとは限らない。予測確率が実際の発生率を適切に表しているかを確認し、必要に応じて確率を調整する。</p>
-  <ol>
-    <li>例えば、モデルが1,000人ぶんの予測確率を出力する。</li>
-    <li>そこから予測購入確率が80%前後のグループを100人取り出す。</li>
-    <li>100人のうち実際に80人程度が購入していれば、予測確率と実際の発生率はよく対応しているといえる。</li>
-    <li>実際の購入者が50人だった場合、予測確率は実際とズレている状態にある。</li>
-    <li>このとき、<span class='inline-mark'>モデルが出力した予測確率と実際の発生率が対応するように調整する</span>ことを「キャリブレーション」と呼ぶ。</li>
-  </ol>
+      <h2 id="calibration">キャリブレーション</h2>
+      <p>サンプル事例では、S-LearnerやT-Learnerで使用する分類モデルの予測確率などをキャリブレーション（較正: こうせい）している。</p>
+      <p>分類モデルの<code>Fpredict_proba()</code>が出力する確率は、実際の発生率（購入率など）と一致するとは限らない。予測確率が実際の発生率を適切に表しているかを確認し、必要に応じて確率を調整する。
+      </p>
+      <ol>
+        <li>例えば、モデルが1,000人ぶんの予測確率を出力する。</li>
+        <li>そこから予測購入確率が80%前後のグループを100人取り出す。</li>
+        <li>100人のうち実際に80人程度が購入していれば、予測確率と実際の発生率はよく対応しているといえる。</li>
+        <li>実際の購入者が50人だった場合、予測確率は実際とズレている状態にある。</li>
+        <li>このとき、<span class='inline-mark'>モデルが出力した予測確率と実際の発生率が対応するように調整する</span>ことを「キャリブレーション」と呼ぶ。</li>
+      </ol>
 
 
-  <h3 id="why-important-in-uplift">なぜアップリフトモデリングで重要なのか</h3>
-  <p>予測確率そのものを意思決定に使う場合には、通常の分類問題でもキャリブレーションを利用することはある。アップリフトモデリングでは、確率の適切さがより重要になりやすい。</p>
-  <p>S, T-Learnerでは、処置ありでの予測確率と処置なしでの予測確率の差からアップリフトを推定する。</p>
-  <ol>
-    <li>例えばあるグループにおいて、処置ありの場合の購入確率を80%、処置なしの場合を50%と予測したとする。このとき、推定したアップリフトは30pointsとなる。</li>
-    <li>仮に実際の購入率は処置あり70%、処置なし60%だったとする。この場合、真のアップリフトは10pointsであり、推定値は20points過大になっている。</li>
-    <li>つまり、<strong>処置あり/なしそれぞれの確率のズレ</strong>がアップリフトの推定値にも影響しやすい。</li>
-  </ol>
-  <p>
-    だからといって、アップリフトモデリングでは必ずキャリブレーションしなければならないわけではない。キャリブレーションなしでも十分な順位付け性能が得られる場合はある。サンプル事例では<strong>分類モデルの予測確率を実際の発生率により対応させる</strong>ことを目的として、キャリブレーションをおこなう。
-  </p>
+      <h3 id="why-important-in-uplift">なぜアップリフトモデリングで重要なのか</h3>
+      <p>予測確率そのものを意思決定に使う場合には、通常の分類問題でもキャリブレーションを利用することはある。アップリフトモデリングでは、確率の適切さがより重要になりやすい。</p>
+      <p>S, T-Learnerでは、処置ありでの予測確率と処置なしでの予測確率の差からアップリフトを推定する。</p>
+      <ol>
+        <li>例えばあるグループにおいて、処置ありの場合の購入確率を80%、処置なしの場合を50%と予測したとする。このとき、推定したアップリフトは30pointsとなる。</li>
+        <li>仮に実際の購入率は処置あり70%、処置なし60%だったとする。この場合、真のアップリフトは10pointsであり、推定値は20points過大になっている。</li>
+        <li>つまり、<strong>処置あり/なしそれぞれの確率のズレ</strong>がアップリフトの推定値にも影響しやすい。</li>
+      </ol>
+      <p>
+        だからといって、アップリフトモデリングでは必ずキャリブレーションしなければならないわけではない。キャリブレーションなしでも十分な順位付け性能が得られる場合はある。サンプル事例では<strong>分類モデルの予測確率を実際の発生率により対応させる</strong>ことを目的として、キャリブレーションをおこなう。
+      </p>
 
 
-  <h3 id="calibration-methods">キャリブレーションの手法</h3>
-  <p>分類器（モデル）とは別に、モデルが出力した確率やスコア（CVしやすさ、増分の大きさなど）を、実際の発生率に対応するように変換する<strong>較正器（キャリブレーター）</strong>を追加する。</p>
-  <p>キャリブレーションには複数の手法がある。ここでは、scikit-learnの<code>CalibratedClassifierCV</code>で利用できる手法のうち2つを取り上げる。</p>
-  <ul>
-    <li>Sigmoid（Platt Scaling）<ul>
-        <li>シグモイド関数を使って、モデルの出力を確率に変換する方法。</li>
-        <li>確率のズレが、シグモイド関数で十分に表現できる場合に適している（Isotonicよりも較正器の自由度が低い）。</li>
-        <li>較正用データが少ない場合にも使いやすい。</li>
+      <h3 id="calibration-methods">キャリブレーションの手法</h3>
+      <p>分類器（モデル）とは別に、モデルが出力した確率やスコア（CVしやすさ、増分の大きさなど）を、実際の発生率に対応するように変換する<strong>較正器（キャリブレーター）</strong>を追加する。</p>
+      <p>キャリブレーションには複数の手法がある。ここでは、scikit-learnの<code>CalibratedClassifierCV</code>で利用できる手法のうち2つを取り上げる。</p>
+      <ul>
+        <li>Sigmoid（Platt Scaling）<ul>
+            <li>シグモイド関数を使って、モデルの出力を確率に変換する方法。</li>
+            <li>確率のズレが、シグモイド関数で十分に表現できる場合に適している（Isotonicよりも較正器の自由度が低い）。</li>
+            <li>較正用データが少ない場合にも使いやすい。</li>
+          </ul>
+        </li>
+        <li>Isotonic（等調回帰）<ul>
+            <li>データから単調な変換関数を学習する方法。</li>
+            <li>特定の関数の形を仮定せず、データに合わせて柔軟に確率を調整できる。</li>
+            <li>較正用データが少ないと過学習しやすいため、十分なデータを確保できる場合に検討する。</li>
+          </ul>
+        </li>
       </ul>
-    </li>
-    <li>Isotonic（等調回帰）<ul>
-        <li>データから単調な変換関数を学習する方法。</li>
-        <li>特定の関数の形を仮定せず、データに合わせて柔軟に確率を調整できる。</li>
-        <li>較正用データが少ないと過学習しやすいため、十分なデータを確保できる場合に検討する。</li>
-      </ul>
-    </li>
-  </ul>
 
 
-  <h3 id="preparing-calibration-data">キャリブレーション用データの用意</h3>
-  <p>分類器の学習に使ったデータを、そのままキャリブレーションに使わない。</p>
-  <p>
-    分類器は、学習に使ったデータに対して、未知のデータに対する場合よりも良い予測を示すことがある。そのため、学習データに対する予測を使って較正器を学習すると、未知のデータでの予測確率を適切に較正できない可能性がある。原則として、分類器の学習には使っていないデータを用いて較正する。
-  </p>
+      <h3 id="preparing-calibration-data">キャリブレーション用データの用意</h3>
+      <p>分類器の学習に使ったデータを、そのままキャリブレーションに使わない。</p>
+      <p>
+        分類器は、学習に使ったデータに対して、未知のデータに対する場合よりも良い予測を示すことがある。そのため、学習データに対する予測を使って較正器を学習すると、未知のデータでの予測確率を適切に較正できない可能性がある。原則として、分類器の学習には使っていないデータを用いて較正する。
+      </p>
 
 
-  <h4>FrozenEstimator（hold-out）</h4>
-  <p>すでに学習済みの分類器を固定して、別データでキャリブレーションする方法。</p>
-  <pre><code>base_model = lgb.LGBMClassifier(**{**params_clf, &#39;n_estimators&#39;: n_trees}).fit(X_tr, y_tr)
+      <h4>FrozenEstimator（hold-out）</h4>
+      <p>すでに学習済みの分類器を固定して、別データでキャリブレーションする方法。</p>
+      <pre><code>base_model = lgb.LGBMClassifier(**{**params_clf, &#39;n_estimators&#39;: n_trees}).fit(X_tr, y_tr)
 model = CalibratedClassifierCV(FrozenEstimator(base_model), method=&#39;sigmoid&#39;)
 model.fit(X_va, y_va)
 </code></pre>
-  <ol>
-    <li>Trainで分類器を学習（木の本数はValでのEarly Stoppingで決める）</li>
-    <li>学習済み分類器を<code>FrozenEstimator</code>で固定</li>
-    <li>Valだけを使って較正器を作る</li>
-  </ol>
-  <p>こうする理由</p>
-  <ul>
-    <li>まず分類器を学習させて、次に別のデータで予測確率だけを調整するという処理の構造が分かりやすい。</li>
-    <li>クロスバリデーションでは、時点データの場合に「新しい期間で学習して、古い期間で較正する」ことが起きうる。</li>
-    <li>Trainよりも時点が新しいValを較正に使うことで、過去のデータで学習した分類器を、より新しい期間のデータで較正するという時間の順序を保てる。</li>
-  </ul>
+      <ol>
+        <li>Trainで分類器を学習（木の本数はValでのEarly Stoppingで決める）</li>
+        <li>学習済み分類器を<code>FrozenEstimator</code>で固定</li>
+        <li>Valだけを使って較正器を作る</li>
+      </ol>
+      <p>こうする理由</p>
+      <ul>
+        <li>まず分類器を学習させて、次に別のデータで予測確率だけを調整するという処理の構造が分かりやすい。</li>
+        <li>クロスバリデーションでは、時点データの場合に「新しい期間で学習して、古い期間で較正する」ことが起きうる。</li>
+        <li>Trainよりも時点が新しいValを較正に使うことで、過去のデータで学習した分類器を、より新しい期間のデータで較正するという時間の順序を保てる。</li>
+      </ul>
 
 
-  <h4>クロスバリデーション（cv=k）</h4>
-  <p>学習データをk分割し、分割ごとの「学習に使っていない側」でキャリブレーションする方法（分類器の学習と較正器を分離する）。</p>
-  <ul>
-    <li>データが少なく、キャリブレーション用のデータを別に取るともったいない場合などには有用。</li>
-    <li>どんな処理をしているかがコードを見ただけではわかりにくい。</li>
-  </ul>
-  <pre><code>base_model = lgb.LGBMClassifier(**params_clf)
+      <h4>クロスバリデーション（cv=k）</h4>
+      <p>学習データをk分割し、分割ごとの「学習に使っていない側」でキャリブレーションする方法（分類器の学習と較正器を分離する）。</p>
+      <ul>
+        <li>データが少なく、キャリブレーション用のデータを別に取るともったいない場合などには有用。</li>
+        <li>どんな処理をしているかがコードを見ただけではわかりにくい。</li>
+      </ul>
+      <pre><code>base_model = lgb.LGBMClassifier(**params_clf)
 model = CalibratedClassifierCV(base_model, cv=3, method=&#39;sigmoid&#39;, ensemble=False)
 model.fit(X, y)
 </code></pre>
 
-  <div class="mdc-note-box">
-    <p><strong>ensemble=True（デフォルト値）の場合</strong></p>
-    <ol>
-      <li>分類器を学習: cv=3なのでデータセットを3分割し、そのうち2つのfoldを使って分類器を学習。</li>
-      <li>較正用の予測を作成: 学習に使っていない残り1つのfoldについて、分類器で予測確率を出力する。</li>
-      <li>較正器を学習: 予測確率と実際の結果を使い、確率を調整するための変換関数を学習。</li>
-      <li>これを3foldぶん繰り返し、3組の「分類器＋較正器」を作る。</li>
-      <li>予測時には、3組のモデルがそれぞれ出力した予測確率を平均する。</li>
-    </ol>
-    <p>3-foldの場合、予測時には3組の「分類器＋較正器」の予測確率を平均する。複数のモデルを組み合わせることで、予測性能や確率の安定性が改善する場合がある。一方、複数の分類器を学習するため計算量が増える。</p>
-    <p><strong>ensemble=Falseの場合</strong></p>
-    <ol>
-      <li>データセットを3分割し、各foldについて、残りのデータで学習した分類器から予測確率を得る。</li>
-      <li>すべてのfoldの予測確率を集め、実際の発生結果と組み合わせて較正器を1つ学習する。</li>
-      <li>全データを使って、改めて分類器を学習。</li>
-      <li>全データで学習した分類器と、手順2で学習させた較正器を組み合わせて使用する。</li>
-    </ol>
-    <p>3foldなら3回のクロスバリデーションをおこなったうえで、1つの「分類器＋較正器」が作られ、予測時にはこれのみを使用する。そのため、<code>ensemble=True</code>よりも計算量やモデルサイズを抑えやすい。</p>
-    <p>ただし、較正器の学習に使った予測が、全データで再学習した分類器の予測と完全に同じ性質を持つとは限らない。全データで学習させた分類器は、各foldで学習させた分類器より多くのデータを使っているため。</p>
-  </div>
+      <div class="mdc-note-box">
+        <p><strong>ensemble=True（デフォルト値）の場合</strong></p>
+        <ol>
+          <li>分類器を学習: cv=3なのでデータセットを3分割し、そのうち2つのfoldを使って分類器を学習。</li>
+          <li>較正用の予測を作成: 学習に使っていない残り1つのfoldについて、分類器で予測確率を出力する。</li>
+          <li>較正器を学習: 予測確率と実際の結果を使い、確率を調整するための変換関数を学習。</li>
+          <li>これを3foldぶん繰り返し、3組の「分類器＋較正器」を作る。</li>
+          <li>予測時には、3組のモデルがそれぞれ出力した予測確率を平均する。</li>
+        </ol>
+        <p>3-foldの場合、予測時には3組の「分類器＋較正器」の予測確率を平均する。複数のモデルを組み合わせることで、予測性能や確率の安定性が改善する場合がある。一方、複数の分類器を学習するため計算量が増える。</p>
+        <p><strong>ensemble=Falseの場合</strong></p>
+        <ol>
+          <li>データセットを3分割し、各foldについて、残りのデータで学習した分類器から予測確率を得る。</li>
+          <li>すべてのfoldの予測確率を集め、実際の発生結果と組み合わせて較正器を1つ学習する。</li>
+          <li>全データを使って、改めて分類器を学習。</li>
+          <li>全データで学習した分類器と、手順2で学習させた較正器を組み合わせて使用する。</li>
+        </ol>
+        <p>
+          3foldなら3回のクロスバリデーションをおこなったうえで、1つの「分類器＋較正器」が作られ、予測時にはこれのみを使用する。そのため、<code>ensemble=True</code>よりも計算量やモデルサイズを抑えやすい。
+        </p>
+        <p>ただし、較正器の学習に使った予測が、全データで再学習した分類器の予測と完全に同じ性質を持つとは限らない。全データで学習させた分類器は、各foldで学習させた分類器より多くのデータを使っているため。</p>
+      </div>
 
-  <h3 id="caution-about-calibration">キャリブレーションの注意点</h3>
-  <ul>
-    <li>分類モデルの識別能力や順位付け能力を直接改善することを目的とした処理ではない。</li>
-    <li>予測確率と実際の発生率の対応を整える処理であり、モデルの評価指標（QiniやAUUC）を必ず改善するわけではない。</li>
-    <li>時系列データの順序を守りたい場合は、学習データよりも新しい期間のデータを較正に使う方法などを検討する（クロスバリデーション使用時は、データの時間的な順序を考慮した分割方法を選ぶ）。</li>
-    <li>キャリブレーション実施時は、予測確率と実際の発生率がどの程度対応しているか確認する（較正器を適用しただけで、確率が適切に較正されたとは判断できない）。</li>
-  </ul>
-
-
-
-  <h2>アップリフトの取得</h2>
-  <p>モデルのチェックや評価、分析をするために、予測値などを取得しておく。サンプル事例では各Learnerによる予測値を元のデータセットとともにdataframe化している。</p>
-  <table>
-    <thead>
-      <tr>
-        <th align="left">Learner</th>
-        <th align="left">カラム名</th>
-        <th align="left">意味</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td align="left">S-Learner</td>
-        <td align="left">prob_t_s</td>
-        <td align="left">処置した場合の購入確率</td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">prob_c_s</td>
-        <td align="left">処置しなかった場合の購入確率</td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">score_s</td>
-        <td align="left"><strong>CATEの推定値（処置による購入確率の差。0.10なら10points差に相当）</strong></td>
-      </tr>
-      <tr>
-        <td align="left">T-Learner</td>
-        <td align="left">prob_t_t</td>
-        <td align="left">処置した場合の購入確率</td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">prob_c_t</td>
-        <td align="left">処置しなかった場合の購入確率</td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">score_t</td>
-        <td align="left"><strong>CATEの推定値（処置による購入確率の差）</strong></td>
-      </tr>
-      <tr>
-        <td align="left">X-Learner</td>
-        <td align="left">tau_t_x</td>
-        <td align="left">処置群の疑似ITEから学習させたCATEの推定値</td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">tau_c_x</td>
-        <td align="left">対照群の疑似ITEから学習させたCATEの推定値</td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">score_x</td>
-        <td align="left"><strong>tau_t_xとtau_c_xを傾向スコアで統合したCATEの推定値（処置による購入確率の差）</strong></td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">propensity_score</td>
-        <td align="left">傾向スコア（処置を受ける確率の推定値）</td>
-      </tr>
-      <tr>
-        <td align="left"></td>
-        <td align="left">ipw_weight</td>
-        <td align="left">傾向スコアから計算したIPW重み</td>
-      </tr>
-    </tbody>
-  </table>
+      <h3 id="caution-about-calibration">キャリブレーションの注意点</h3>
+      <ul>
+        <li>分類モデルの識別能力や順位付け能力を直接改善することを目的とした処理ではない。</li>
+        <li>予測確率と実際の発生率の対応を整える処理であり、モデルの評価指標（QiniやAUUC）を必ず改善するわけではない。</li>
+        <li>時系列データの順序を守りたい場合は、学習データよりも新しい期間のデータを較正に使う方法などを検討する（クロスバリデーション使用時は、データの時間的な順序を考慮した分割方法を選ぶ）。</li>
+        <li>キャリブレーション実施時は、予測確率と実際の発生率がどの程度対応しているか確認する（較正器を適用しただけで、確率が適切に較正されたとは判断できない）。</li>
+      </ul>
 
 
 
-  <h2 id="sanity">Sanity</h2>
-  <p><span class='inline-pink'>推定結果そのものの健全性をチェックする</span></p>
-  <p>アップリフトは個人ごとの正解を直接観測できない。そのためモデルを評価する前に、アップリフトの元になっている<strong>予測値そのものが妥当そうか</strong>を確認する。ここでは以下を見る。</p>
-  <ol>
-    <li>予測確率と実際の発生率がどの程度対応しているか（キャリブレーション）</li>
-    <li>予測値の分布が極端になってないか</li>
-    <li>処置群と対照群の比較可能性が確保されているか（傾向スコアの重なり）</li>
-    <li>処置群と対照群で共変量の分布がどの程度そろっているか（共変量バランス）</li>
-  </ol>
+      <h2 id="get-uplift">アップリフトの取得</h2>
+      <p>モデルのチェックや評価、分析をするために、予測値などを取得しておく。サンプル事例では各Learnerによる予測値を元のデータセットとともにdataframe化している。</p>
+      <table>
+        <thead>
+          <tr>
+            <th align="left">Learner</th>
+            <th align="left">カラム名</th>
+            <th align="left">意味</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="left">S-Learner</td>
+            <td align="left">prob_t_s</td>
+            <td align="left">処置した場合の購入確率</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">prob_c_s</td>
+            <td align="left">処置しなかった場合の購入確率</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">score_s</td>
+            <td align="left"><strong>CATEの推定値（処置による購入確率の差。0.10なら10points差に相当）</strong></td>
+          </tr>
+          <tr>
+            <td align="left">T-Learner</td>
+            <td align="left">prob_t_t</td>
+            <td align="left">処置した場合の購入確率</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">prob_c_t</td>
+            <td align="left">処置しなかった場合の購入確率</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">score_t</td>
+            <td align="left"><strong>CATEの推定値（処置による購入確率の差）</strong></td>
+          </tr>
+          <tr>
+            <td align="left">X-Learner</td>
+            <td align="left">tau_t_x</td>
+            <td align="left">処置群の疑似ITEから学習させたCATEの推定値</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">tau_c_x</td>
+            <td align="left">対照群の疑似ITEから学習させたCATEの推定値</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">score_x</td>
+            <td align="left"><strong>tau_t_xとtau_c_xを傾向スコアで統合したCATEの推定値（処置による購入確率の差）</strong></td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">propensity_score</td>
+            <td align="left">傾向スコア（処置を受ける確率の推定値）</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">ipw_weight</td>
+            <td align="left">傾向スコアから計算したIPW重み</td>
+          </tr>
+        </tbody>
+      </table>
 
 
-  <h3 id="calibration-before-after">Calibration before/after</h3>
-  <p>モデルが出力した予測確率と実際の発生率の対応関係を、キャリブレーション前後で比較する。</p>
-  <p>単純化したイメージとしては、</p>
-  <ul>
-    <li>キャリブレーション前の、予測確率と実際の発生率の差</li>
-    <li>キャリブレーション後の、予測確率と実際の発生率の差</li>
-  </ul>
-  <p>後者で差が縮まっていれば望ましい状態に近づいたといえる。ただし、後述する<span class='inline-mark'>いろいろな視点・指標を確認し、ひとつの結果だけを拠り所にしない</span>。</p>
 
-  <div class="mdc-note-box">
-    <p>サンプル事例では購入確率モデル4つ、傾向スコアモデル1つ、計5つについて確認する。</p>
-    <p>購入確率モデル</p>
-    <ul>
-      <li>予測した購入確率と実際の購入率が対応しているか。</li>
-      <li>反実仮想（処置群の人を処置なしと仮定して予測した結果など）では実際の購入データは存在しないため、処置群/対照群に分けて、キャリブレーション前後で比較する。<ul>
-          <li>S-Learner（<code>model_s</code>）の処置群</li>
-          <li>S-Learner（<code>model_s</code>）の対照群</li>
-          <li>T-Learner（<code>model_t</code>）の処置群</li>
-          <li>T-Learner（<code>model_c</code>）の対照群</li>
+      <h2 id="sanity">Sanity</h2>
+      <p><span class='inline-pink'>推定結果そのものの健全性をチェックする</span></p>
+      <p>アップリフトは個人ごとの正解を直接観測できない。そのためモデルを評価する前に、アップリフトの元になっている<strong>予測値そのものが妥当そうか</strong>を確認する。ここでは以下を見る。</p>
+      <ol>
+        <li>予測確率と実際の発生率がどの程度対応しているか（キャリブレーション）</li>
+        <li>予測値の分布が極端になってないか</li>
+        <li>処置群と対照群の比較可能性が確保されているか（傾向スコアの重なり）</li>
+        <li>処置群と対照群で共変量の分布がどの程度そろっているか（共変量バランス）</li>
+      </ol>
+
+
+      <h3 id="calibration-before-after">Calibration before/after</h3>
+      <p>モデルが出力した予測確率と実際の発生率の対応関係を、<span class='inline-pink'>キャリブレーション前後で比較</span>する。</p>
+      <p>単純化したイメージとしては、</p>
+      <ul>
+        <li>キャリブレーション前の、予測確率と実際の発生率の差</li>
+        <li>キャリブレーション後の、予測確率と実際の発生率の差</li>
+      </ul>
+      <p>後者で差が縮まっていれば望ましい状態に近づいたといえる。ただし、後述する<span class='inline-mark'>いろいろな視点・指標を確認し、ひとつの結果だけを拠り所にしない</span>。</p>
+
+      <div class="mdc-note-box">
+        <p>サンプル事例では購入確率モデル4つ、傾向スコアモデル1つ、計5つについて確認する。</p>
+        <p>購入確率モデル</p>
+        <ul>
+          <li>予測した購入確率と実際の購入率が対応しているか。</li>
+          <li>反実仮想（処置群の人を処置なしと仮定して予測した結果など）では実際の購入データは存在しないため、処置群/対照群に分けて、キャリブレーション前後で比較する。<ul>
+              <li>S-Learner（<code>model_s</code>）の処置群</li>
+              <li>S-Learner（<code>model_s</code>）の対照群</li>
+              <li>T-Learner（<code>model_t</code>）の処置群</li>
+              <li>T-Learner（<code>model_c</code>）の対照群</li>
+            </ul>
+          </li>
         </ul>
-      </li>
-    </ul>
-    <p>傾向スコアモデル（<code>g</code>）</p>
-    <ul>
-      <li>予測した処置確率と実際の処置率が対応しているか。</li>
-      <li>実際の処置データは全員ぶんあるため、一度に比較する。</li>
-    </ul>
-    <p>例えば傾向スコア0.2前後と予測されたグループで、実際は50%(0.5)の人が処置を受けていたとする。</p>
-    <ul>
-      <li>IPW重みの予測値は、処置群5 対照群1.25だが、実際はどちらも2前後。</li>
-      <li>傾向スコアの予測がズレているとIPWによる重み付けが不適切になり、処置効果の推定に影響してくる。</li>
-    </ul>
-    <p>IPWを用いる場合、傾向スコアの推定が適切であることは重要。とはいえ傾向スコアのキャリブレーションが良好でも、（傾向スコアの重なりや共変量バランスなども影響するため）因果効果の推定が正しいと保証されるわけではない。</p>
-    <p>サンプル事例ではValを使って較正器を学習している。Valで較正前後を比較すると、較正器の学習に使ったデータで評価することになり、未知データでの効果を適切に確認できない可能性がある。よって較正に使っていないTestで比較する。
-    </p>
+        <p>傾向スコアモデル（<code>g</code>）</p>
+        <ul>
+          <li>予測した処置確率と実際の処置率が対応しているか。</li>
+          <li>実際の処置データは全員ぶんあるため、一度に比較する。</li>
+        </ul>
+        <p>例えば傾向スコア0.2前後と予測されたグループで、実際は50%(0.5)の人が処置を受けていたとする。</p>
+        <ul>
+          <li>IPW重みの予測値は、処置群5 対照群1.25だが、実際はどちらも2前後。</li>
+          <li>傾向スコアの予測がズレているとIPWによる重み付けが不適切になり、処置効果の推定に影響してくる。</li>
+        </ul>
+        <p>IPWを用いる場合、傾向スコアの推定が適切であることは重要。とはいえ傾向スコアのキャリブレーションが良好でも、（傾向スコアの重なりや共変量バランスなども影響するため）因果効果の推定が正しいと保証されるわけではない。
+        </p>
+        <p>
+          サンプル事例ではValを使って較正器を学習している。Valで較正前後を比較すると、較正器の学習に使ったデータで評価することになり、未知データでの効果を適切に確認できない可能性がある。よって較正に使っていないTestで比較する。
+        </p>
+      </div>
+
+
+      <h4>予測確率の分布</h4>
+      <p>
+        キャリブレーションによって、予測確率の分布がどのように変化したかを見ておく。変化の仕方はさまざまなので、キャリブレーションの良否を判断するのではなく、<strong>全体的な変化を把握</strong>するための視点の一つ。
+      </p>
+
+      <div class="mdc-note-box">
+        <p>見方の例</p>
+        <ol>
+          <li>較正前は予測値が0や1付近に集中していた（絶対に買わない/買うとモデルが極端な予測をしていた）分布だったとする。</li>
+          <li>だが現実世界では、購入行動のような人間の気まぐれに左右されやすい出来事が、確実に発生することはそうないし、断定的に予測することも困難なことが多い。</li>
+          <li>較正後に極端な予測が減りマイルドな分布になっていれば、キャリブレーションによって現実的な確率に近づいた、すなわち予測と実際の対応関係が改善したという解釈は成り立ちそう。</li>
+        </ol>
+        <p>※あくまで一例でありこのケースが多いわけではない。また同じ状況ならキャリブレーションがうまくいったという意味ではないし、違う状況ならダメだったという意味でもない。</p>
+      </div>
+
+
+      <h4>予測確率平均と実際の発生率平均</h4>
+      <p>キャリブレーションによって、予測確率の平均（<code>mean_pred</code>）が実際の発生率（<code>obs_rate</code>）に近づいているかを見ておく。</p>
+      <ul>
+        <li>較正前の平均予測確率が実際の発生率から離れていた場合、較正後に差が縮まっていれば、「平均的には」対応関係が改善したといえる。</li>
+        <li>予測確率の標準偏差（<code>pred_std</code>）の変化の仕方はさまざま（バラツキは縮小することも拡大することもあるため良否判断とはしない）。</li>
+      </ul>
+
+
+      <h4>信頼性曲線: Reliability Curve</h4>
+      <p>予測確率をいくつかの区間（bin）に分け、各binで平均予測確率と実際の発生率のズレをプロットして、キャリブレーション前後で比較する。</p>
+      <ul>
+        <li><span class='inline-mark'>キャリブレーションを視覚的に確認する中心的な指標</span>。</li>
+        <li>較正前の曲線が対角線から離れていた場合、較正後に対角線に近づいていれば、「全般的には」対応関係が改善したといえる。</li>
+        <li>bin単位でのズレを表している（顧客ごとの予測確率の適切さや顧客間の違いを捉える指標ではない）。</li>
+        <li>binの分け方やbin数によって見え方は変わる（後述のECEと条件をそろえる）。</li>
+        <li>各binの件数が少ない場合は、実際の発生率は不確かな推定になるため、おおまかな傾向把握にとどめる。</li>
+      </ul>
+      <p>グラフの見方（横軸に予測、縦軸に実際）</p>
+      <ul>
+        <li><strong>対角線に近い</strong> → 予測と実際が近い（望ましい状態）</li>
+        <li><strong>対角線より下</strong> → 予測を高く出しすぎ（過大評価）</li>
+        <li><strong>対角線より上</strong> → 予測を低く出しすぎ（過小評価）</li>
+      </ul>
+
+      <div class="mdc-note-box">
+        <p>binの分け方</p>
+        <ul>
+          <li>等幅と等頻度がある。 strategy=&#39;uniform&#39; or &#39;quantile&#39;</li>
+          <li>サンプル事例では予測確率が低い値に寄るため、各binで人数が等しくなる等頻度を使用。</li>
+        </ul>
+        <p>較正後のほうが悪化していた場合</p>
+        <ul>
+          <li>件数が少ないことによるブレ</li>
+          <li>Val（較正器学習用）とTest（較正器評価用）で、トレンドや周期性などが異なる</li>
+          <li>キャリブレーションのmethod（Sigmoid, Isotonic）が合ってない</li>
+          <li>較正器がValに適合しすぎた、などが考えられる</li>
+        </ul>
+        <p>処置割り当てがランダムの場合</p>
+        <ul>
+          <li>傾向スコアモデルでは予測確率がほぼ一定になるのが自然。</li>
+          <li>信頼性曲線の点は集中しやすいため、対角線との関係性ではなく、予測確率の平均やバラツキ、実際の処置率との対応を確認する。</li>
+        </ul>
+      </div>
+
+
+      <h4>ECE: Expected Calibration Error（期待較正誤差）</h4>
+      <p>予測確率と実際の発生率のズレを、数値で見ておく。</p>
+      <ul>
+        <li>信頼性曲線におけるbinごとのズレを、各binの件数で重み付けして平均して絶対値をとることで、1つの数値に要約したような指標。</li>
+        <li>bin単位でのズレを表している（顧客ごとの予測確率の適切さや顧客間の違いを捉える指標ではない）。</li>
+        <li>binの分け方やbin数によって見え方は変わる（前述の信頼性曲線と条件をそろえる）。</li>
+      </ul>
+      <p>見方</p>
+      <ul>
+        <li>予測確率も実際の発生率も0〜1なので、その差の絶対値は0〜1の値を取る。</li>
+        <li><strong>ECEが小さい</strong> → 予測確率と実際の発生率が全体として近い</li>
+        <li><strong>ECEが大きい</strong> → 予測確率と実際の発生率にズレがある</li>
+      </ul>
+
+      <div class="mdc-note-box">
+        <p>binの分け方</p>
+        <ul>
+          <li>等幅と等頻度がある。</li>
+          <li>サンプル事例では購入確率が低い値に寄るため、人数が等しくなる等頻度を使用（自作関数内でpd.qcutしている）。</li>
+        </ul>
+        <p>ECE注意点</p>
+        <ul>
+          <li>bin内のズレを集約するぶん、異なるbinでの過大予測と過小予測が打ち消し合うこともある。</li>
+          <li>実際の発生率が低い場合や、ほぼ全員を平均購入率で予測するモデルなどの場合は、ECEが小さくなりやすい。</li>
+          <li>つまり打ち消し合う可能性やデータ特性などからして、ECEが小さければ較正がうまくいっているとは限らない。</li>
+        </ul>
+      </div>
+
+
+      <h4>Brier Score / BSS</h4>
+      <p>キャリブレーションによって、<strong>予測確率の全体的な品質</strong>が改善したかを見ておく。</p>
+      <p>Brier Score</p>
+      <ul>
+        <li>予測確率と実際（発生有無の0/1）との差を二乗して平均した指標。</li>
+        <li>0が理想。値が<strong>小さいほどよい</strong>（予測が実際に近い）。</li>
+      </ul>
+      <p>BSS: Brier Skill Score</p>
+      <ul>
+        <li>Brier Scoreを基準モデル（全員一律で実際の発生率平均と予測した場合のBrier Score）と比較し、どの程度改善したかを表す指標。</li>
+        <li><strong>1に近いほどよい</strong>。0なら基準モデルと同等、マイナスなら基準モデルより悪い。</li>
+        <li>Brier Scoreは発生率の水準によって値が変わりやすいため、基準モデルに対する「相対的な改善度」を確認するならこちらの方が向いている。</li>
+      </ul>
+
+      <div class="mdc-note-box">
+        <p>もともとは、予測確率と実際の結果を照らし合わせて、確率予測が実際の結果をどの程度捉えているかを評価する、予測確率の良し悪しを総合的に採点するために作られた（天気予報の分野でBrier
+          Scoreが考案され、発展形でBSSが登場）。
+        </p>
+        <p>Brier Scoreは、予測確率と実際の発生率との対応（信頼性曲線などが表すもの）だけでなく、発生有無（購入しやすい人と購入しにくい人）をどの程度区別できているかというモデルの分解能力も反映している。</p>
+        <p>Brier Score = 不確実性(uncertainty) + 信頼性(reliability) - 分解能(resolution) </p>
+        <ul>
+          <li>不確実性: 平均発生率 * (1 - 平均発生率) データそのもので決まりモデルでは変えられない。</li>
+          <li>信頼性: 予測確率と実際のズレ。小さいほど良い。</li>
+          <li>分解能: binごとの実際の発生率が、全体での平均発生率からどれだけ離れているか。すなわち購入しやすい人としにくい人を予測が区別できているかを表す。大きいほど良いので引き算。</li>
+        </ul>
+        <p>つまりBrier Scoreが改善（値が小さくなった）したからといって、予測確率と実際の発生率の対応関係が改善したとは限らない。</p>
+        <p>Brier Score, BSSは、キャリブレーションによる予測確率全体への影響を補足的に捉えるために使うのがよい（予測確率と実際の発生率の対応関係が改善しているかは信頼性曲線やECEで確認する）。</p>
+      </div>
+
+      <p>ここまでは、実際に結果を観測できるデータについて、キャリブレーションによって予測確率が適切になったかの確認。</p>
+      <p>次からは、反実仮想も含めた全データを対象に（較正後を所与として）、予測値の分布や平均、変動などを、処置した場合/しなかった場合を対比させながら確認していく。</p>
+
+
+      <h3 id="prob-distribution">Prob Distribution</h3>
+      <p>モデルの出力した予測値の<span class='inline-pink'>分布や水準に不自然な点がないか</span>を確認する。</p>
+      <p>分布に極端な偏りがないかを把握することで、<span class='inline-mark'>モデル作成や予測値の導出に不具合が生じていないかを確認</span>することを企図している。</p>
+      <p>分布の偏りの一例</p>
+      <ul>
+        <li>予測購入確率が1付近に極端に集中している</li>
+        <li>予測値が少数の値に集中しており、顧客間の違いがほとんど表れていない</li>
+        <li>アップリフトが極端な正負の値に偏っている</li>
+      </ul>
+      <p>このような場合、データリーケージやモデルの設定、予測の過度な確信、推定の不安定さなどが考えられる。ただし分布だけで決めつけない（実際のデータや評価結果も確認する）。</p>
+      <p>一方で、極端な偏りがないことが処置効果の推定の正しさを保証するわけでもない。</p>
+      <p>またLearner間や処置群/対照群での分布の違いは、良否を判断するのではなく、各手法の特徴や推定の傾向を把握するために見る。</p>
+
+
+      <h4>S,T-Learnerの分布</h4>
+      <p>予測購入確率の分布を、全員に処置した場合（<code>prob_t</code>）と、全員に処置しなかった場合（<code>prob_c</code>）別にプロットする。</p>
+      <ul>
+        <li>S-Learner: 1つのモデルに処置の有無を入力して得た値</li>
+        <li>T-Learner: 処置群/対照群で別々のモデルを作って得た値</li>
+        <li>最終的なアップリフトの前段階の予測値なので、ここでは予測結果の特徴や不安定さの把握が目的</li>
+      </ul>
+      <p>見方の一例</p>
+      <ul>
+        <li><strong>分布の形状</strong>
+          <ul>
+            <li>実際の購入率が低い場合、予測購入確率が低い値に偏ること自体は異常ではない。</li>
+            <li>顧客間の予測値の違いがほとんどない場合は、特徴量やモデルの設定などが、購入確率の違いを十分に捉えられていない可能性がある。</li>
+          </ul>
+        </li>
+        <li><strong>prob_tとprob_c</strong>
+          <ul>
+            <li>処置の有無によって予測購入確率がどのように変化しているか。</li>
+            <li><code>prob_t</code>の平均が<code>prob_c</code>の平均より高ければ、平均的には処置によって購入確率が上昇すると予測している。</li>
+            <li>処置がランダム割り当ての場合は、期待値（各条件下の平均購入確率の推定値）を、処置群/対照群の実際の購入率（obs）と比較することで、予測が実際と大きく乖離していないか。</li>
+          </ul>
+        </li>
+      </ul>
+
+
+      <h4>X-Learnerの分布</h4>
+      <p>擬似ITEから推定した処置効果を、顧客単位でプロットする。</p>
+      <p>
+        <code>tau_t</code>と<code>tau_c</code>は、処置群/対照群それぞれのデータで構築した疑似ITEから学習した、処置効果の推定値。同じ顧客の処置効果をそれぞれに推定しているため、<strong>顧客ごとの値を比較</strong>することで、推定結果の一致度や不安定さを確認する。
+      </p>
+      <ul>
+        <li><code>tau_t</code>と<code>tau_c</code>の分布をKDEで重ねてプロット。</li>
+        <li>顧客ごとの<code>tau_t</code>と<code>tau_c</code>をhexbinでプロットし、相関係数、差の平均、差の標準偏差も算出する。</li>
+        <li>最終的なアップリフトの前段階の予測値なので、ここでは予測結果の特徴や不安定さの把握が目的</li>
+      </ul>
+      <div class="mdc-note-box">
+
+        <p>hexbin: データ（点）が多いと散布図では見にくいので、ハニカム（六角形）のグリッドで区切って「濃淡（件数）」で表現するグラフ。</p>
+      </div>
+
+      <p>見方</p>
+      <ul>
+        <li>分布の形状が似ていれば、2つの回帰が似た効果を推定している。</li>
+        <li>相関が弱い場合や対角線から大きく外れる場合は、2つの推定結果に違いがあることを示す（どちらの推定値が正しいかは判断できない）。</li>
+        <li>差の平均は2つの推定値の系統的なズレ、差の標準偏差は顧客ごとのズレのバラツキを表す。</li>
+        <li>ズレが大きい場合は、処置群/対照群のデータ量や特徴量の分布などを確認し、推定が不安定になっていないかを調べる。</li>
+      </ul>
+
+
+      <h4>S,T,X-Learnerのアップリフト</h4>
+      <ul>
+        <li>S,T-Learner: <code>prob_t</code> - <code>prob_c</code>から算出</li>
+        <li>X-Learner: <code>tau_t</code>と<code>tau_c</code>を傾向スコアで重み付けして算出</li>
+      </ul>
+      <p>見方</p>
+      <ul>
+        <li>プラスのアップリフトが多い場合は、処置によって購入確率が上がると予測された顧客が多いことを示す（実際に効果がある顧客が多いとは限らない）。</li>
+        <li>マイナスのアップリフトは、処置によって購入確率が下がると予測された顧客のこと。実際の負の効果（処置すると買わない）の表れ、あるいは推定誤差による可能性もある。</li>
+        <li>期待値と実際のATE推定値を比較し、平均的な効果が大きく乖離していないか確認する。</li>
+        <li>期待値以外に、標準偏差、分位点、負の割合などからも分布の特徴を把握する。</li>
+      </ul>
+      <p>各Learnerの傾向</p>
+      <ul>
+        <li>おおまかな特徴であり、必ずそうなるわけではない。</li>
+        <li>分布の広がりが大きい＝選別性能が高いとは限らない（ノイズでも広がる）。</li>
+        <li>分布が広いから悪い、狭いから良いわけでもない。</li>
+      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th align="left">Learner</th>
+            <th align="left">分布に関して考えられる傾向</th>
+            <th align="left">確認したいこと</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="left">S-Learner</td>
+            <td align="left">処置効果を十分捉えきれずに0近辺に縮む場合がある</td>
+            <td align="left">過度に0付近に集中していないか</td>
+          </tr>
+          <tr>
+            <td align="left">T-Learner</td>
+            <td align="left">2つのモデルの予測誤差が差分に反映されて分布が広がる場合がある</td>
+            <td align="left">極端な正負の値が多くないか</td>
+          </tr>
+          <tr>
+            <td align="left">X-Learner</td>
+            <td align="left">疑似ITEを学習するぶんT-Learnerとは異なる。分布が縮む場合もある</td>
+            <td align="left">推定値の範囲や分布が不自然でないか</td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <h3 id="propensity-score-overlap">Propensity Score Overlap</h3>
+      <p><span class='inline-pink'>傾向スコアの分布</span>の重なり（overlap）を確認する。</p>
+      <p>
+        傾向スコアモデル（<code>g</code>）の<code>predict_proba()</code>から、処置を受ける確率を取り出し、処置群/対照群別に傾向スコア（PS）の分布をプロットする。2群の分布がどの程度重なっているかを確認することで、似たような特徴を持つ顧客について、<strong>処置群と対照群を比較できるだけのデータがあるか</strong>を把握する。X-LearnerやIPWを含む因果効果推定で重要な診断のひとつ。
+      </p>
+
+
+      <h4>2群の分布が十分に重なっている場合</h4>
+      <ul>
+        <li>似たようなPSの顧客が、処置群/対照群の両方に存在する。</li>
+        <li>そのため、観測された特徴が近い顧客同士を比較できる可能性があり、<span
+            class='inline-mark'>因果効果を推定するうえで望ましい状態</span>（重なりがあることだけで因果推定の妥当性が保証されるわけではない）。</li>
+        <li>サンプル事例ではPSをX-Learnerのアップリフト算出とIPWに用いているため、重なりの程度はそれぞれの推定に影響する。</li>
+      </ul>
+
+
+      <h4>2群の分布の重なりが小さい場合</h4>
+      <ul>
+        <li>特定の顧客属性によって処置の有無がほぼ決まっており、似たようなPSの顧客が両群に十分存在しない可能性がある。</li>
+        <li>そのような顧客では処置群と対照群の結果を直接比較することが難しく、因果効果の推定が不安定になりやすい。</li>
+      </ul>
+
+
+      <h4>重なりが小さいと何が問題か？</h4>
+      <ol>
+        <li>例えば、ある店舗では全員にクーポンを配布し、別の店舗では誰にも配布していないとする。</li>
+        <li>店舗という特徴量だけで処置の有無をほぼ予測できてしまう。</li>
+        <li>そしてクーポンを配布した店舗には対照群のデータが、配布しなかった店舗には処置群のデータがほとんど存在しない状態にある。</li>
+        <li>このような店舗の顧客については、処置をした場合としなかった場合の結果を観測データから直接比較することが難しく、モデルによる外挿に頼りやすくなる。</li>
+        <li>
+          X-Learnerでは処置群/対照群それぞれのデータから処置効果を推定するため、データが不足している領域では推定が不安定になりやすい。IPWにおいてもPSが0や1に近い顧客の重みが大きくなり、推定の分散が増える可能性がある。
+        </li>
+      </ol>
+      <div class="mdc-note-box">
+        <p>
+          ※重なりが小さいことだけで、X-Learnerの推定が必ず悪くなるとは限らない。X-Learnerは、処置群と対照群の件数が異なる場合などにも有効なことがある。ただし、処置群/対照群のどちらかがほとんど存在しない領域では、信頼できる効果推定が難しくなりやすい。
+        </p>
+      </div>
+
+
+      <h4>感覚的な判断を補う</h4>
+      <p>分布をプロットするだけでは感覚的な判断になりがちなので、定量情報を見ておく。</p>
+      <ul>
+        <li>しきい値を決めて、極端なPSの件数をカウントする。<ul>
+            <li>例えば、PSが0.05未満または0.95超の顧客がどの程度いるかを見る。</li>
+            <li>しきい値はデータや推定目的に応じて設定する。</li>
+          </ul>
+        </li>
+        <li>モデル<code>g</code>のAUC算出。処置有無が特徴量からどの程度予測できるかを把握するための目安。<ul>
+            <li>0.5前後なら、モデルは特徴量から処置の有無をほとんど識別できていない（望ましい状態）。ただし、これだけで共変量バランスがよいとは判断できない。</li>
+            <li>0.5から大きく離れるなら、処置の有無が特徴量から予測しやすい可能性がある。特にAUCが高い場合は、処置の割り当てが特徴量に依存していないか、PSの分布や共変量バランスも確認する。</li>
+          </ul>
+        </li>
+      </ul>
+
+
+
+      <h3 id="covariate-balance">Covariate Balance</h3>
+      <p>傾向スコアを用いた重み付け（IPW）などの共変量調整をおこなっている場合は、<span
+          class='inline-pink'>共変量バランス</span>を確認する。共変量調整の前後で、ASMDなどの指標を比較し、Love plotなどで可視化する。</p>
+      <div class="mdc-note-box">
+        <p>※共変量バランス: 処置群と対照群で、共変量（顧客属性や過去の購入回数などの特徴量）の分布がどの程度そろっているかを表す。</p>
+        <p>※共変量調整: 処置群と対照群の共変量バランスを改善するための手続き。傾向スコアを用いた重み付け（IPWなど）、マッチング、層別解析などの方法がある。</p>
+      </div>
+
+
+      <h4>ASMD: Absolute Standardized Mean Difference</h4>
+      <ul>
+        <li>標準化平均差（SMD）の絶対値。</li>
+        <li><span class='inline-mark'>共変量バランスを測る</span>指標の一つ。値が小さいほど、処置群と対照群の差が小さい。</li>
+        <li>数値型の特徴量では、処置群と対照群の平均値の差を、2群の標準偏差をまとめた値（pooled SD）で割り、絶対値を取る。調整後は、重み付けなどを反映した統計量を用いて計算する。</li>
+        <li>サンプル事例では、カテゴリ変数はone-hot化し、カテゴリごとに割合の差を標準化している。</li>
+      </ul>
+      <p>ASMDの目安</p>
+      <ul>
+        <li>ASMD &lt; 0.10 → おおむねバランスが取れているとみなす目安。</li>
+        <li>ASMD ≥ 0.10 → 共変量の偏りが残っていないか確認する。</li>
+      </ul>
+      <div class="mdc-note-box">
+        <p>※0.10は一般的に使われる目安であり、絶対的な基準ではない。</p>
+      </div>
+
+
+      <h4>Love plot</h4>
+      <ul>
+        <li>特徴量ごとに、共変量調整前と調整後のASMDをプロットしたグラフ。</li>
+        <li>調整前後で共変量バランスが改善したか、調整後に偏りが残っていないかを確認する。</li>
+      </ul>
+      <p>見方</p>
+      <ul>
+        <li>調整前後でASMDがどの程度変化したかを見る。調整後にASMDが小さくなっていれば、その共変量のバランスが改善したと解釈できる。0.1未満かどうかは、残っている偏りを確認するための目安として使う。</li>
+        <li>調整後もASMDが目安を超えている場合は、共変量の偏りが残っている。傾向スコアモデルの見直しや、重み付け方法の検討が必要になる場合がある。</li>
+        <li>調整後にASMDが悪化する特徴量がある場合は、PSの分布や重みの大きさも確認し、極端な重みが生じていないかを調べる。</li>
+        <li>処置割り当てがランダムな場合は、調整前から共変量バランスが比較的よく、調整後も大きく変化しないことが期待される。ただし件数が少ない場合などは偶然の偏りが生じることがある。</li>
+        <li>ランダム割り当てでも、件数や共変量の性質を踏まえて判断する。ASMDの値だけでなく、共変量の分布や割り当て方法も確認する。</li>
+      </ul>
+      <div class="mdc-info-box">
+        <p>※共変量バランスが改善しても、未観測の交絡などが残っている可能性があるため、それだけで因果効果を正しく推定できると保証されるわけではない。</p>
+      </div>
+
+
+
+
+
+
+      <h2 id="evaluation">Evaluation</h2>
+      <h3 id="qini-curve-auuc">Qini Curve, AUUC</h3>
+      <h3 id="bootstrap-auuc">Bootstrap AUUC</h3>
+      <h3 id="overfitting-check">Overfitting Check</h3>
+      <h3 id="predicted-score-vs-actual">Predicted Score vs Actual</h3>
+
+      <h2 id="profiling">Profiling</h2>
+      <h3 id="score-quantiles">Score Quantiles</h3>
+      <h3 id="between-learner">Between Learner</h3>
+      <h3 id="expected-net-profit">Expected Net Profit</h3>
+
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
-
-
-  <h4>予測確率の分布</h4>
-  <p>キャリブレーションによって、予測確率の分布がどのように変化したかを見ておく。変化の仕方はさまざまなので、キャリブレーションの良否を判断するのではなく、<strong>全体的な変化を把握</strong>するための視点の一つ。
-  </p>
-
-  <div class="mdc-note-box">
-    <p>見方の例</p>
-    <ol>
-      <li>較正前は予測値が0や1付近に集中していた（絶対に買わない/買うとモデルが極端な予測をしていた）分布だったとする。</li>
-      <li>だが現実世界では、購入行動のような人間の気まぐれに左右されやすい出来事が、確実に発生することはそうないし、断定的に予測することも困難なことが多い。</li>
-      <li>較正後に極端な予測が減りマイルドな分布になっていれば、キャリブレーションによって現実的な確率に近づいた、すなわち予測と実際の対応関係が改善したという解釈は成り立ちそう。</li>
-    </ol>
-    <p>※あくまで一例でありこのケースが多いわけではない。また同じ状況ならキャリブレーションがうまくいったという意味ではないし、違う状況ならダメだったという意味でもない。</p>
-  </div>
-
-
-  <h4>予測確率平均と実際の発生率平均</h4>
-  <p>キャリブレーションによって、予測確率の平均（<code>mean_pred</code>）が実際の発生率（<code>obs_rate</code>）に近づいているかを見ておく。</p>
-  <ul>
-    <li>較正前の平均予測確率が実際の発生率から離れていた場合、較正後に差が縮まっていれば、「平均的には」対応関係が改善したといえる。</li>
-    <li>予測確率の標準偏差（<code>pred_std</code>）の変化の仕方はさまざま（バラツキは縮小することも拡大することもあるため良否判断とはしない）。</li>
-  </ul>
-
-
-  <h4>信頼性曲線: Reliability Curve</h4>
-  <p>予測確率をいくつかの区間（bin）に分け、各binで平均予測確率と実際の発生率のズレをプロットして、キャリブレーション前後で比較する。</p>
-  <ul>
-    <li><span class='inline-mark'>キャリブレーションを視覚的に確認する中心的な指標</span>。</li>
-    <li>較正前の曲線が対角線から離れていた場合、較正後に対角線に近づいていれば、「全般的には」対応関係が改善したといえる。</li>
-    <li>bin単位でのズレを表している（顧客ごとの予測確率の適切さや顧客間の違いを捉える指標ではない）。</li>
-    <li>binの分け方やbin数によって見え方は変わる（後述のECEと条件をそろえる）。</li>
-    <li>各binの件数が少ない場合は、実際の発生率は不確かな推定になるため、おおまかな傾向把握にとどめる。</li>
-  </ul>
-  <p>グラフの見方（横軸に予測、縦軸に実際）</p>
-  <ul>
-    <li><strong>対角線に近い</strong> → 予測と実際が近い（望ましい状態）</li>
-    <li><strong>対角線より下</strong> → 予測を高く出しすぎ（過大評価）</li>
-    <li><strong>対角線より上</strong> → 予測を低く出しすぎ（過小評価）</li>
-  </ul>
-
-  <div class="mdc-note-box">
-    <p>binの分け方</p>
-    <ul>
-      <li>等幅と等頻度がある。 strategy=&#39;uniform&#39; or &#39;quantile&#39;</li>
-      <li>サンプル事例では予測確率が低い値に寄るため、各binで人数が等しくなる等頻度を使用。</li>
-    </ul>
-    <p>較正後のほうが悪化していた場合</p>
-    <ul>
-      <li>件数が少ないことによるブレ</li>
-      <li>Val（較正器学習用）とTest（較正器評価用）で、トレンドや周期性などが異なる</li>
-      <li>キャリブレーションのmethod（Sigmoid, Isotonic）が合ってない</li>
-      <li>較正器がValに適合しすぎた、などが考えられる</li>
-    </ul>
-    <p>処置割り当てがランダムの場合</p>
-    <ul>
-      <li>傾向スコアモデルでは予測確率がほぼ一定になるのが自然。</li>
-      <li>信頼性曲線の点は集中しやすいため、対角線との関係性ではなく、予測確率の平均やバラツキ、実際の処置率との対応を確認する。</li>
-    </ul>
-  </div>
-
-
-  <h4>ECE: Expected Calibration Error（期待較正誤差）</h4>
-  <p>予測確率と実際の発生率のズレを、数値で見ておく。</p>
-  <ul>
-    <li>信頼性曲線におけるbinごとのズレを、各binの件数で重み付けして平均して絶対値をとることで、1つの数値に要約したような指標。</li>
-    <li>bin単位でのズレを表している（顧客ごとの予測確率の適切さや顧客間の違いを捉える指標ではない）。</li>
-    <li>binの分け方やbin数によって見え方は変わる（前述の信頼性曲線と条件をそろえる）。</li>
-  </ul>
-  <p>見方</p>
-  <ul>
-    <li>予測確率も実際の発生率も0〜1なので、その差の絶対値は0〜1の値を取る。</li>
-    <li><strong>ECEが小さい</strong> → 予測確率と実際の発生率が全体として近い</li>
-    <li><strong>ECEが大きい</strong> → 予測確率と実際の発生率にズレがある</li>
-  </ul>
-
-  <div class="mdc-note-box">
-    <p>binの分け方</p>
-    <ul>
-      <li>等幅と等頻度がある。</li>
-      <li>サンプル事例では購入確率が低い値に寄るため、人数が等しくなる等頻度を使用（自作関数内でpd.qcutしている）。</li>
-    </ul>
-    <p>ECE注意点</p>
-    <ul>
-      <li>bin内のズレを集約するぶん、異なるbinでの過大予測と過小予測が打ち消し合うこともある。</li>
-      <li>実際の発生率が低い場合や、ほぼ全員を平均購入率で予測するモデルなどの場合は、ECEが小さくなりやすい。</li>
-      <li>つまり打ち消し合う可能性やデータ特性などからして、ECEが小さければ較正がうまくいっているとは限らない。</li>
-    </ul>
-  </div>
-
-
-  <h4>Brier Score / BSS</h4>
-  <p>キャリブレーションによって、<strong>予測確率の全体的な品質</strong>が改善したかを見ておく。</p>
-  <p>Brier Score</p>
-  <ul>
-    <li>予測確率と実際（発生有無の0/1）との差を二乗して平均した指標。</li>
-    <li>0が理想。値が<strong>小さいほどよい</strong>（予測が実際に近い）。</li>
-  </ul>
-  <p>BSS: Brier Skill Score</p>
-  <ul>
-    <li>Brier Scoreを基準モデル（全員一律で実際の発生率平均と予測した場合のBrier Score）と比較し、どの程度改善したかを表す指標。</li>
-    <li><strong>1に近いほどよい</strong>。0なら基準モデルと同等、マイナスなら基準モデルより悪い。</li>
-    <li>Brier Scoreは発生率の水準によって値が変わりやすいため、基準モデルに対する「相対的な改善度」を確認するならこちらの方が向いている。</li>
-  </ul>
-
-  <div class="mdc-note-box">
-    <p>もともとは、予測確率と実際の結果を照らし合わせて、確率予測が実際の結果をどの程度捉えているかを評価する、予測確率の良し悪しを総合的に採点するために作られた（天気予報の分野でBrier
-      Scoreが考案され、発展形でBSSが登場）。
-    </p>
-    <p>Brier Scoreは、予測確率と実際の発生率との対応（信頼性曲線などが表すもの）だけでなく、発生有無（購入しやすい人と購入しにくい人）をどの程度区別できているかというモデルの分解能力も反映している。</p>
-    <p>Brier Score = 不確実性(uncertainty) + 信頼性(reliability) - 分解能(resolution) </p>
-    <ul>
-      <li>不確実性: 平均発生率 * (1 - 平均発生率) データそのもので決まりモデルでは変えられない。</li>
-      <li>信頼性: 予測確率と実際のズレ。小さいほど良い。</li>
-      <li>分解能: binごとの実際の発生率が、全体での平均発生率からどれだけ離れているか。すなわち購入しやすい人としにくい人を予測が区別できているかを表す。大きいほど良いので引き算。</li>
-    </ul>
-    <p>つまりBrier Scoreが改善（値が小さくなった）したからといって、予測確率と実際の発生率の対応関係が改善したとは限らない。</p>
-    <p>Brier Score, BSSは、キャリブレーションによる予測確率全体への影響を補足的に捉えるために使うのがよい（予測確率と実際の発生率の対応関係が改善しているかは信頼性曲線やECEで確認する）。</p>
-  </div>
-
-<p>ここまでは、実際に結果を観測できるデータについて、キャリブレーションによって予測確率が適切になったかの確認。</p>
-<p>次からは、反実仮想も含めた全データを対象に（較正後を所与として）、予測値の分布や平均、変動などを、処置した場合/しなかった場合を対比させながら確認していく。</p>
-
-
-  <h3 id="prob-distribution">Prob Distribution</h3>
-<p>モデルの出力した予測値の分布や水準に不自然な点がないかを確認する。</p>
-<p>分布に極端な偏りがないかを把握することで、<span class='inline-mark'>モデル作成や予測値の導出に不具合が生じていないかを確認</span>することを企図している。</p>
-<p>分布の偏りの一例</p>
-<ul>
-  <li>予測購入確率が1付近に極端に集中している</li>
-  <li>予測値が少数の値に集中しており、顧客間の違いがほとんど表れていない</li>
-  <li>アップリフトが極端な正負の値に偏っている</li>
-</ul>
-<p>このような場合、データリーケージやモデルの設定、予測の過度な確信、推定の不安定さなどが考えられる。ただし分布だけで決めつけない（実際のデータや評価結果も確認する）。</p>
-<p>一方で、極端な偏りがないことが処置効果の推定の正しさを保証するわけでもない。</p>
-<p>またLearner間や処置群/対照群での分布の違いは、良否を判断するのではなく、各手法の特徴や推定の傾向を把握するために見る。</p>
-
-
-<h4>S,T-Learnerの分布</h4>
-<p>予測購入確率の分布を、全員に処置した場合（<code>prob_t</code>）と、全員に処置しなかった場合（<code>prob_c</code>）別にプロットする。</p>
-<ul>
-  <li>S-Learner: 1つのモデルに処置の有無を入力して得た値</li>
-  <li>T-Learner: 処置群/対照群で別々のモデルを作って得た値</li>
-  <li>最終的なアップリフトの前段階の予測値なので、ここでは予測結果の特徴や不安定さの把握が目的</li>
-</ul>
-<p>見方の一例</p>
-<ul>
-  <li><strong>分布の形状</strong>
-    <ul>
-      <li>実際の購入率が低い場合、予測購入確率が低い値に偏ること自体は異常ではない。</li>
-      <li>顧客間の予測値の違いがほとんどない場合は、特徴量やモデルの設定などが、購入確率の違いを十分に捉えられていない可能性がある。</li>
-    </ul>
-  </li>
-  <li><strong>prob_tとprob_c</strong>
-    <ul>
-      <li>処置の有無によって予測購入確率がどのように変化しているか。</li>
-      <li><code>prob_t</code>の平均が<code>prob_c</code>の平均より高ければ、平均的には処置によって購入確率が上昇すると予測している。</li>
-      <li>処置がランダム割り当ての場合は、期待値（各条件下の平均購入確率の推定値）を、処置群/対照群の実際の購入率（obs）と比較することで、予測が実際と大きく乖離していないか。</li>
-    </ul>
-  </li>
-</ul>
-
-
-<h4>X-Learnerの分布</h4>
-<p>擬似ITEから推定した処置効果を、顧客単位でプロットする。</p>
-<p>
-  <code>tau_t</code>と<code>tau_c</code>は、処置群/対照群それぞれのデータで構築した疑似ITEから学習した、処置効果の推定値。同じ顧客の処置効果をそれぞれに推定しているため、<strong>顧客ごとの値を比較</strong>することで、推定結果の一致度や不安定さを確認する。
-</p>
-<ul>
-  <li><code>tau_t</code>と<code>tau_c</code>の分布をKDEで重ねてプロット。</li>
-  <li>顧客ごとの<code>tau_t</code>と<code>tau_c</code>をhexbinでプロットし、相関係数、差の平均、差の標準偏差も算出する。</li>
-  <li>最終的なアップリフトの前段階の予測値なので、ここでは予測結果の特徴や不安定さの把握が目的</li>
-</ul>
-<div class="mdc-note-box">
-
-  <p>hexbin: データ（点）が多いと散布図では見にくいので、ハニカム（六角形）のグリッドで区切って「濃淡（件数）」で表現するグラフ。</p>
-</div>
-
-<p>見方</p>
-<ul>
-  <li>分布の形状が似ていれば、2つの回帰が似た効果を推定している。</li>
-  <li>相関が弱い場合や対角線から大きく外れる場合は、2つの推定結果に違いがあることを示す（どちらの推定値が正しいかは判断できない）。</li>
-  <li>差の平均は2つの推定値の系統的なズレ、差の標準偏差は顧客ごとのズレのバラツキを表す。</li>
-  <li>ズレが大きい場合は、処置群/対照群のデータ量や特徴量の分布などを確認し、推定が不安定になっていないかを調べる。</li>
-</ul>
-
-
-<h4>S,T,X-Learnerのアップリフト</h4>
-<ul>
-  <li>S,T-Learner: <code>prob_t</code> - <code>prob_c</code>から算出</li>
-  <li>X-Learner: <code>tau_t</code>と<code>tau_c</code>を傾向スコアで重み付けして算出</li>
-</ul>
-<p>見方</p>
-<ul>
-  <li>プラスのアップリフトが多い場合は、処置によって購入確率が上がると予測された顧客が多いことを示す（実際に効果がある顧客が多いとは限らない）。</li>
-  <li>マイナスのアップリフトは、処置によって購入確率が下がると予測された顧客のこと。実際の負の効果（処置すると買わない）の表れ、あるいは推定誤差による可能性もある。</li>
-  <li>期待値と実際のATE推定値を比較し、平均的な効果が大きく乖離していないか確認する。</li>
-  <li>期待値以外に、標準偏差、分位点、負の割合などからも分布の特徴を把握する。</li>
-</ul>
-<p>各Learnerの傾向</p>
-<ul>
-  <li>おおまかな特徴であり、必ずそうなるわけではない。</li>
-  <li>分布の広がりが大きい＝選別性能が高いとは限らない（ノイズでも広がる）。</li>
-  <li>分布が広いから悪い、狭いから良いわけでもない。</li>
-</ul>
-<table>
-  <thead>
-    <tr>
-      <th align="left">Learner</th>
-      <th align="left">分布に関して考えられる傾向</th>
-      <th align="left">確認したいこと</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left">S-Learner</td>
-      <td align="left">処置効果を十分捉えきれずに0近辺に縮む場合がある</td>
-      <td align="left">過度に0付近に集中していないか</td>
-    </tr>
-    <tr>
-      <td align="left">T-Learner</td>
-      <td align="left">2つのモデルの予測誤差が差分に反映されて分布が広がる場合がある</td>
-      <td align="left">極端な正負の値が多くないか</td>
-    </tr>
-    <tr>
-      <td align="left">X-Learner</td>
-      <td align="left">疑似ITEを学習するぶんT-Learnerとは異なる。分布が縮む場合もある</td>
-      <td align="left">推定値の範囲や分布が不自然でないか</td>
-    </tr>
-  </tbody>
-</table>
-
-
-  <h3 id="propensity-score-overlap">Propensity Score Overlap</h3>
-<p>傾向スコアの分布の重なり（overlap）を確認する。</p>
-<p>
-  傾向スコアモデル（<code>g</code>）の<code>predict_proba()</code>から、処置を受ける確率を取り出し、処置群/対照群別に傾向スコア（PS）の分布をプロットする。2群の分布がどの程度重なっているかを確認することで、似たような特徴を持つ顧客について、<strong>処置群と対照群を比較できるだけのデータがあるか</strong>を把握する。X-LearnerやIPWを含む因果効果推定で重要な診断のひとつ。
-</p>
-
-
-<h4>2群の分布が十分に重なっている場合</h4>
-<ul>
-  <li>似たようなPSの顧客が、処置群/対照群の両方に存在する。</li>
-  <li>そのため、観測された特徴が近い顧客同士を比較できる可能性があり、<span
-      class='inline-mark'>因果効果を推定するうえで望ましい状態</span>（重なりがあることだけで因果推定の妥当性が保証されるわけではない）。</li>
-  <li>サンプル事例ではPSをX-Learnerのアップリフト算出とIPWに用いているため、重なりの程度はそれぞれの推定に影響する。</li>
-</ul>
-
-
-<h4>2群の分布の重なりが小さい場合</h4>
-<ul>
-  <li>特定の顧客属性によって処置の有無がほぼ決まっており、似たようなPSの顧客が両群に十分存在しない可能性がある。</li>
-  <li>そのような顧客では処置群と対照群の結果を直接比較することが難しく、因果効果の推定が不安定になりやすい。</li>
-</ul>
-
-
-<h4>重なりが小さいと何が問題か？</h4>
-<ol>
-  <li>例えば、ある店舗では全員にクーポンを配布し、別の店舗では誰にも配布していないとする。</li>
-  <li>店舗という特徴量だけで処置の有無をほぼ予測できてしまう。</li>
-  <li>そしてクーポンを配布した店舗には対照群のデータが、配布しなかった店舗には処置群のデータがほとんど存在しない状態にある。</li>
-  <li>このような店舗の顧客については、処置をした場合としなかった場合の結果を観測データから直接比較することが難しく、モデルによる外挿に頼りやすくなる。</li>
-  <li>X-Learnerでは処置群/対照群それぞれのデータから処置効果を推定するため、データが不足している領域では推定が不安定になりやすい。IPWにおいてもPSが0や1に近い顧客の重みが大きくなり、推定の分散が増える可能性がある。
-  </li>
-</ol>
-<div class="mdc-note-box">
-  <p>※重なりが小さいことだけで、X-Learnerの推定が必ず悪くなるとは限らない。X-Learnerは、処置群と対照群の件数が異なる場合などにも有効なことがある。ただし、処置群/対照群のどちらかがほとんど存在しない領域では、信頼できる効果推定が難しくなりやすい。</p>
-</div>
-
-
-<h4>感覚的な判断を補う</h4>
-<p>分布をプロットするだけでは感覚的な判断になりがちなので、定量情報を見ておく。</p>
-<ul>
-  <li>しきい値を決めて、極端なPSの件数をカウントする。<ul>
-      <li>例えば、PSが0.05未満または0.95超の顧客がどの程度いるかを見る。</li>
-      <li>しきい値はデータや推定目的に応じて設定する。</li>
-    </ul>
-  </li>
-  <li>モデル<code>g</code>のAUC算出。処置有無が特徴量からどの程度予測できるかを把握するための目安。<ul>
-      <li>0.5前後なら、モデルは特徴量から処置の有無をほとんど識別できていない（望ましい状態）。ただし、これだけで共変量バランスがよいとは判断できない。</li>
-      <li>0.5から大きく離れるなら、処置の有無が特徴量から予測しやすい可能性がある。特にAUCが高い場合は、処置の割り当てが特徴量に依存していないか、PSの分布や共変量バランスも確認する。</li>
-    </ul>
-  </li>
-</ul>
-
-
-
-  <h3 id="covariate-balance">Covariate Balance</h3>
-<p>傾向スコアを用いた重み付け（IPW）などの共変量調整をおこなっている場合は、共変量バランスを確認する。共変量調整の前後で、ASMDなどの指標を比較し、Love plotなどで可視化する。</p>
-<div class="mdc-note-box">
-  <p>※共変量バランス: 処置群と対照群で、共変量（顧客属性や過去の購入回数などの特徴量）の分布がどの程度そろっているかを表す。</p>
-  <p>※共変量調整: 処置群と対照群の共変量バランスを改善するための手続き。傾向スコアを用いた重み付け（IPWなど）、マッチング、層別解析などの方法がある。</p>
-</div>
-
-
-<h4>ASMD: Absolute Standardized Mean Difference</h4>
-<ul>
-  <li>標準化平均差（SMD）の絶対値。</li>
-  <li><span class='inline-mark'>共変量バランスを測る</span>指標の一つ。値が小さいほど、処置群と対照群の差が小さい。</li>
-  <li>数値型の特徴量では、処置群と対照群の平均値の差を、2群の標準偏差をまとめた値（pooled SD）で割り、絶対値を取る。調整後は、重み付けなどを反映した統計量を用いて計算する。</li>
-  <li>サンプル事例では、カテゴリ変数はone-hot化し、カテゴリごとに割合の差を標準化している。</li>
-</ul>
-<p>ASMDの目安</p>
-<ul>
-  <li>ASMD &lt; 0.10 → おおむねバランスが取れているとみなす目安。</li>
-  <li>ASMD ≥ 0.10 → 共変量の偏りが残っていないか確認する。</li>
-</ul>
-<div class="mdc-note-box">
-  <p>※0.10は一般的に使われる目安であり、絶対的な基準ではない。</p>
-</div>
-
-
-<h4>Love plot</h4>
-<ul>
-  <li>特徴量ごとに、共変量調整前と調整後のASMDをプロットしたグラフ。</li>
-  <li>調整前後で共変量バランスが改善したか、調整後に偏りが残っていないかを確認する。</li>
-</ul>
-<p>見方</p>
-<ul>
-  <li>調整前後でASMDがどの程度変化したかを見る。調整後にASMDが小さくなっていれば、その共変量のバランスが改善したと解釈できる。0.1未満かどうかは、残っている偏りを確認するための目安として使う。</li>
-  <li>調整後もASMDが目安を超えている場合は、共変量の偏りが残っている。傾向スコアモデルの見直しや、重み付け方法の検討が必要になる場合がある。</li>
-  <li>調整後にASMDが悪化する特徴量がある場合は、PSの分布や重みの大きさも確認し、極端な重みが生じていないかを調べる。</li>
-  <li>処置割り当てがランダムな場合は、調整前から共変量バランスが比較的よく、調整後も大きく変化しないことが期待される。ただし件数が少ない場合などは偶然の偏りが生じることがある。</li>
-  <li>ランダム割り当てでも、件数や共変量の性質を踏まえて判断する。ASMDの値だけでなく、共変量の分布や割り当て方法も確認する。</li>
-</ul>
-<div class="mdc-info-box">
-  <p>※共変量バランスが改善しても、未観測の交絡などが残っている可能性があるため、それだけで因果効果を正しく推定できると保証されるわけではない。</p>
-</div>
-
-
-
-
-
-
-  <h2 id="evaluation">Evaluation</h2>
-  <h3 id="qini-curve-auuc">Qini Curve, AUUC</h3>
-  <h3 id="bootstrap-auuc">Bootstrap AUUC</h3>
-  <h3 id="overfitting-check">Overfitting Check</h3>
-  <h3 id="predicted-score-vs-actual">Predicted Score vs Actual</h3>
-
-  <h2 id="profiling">Profiling</h2>
-  <h3 id="score-quantiles">Score Quantiles</h3>
-  <h3 id="between-learner">Between Learner</h3>
-  <h3 id="expected-net-profit">Expected Net Profit</h3>
-
-
-  <footer id="footer">
-    <div class="footer-links">
-      <a href="https://sasasakaz.github.io/">🏠 Home</a>
-      <span class="separator">|</span>
-      <a href="#header">Back to Top</a>
-    </div>
-    <p>Author: sasasakaz</p>
-  </footer>
 </body>
-
 </html>

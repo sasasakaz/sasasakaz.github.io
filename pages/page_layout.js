@@ -1,0 +1,308 @@
+/*!
+ * layout.js — 3カラムレイアウト（左: ページ一覧 / 中央: 本文 / 右: 目次）
+ *
+ * 使い方（各ページ）
+ *   1. <body class="layout-3col"> にする
+ *   2. <head> に <script src="layout.js" defer></script> を入れる
+ *   3. 本文を <main id="content"> で囲み、左右に <nav id="site-nav"> / <nav id="page-toc"> を置く
+ *      （骨組みは uplift_advanced.html を参照）
+ *
+ * ページを追加したとき: 下の SITE_NAV に1行足すだけでよい。
+ */
+(function () {
+  'use strict';
+
+  /* ===================== 設定 ===================== */
+
+  // 一覧のパスは「トップページ基準」で書く（pages/xxx.html）。
+  // このスクリプトを使うページは pages/ 配下にあるため、先頭に LINK_BASE を付けて解決する。
+  // （トップページ側で使う場合は '' にする）
+  var LINK_BASE = '../';
+
+  var HOME = ['🏠 トップページ', ''];
+
+  var SITE_NAV = [
+    {
+      group: '解説',
+      items: [
+        ['📘 AI 70年', 'https://sasasakaz.github.io/pages/ai_70_years.html'],
+        ['🤖 機械学習の歴史', 'https://sasasakaz.github.io/pages/ml_history.html'],
+        ['🤖 機械学習の手法', 'https://sasasakaz.github.io/pages/ml_for_structured_data.html'],
+        ['🤖 機械学習の評価指標', 'https://sasasakaz.github.io/pages/ml_evaluation.html'],
+        ['🤖 機械学習モデルの解釈', 'https://sasasakaz.github.io/pages/ml_interpretation.html'],
+        ['🎯 アップリフトモデリング（基礎）', 'https://sasasakaz.github.io/pages/uplift_basic.html'],
+        ['🎯 アップリフトモデリング（実践）', 'https://sasasakaz.github.io/pages/uplift_advanced.html']
+      ]
+    },
+    {
+      group: 'ツール',
+      items: [
+        ['💬 Dify', 'https://sasasakaz.github.io/pages/dify.html'],
+        ['🦊 Easy Bayesian Estimation for Means', 'https://app-rjeavrnuhlwfgk3qornjgr.streamlit.app'],
+        ['🦁 Easy Bayesian Estimation for Proportions', 'https://sasasakaz.github.io/pages/beat_5g.html'],
+        ['🐶 Markdown Converter', 'https://sasasakaz.github.io/pages/markdown_converter.html'],
+        ['🐯 Diff Viewer', 'https://sasasakaz.github.io/pages/diff_viewer.html'],
+        ['🦄 Amazon URL Shortener', 'https://sasasakaz.github.io/pages/amazon_url_shortener.html'],
+        ['🐹 QR Contact URL Generator', 'https://sasasakaz.github.io/pages/qr_contact_url_generator.html'],
+        ['🐼 URL to QR', 'https://sasasakaz.github.io/pages/url_to_qr_code.html']
+      ]
+    }
+  ];
+
+  var TOC_SELECTOR = 'h2, h3';              // 目次に出す見出し
+  var ACTIVE_OFFSET = 80;                   // この位置(px)より上に来た最後の見出しを「現在地」とする
+  var STORAGE_KEY = 'layout3col.v1';        // <head> の早期スクリプトと同じキーにする
+  var WIDE_QUERY = '(min-width: 1280px)';   // CSS のブレークポイントと揃える
+
+  /* ===================== 共通 ===================== */
+
+  var root = document.documentElement;
+  var mq = window.matchMedia(WIDE_QUERY);
+  var state = loadState();
+
+  function el(tag, attrs, text) {
+    var e = document.createElement(tag);
+    for (var k in (attrs || {})) e.setAttribute(k, attrs[k]);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') || {}; }
+    catch (e) { return {}; }
+  }
+
+  function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+    catch (e) { /* 保存できなくても動作には影響しない */ }
+  }
+
+  /* ===================== 左: ページ一覧 ===================== */
+
+  function normalizePath(p) {
+    return p.replace(/\/index\.html$/, '/');
+  }
+
+  function makeLink(label, path, here) {
+    var a = el('a', {}, label);
+    if (/^https?:\/\//.test(path)) {
+      a.href = path;
+      a.target = '_blank';
+      a.rel = 'noopener';
+      a.className = 'external';
+    } else {
+      a.href = LINK_BASE + path;
+      if (normalizePath(new URL(a.href).pathname) === here) {
+        a.className = 'current';
+        a.setAttribute('aria-current', 'page');
+      }
+    }
+    return a;
+  }
+
+  function renderSiteNav() {
+    var box = document.getElementById('site-nav');
+    if (!box) return;
+    var here = normalizePath(location.pathname);
+    var frag = document.createDocumentFragment();
+
+    var top = el('div', { 'class': 'site-nav-group' });
+    top.appendChild(makeLink(HOME[0], HOME[1], here));
+    frag.appendChild(top);
+
+    SITE_NAV.forEach(function (g) {
+      var sec = el('div', { 'class': 'site-nav-group' });
+      sec.appendChild(el('div', { 'class': 'side-title' }, g.group));
+      g.items.forEach(function (it) { sec.appendChild(makeLink(it[0], it[1], here)); });
+      frag.appendChild(sec);
+    });
+
+    box.textContent = '';
+    box.appendChild(frag);
+  }
+
+  /* ===================== 右: 目次 ===================== */
+
+  function slugify(s) {
+    return s.trim().toLowerCase()
+      .replace(/[\s\u3000]+/g, '-')
+      .replace(/[^\p{L}\p{N}_-]/gu, '')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  // id がない見出しにだけ id を自動付与する（既存の id は変更しない）
+  function ensureIds(heads) {
+    var used = {};
+    Array.prototype.forEach.call(document.querySelectorAll('[id]'), function (e) { used[e.id] = true; });
+    heads.forEach(function (h, i) {
+      if (h.id) return;
+      var base = slugify(h.textContent) || ('section-' + (i + 1));
+      var id = base, n = 2;
+      while (used[id]) id = base + '-' + (n++);
+      h.id = id;
+      used[id] = true;
+    });
+  }
+
+  function buildToc() {
+    var box = document.getElementById('page-toc');
+    var content = document.getElementById('content');
+    if (!box || !content) return [];
+
+    var heads = Array.prototype.slice.call(content.querySelectorAll(TOC_SELECTOR));
+    ensureIds(heads);
+
+    var list = el('ul', { 'class': 'page-toc-list' });
+    var items = heads.map(function (h) {
+      var li = el('li', { 'class': 'lv' + h.tagName.charAt(1) });
+      var a = el('a', { href: '#' + h.id }, h.textContent.trim());
+      li.appendChild(a);
+      list.appendChild(li);
+      return { heading: h, link: a };
+    });
+
+    box.textContent = '';
+    box.appendChild(el('div', { 'class': 'side-title' }, '目次'));
+    box.appendChild(list);
+
+    // 狭い画面では、目次をタップしたら閉じる
+    list.addEventListener('click', function (e) {
+      if (e.target.closest('a') && !mq.matches) closeDrawers();
+    });
+    return items;
+  }
+
+  function keepVisible(box, link) {
+    if (!box.getClientRects().length) return;
+    var b = box.getBoundingClientRect();
+    var l = link.getBoundingClientRect();
+    if (l.top < b.top + 8) box.scrollTop -= (b.top + 8 - l.top);
+    else if (l.bottom > b.bottom - 8) box.scrollTop += (l.bottom - (b.bottom - 8));
+  }
+
+  function setupScrollSpy(items) {
+    if (!items.length) return;
+    var box = document.getElementById('page-toc');
+    var title = document.getElementById('topbar-title');
+    var current = -2;
+    var ticking = false;
+
+    function update() {
+      ticking = false;
+      var idx = -1;
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].heading.getBoundingClientRect().top <= ACTIVE_OFFSET) idx = i;
+        else break;
+      }
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
+        idx = items.length - 1;
+      }
+      if (idx === current) return;
+      current = idx;
+
+      items.forEach(function (it, i) {
+        var on = (i === idx);
+        it.link.classList.toggle('active', on);
+        if (on) it.link.setAttribute('aria-current', 'location');
+        else it.link.removeAttribute('aria-current');
+      });
+
+      // 上部バーには、いま読んでいる章（h2）の名前を出す
+      var h2 = '';
+      for (var j = idx; j >= 0; j--) {
+        if (items[j].heading.tagName === 'H2') { h2 = items[j].heading.textContent.trim(); break; }
+      }
+      if (title) title.textContent = h2;
+
+      if (idx >= 0 && box) keepVisible(box, items[idx].link);
+    }
+
+    function onScroll() {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    update();
+  }
+
+  /* ===================== 左右の開閉 ===================== */
+  // 広い画面: 閉じた状態を localStorage に保存（html に left-closed / right-closed）
+  // 狭い画面: ドロワーとして開く（html に left-open / right-open）。保存しない。
+
+  var buttons = {
+    left: document.getElementById('btn-left'),
+    right: document.getElementById('btn-right')
+  };
+
+  function isOpen(side) {
+    return mq.matches
+      ? !root.classList.contains(side + '-closed')
+      : root.classList.contains(side + '-open');
+  }
+
+  function updateAria() {
+    ['left', 'right'].forEach(function (side) {
+      if (buttons[side]) buttons[side].setAttribute('aria-expanded', String(isOpen(side)));
+    });
+  }
+
+  function closeDrawers() {
+    root.classList.remove('left-open', 'right-open');
+    updateAria();
+  }
+
+  function toggle(side) {
+    if (mq.matches) {
+      state[side] = root.classList.toggle(side + '-closed');
+      saveState();
+    } else {
+      var cls = side + '-open';
+      var willOpen = !root.classList.contains(cls);
+      root.classList.remove('left-open', 'right-open');
+      if (willOpen) root.classList.add(cls);
+    }
+    updateAria();
+  }
+
+  function setupToggles() {
+    ['left', 'right'].forEach(function (side) {
+      if (buttons[side]) buttons[side].addEventListener('click', function () { toggle(side); });
+    });
+    var backdrop = document.getElementById('side-backdrop');
+    if (backdrop) backdrop.addEventListener('click', closeDrawers);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !mq.matches) closeDrawers();
+    });
+    var onChange = function () { closeDrawers(); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
+    updateAria();
+  }
+
+  /* ===================== 表の横スクロール ===================== */
+
+  function wrapTables() {
+    var content = document.getElementById('content');
+    if (!content) return;
+    Array.prototype.forEach.call(content.querySelectorAll('table'), function (t) {
+      if (t.parentElement.classList.contains('table-scroll')) return;
+      var w = el('div', { 'class': 'table-scroll' });
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
+  }
+
+  /* ===================== 初期化 ===================== */
+
+  function init() {
+    renderSiteNav();
+    var items = buildToc();
+    wrapTables();
+    setupToggles();
+    setupScrollSpy(items);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();

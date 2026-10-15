@@ -45,9 +45,12 @@ h1 {
 }
 
 h2 {
-  color: #1a365d;  /* 濃いネイビー */
-  border-left: 6px solid #2b5b84;  /* 太い左線 */
-  background-color: #f0f4f8;  /* うすい背景色 */
+  color: #1a365d;
+  /* 濃いネイビー */
+  border-left: 6px solid #2b5b84;
+  /* 太い左線 */
+  background-color: #f0f4f8;
+  /* うすい背景色 */
   padding: 0.4em 0.7em;
   border-radius: 0 4px 4px 0;
   margin-top: 3.0em;
@@ -56,7 +59,8 @@ h2 {
 
 h3 {
   color: #2b5b84;
-  border-left: 4px solid #3182ce;  /* 中太左線、少し明るい青、背景なし */
+  border-left: 4px solid #3182ce;
+  /* 中太左線、少し明るい青、背景なし */
   padding-left: 0.6em;
   margin-top: 2.5em;
   margin-bottom: 0.4em;
@@ -64,12 +68,16 @@ h3 {
 
 h4 {
   font-size: 1.05em;
-  color: #2d3748;  /* 落ち着いた色 */
-  border-left: 2.5px solid #a0aec0;  /* 細線、グレー */
+  color: #2d3748;
+  /* 落ち着いた色 */
+  border-left: 2.5px solid #a0aec0;
+  /* 細線、グレー */
   padding-left: 0.5em;
-  line-height: 1.2;  /* 線の上下の長さをキュッと引き締める */
+  line-height: 1.2;
+  /* 線の上下の長さをキュッと引き締める */
   margin-top: 1.8em;
-  margin-bottom: 0;  /* 下はゼロにする */
+  margin-bottom: 0;
+  /* 下はゼロにする */
 }
 
 
@@ -102,9 +110,11 @@ img {
 .toc {
   border: 1px solid #d0e7f5;
   border-radius: 0.5em;
-  padding: 1em 1.5em;  /* 枠線と中の余白 */
+  padding: 1em 1.5em;
+  /* 枠線と中の余白 */
   margin: 2em 0;
-  background-color: #f8fafc;  /* うっすら背景を入れるとカード感が出る */
+  background-color: #f8fafc;
+  /* うっすら背景を入れるとカード感が出る */
 }
 
 /* 目次のタイトル */
@@ -112,8 +122,10 @@ img {
   font-size: 1.05em;
   font-weight: bold;
   color: #1a365d;
-  margin-top: 0; /* デフォルトの大きな余白を全部消す */
-  margin-bottom: 0.2em;  /* 下のリスト（ul）との間のスキマだけ少し開ける */
+  margin-top: 0;
+  /* デフォルトの大きな余白を全部消す */
+  margin-bottom: 0.2em;
+  /* 下のリスト（ul）との間のスキマだけ少し開ける */
 
   /* h2の装飾（左線や背景帯など）が引き継がれないようにクリア */
   border: none;
@@ -303,7 +315,8 @@ td {
 /* 用語集の先頭の絵文字 */
 .term::before {
   content: "🦊";
-  margin-right: 0.4em; /* アイコンと文字の間の隙間 */
+  margin-right: 0.4em;
+  /* アイコンと文字の間の隙間 */
   font-size: 0.9em;
   vertical-align: 0.05em;
 }
@@ -369,3 +382,325 @@ td {
   font-weight: bold;
 }
 
+
+
+
+/* =====================================================================
+   3カラムレイアウト（<body class="layout-3col"> のページだけに適用）
+   左: ページ一覧 / 中央: 本文 / 右: 目次（追随）
+   ・1280px以上: 3カラム。左右は上部ボタンで開閉（本文は常に中央で幅固定）
+   ・1280px未満: 左右は閉じた状態から、ボタンで本文に重ねて開く
+   ※ブレークポイント(1280px)は page_layout.js の WIDE_QUERY と揃えること
+   ===================================================================== */
+
+.layout-3col {
+  --l3-topbar-h: 44px;
+  --l3-content-w: 750px;
+  --l3-side-w: 210px;
+  --l3-gap: 1.5rem;
+
+  /* 共通の body 設定（max-width 900px / 左右padding）を打ち消す */
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* ---------- 上部バー ---------- */
+
+.layout-3col .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--l3-topbar-h);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0 0.8rem;
+  background: #fff;
+  border-bottom: 1px solid #d0e7f5;
+}
+
+.layout-3col .topbar-btn {
+  flex: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: #2b5b84;
+  background: #f0f4f8;
+  border: 1px solid #d0e7f5;
+  border-radius: 0.4em;
+  padding: 0.3em 0.8em;
+  cursor: pointer;
+}
+
+.layout-3col .topbar-btn:hover {
+  background: #e8f4fc;
+}
+
+/* 開いているときは濃く、閉じているときは薄く */
+.layout-3col .topbar-btn[aria-expanded="true"] {
+  background: #e8f4fc;
+  border-color: #3182ce;
+}
+
+.layout-3col .topbar-btn:focus-visible,
+.layout-3col .side a:focus-visible {
+  outline: 2px solid #3182ce;
+  outline-offset: 2px;
+}
+
+/* いま読んでいる章の名前 */
+.layout-3col .topbar-title {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #718096;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+/* ---------- 3カラム本体 ---------- */
+/* 左右のトラックを同じ 1fr にして、本文を常に画面中央に固定する */
+
+.layout-3col .layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--l3-content-w)) minmax(0, 1fr);
+  column-gap: var(--l3-gap);
+  padding: 0 1rem;
+}
+
+.layout-3col #content {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.layout-3col .side {
+  position: sticky;
+  top: calc(var(--l3-topbar-h) + 1rem);
+  align-self: start;
+  width: var(--l3-side-w);
+  max-height: calc(100vh - var(--l3-topbar-h) - 2rem);
+  margin-top: 1rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 0.9rem;
+}
+
+.layout-3col .side-left {
+  grid-column: 1;
+  justify-self: end;
+}
+
+.layout-3col .side-right {
+  grid-column: 3;
+  justify-self: start;
+  border-left: 1px solid #e2e8f0;
+  padding-left: 0.4rem;
+}
+
+.layout-3col .side-backdrop {
+  display: none;
+}
+
+/* 広い画面: 閉じた側は非表示（本文の位置は動かない） */
+@media (min-width: 1280px) {
+
+  html.left-closed .layout-3col .side-left,
+  html.right-closed .layout-3col .side-right {
+    display: none;
+  }
+}
+
+
+/* ---------- 狭い画面: 左右はドロワー ---------- */
+
+@media (max-width: 1279.98px) {
+  .layout-3col .layout {
+    display: block;
+  }
+
+  .layout-3col #content {
+    max-width: var(--l3-content-w);
+    margin: 0 auto;
+  }
+
+  .layout-3col .side {
+    position: fixed;
+    top: var(--l3-topbar-h);
+    bottom: 0;
+    z-index: 40;
+    width: min(300px, 85vw);
+    max-height: none;
+    align-self: stretch;
+    /* 広い画面用の align-self:start が残ると、縦が中身の高さに縮んでしまう */
+    margin: 0;
+    padding: 1rem;
+    background: #fff;
+    box-shadow: 0 0 24px rgba(0, 0, 0, 0.18);
+    /* 閉じている間はフォーカスも受けないようにする */
+    visibility: hidden;
+    transition: transform 0.2s ease, visibility 0s linear 0.2s;
+  }
+
+  .layout-3col .side-left {
+    left: 0;
+    transform: translateX(-102%);
+  }
+
+  .layout-3col .side-right {
+    right: 0;
+    border-left: none;
+    transform: translateX(102%);
+  }
+
+  html.left-open .layout-3col .side-left,
+  html.right-open .layout-3col .side-right {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.2s ease, visibility 0s;
+  }
+
+  html.left-open .layout-3col .side-backdrop,
+  html.right-open .layout-3col .side-backdrop {
+    display: block;
+  }
+
+  .layout-3col .side-backdrop {
+    position: fixed;
+    top: var(--l3-topbar-h);
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 35;
+    background: rgba(0, 0, 0, 0.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layout-3col .side {
+    transition: none;
+  }
+}
+
+
+/* ---------- 左: ページ一覧 ---------- */
+
+.layout-3col .side-title {
+  margin: 0 0 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #718096;
+}
+
+.layout-3col .site-nav-group+.site-nav-group {
+  margin-top: 1.2rem;
+}
+
+.layout-3col .site-nav-group:first-child {
+  margin-bottom: 1.2rem;
+}
+
+.layout-3col .site-nav-group a {
+  display: block;
+  padding: 0.35em 0.6em;
+  border-radius: 0.3em;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #2d3748;
+  text-decoration: none;
+}
+
+.layout-3col .site-nav-group a:hover {
+  background: #f0f4f8;
+}
+
+.layout-3col .site-nav-group a.current {
+  background: #e8f4fc;
+  color: #1a365d;
+  font-weight: bold;
+}
+
+/* 別サイトへのリンクは印を付ける */
+.layout-3col .site-nav-group a.external::after {
+  content: " ↗";
+  font-size: 0.8em;
+  color: #a0aec0;
+}
+
+
+/* ---------- 右: 目次 ---------- */
+
+.layout-3col .page-toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.layout-3col .page-toc-list a {
+  display: block;
+  padding: 0.25em 0.6em;
+  border-left: 3px solid transparent;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: #4a5568;
+  text-decoration: none;
+}
+
+.layout-3col .page-toc-list li.lv3 a {
+  padding-left: 1.5em;
+  font-size: 0.8rem;
+}
+
+.layout-3col .page-toc-list a:hover {
+  background: #f0f4f8;
+}
+
+.layout-3col .page-toc-list a.active {
+  border-left-color: #3182ce;
+  background: #f0f4f8;
+  color: #1a365d;
+  font-weight: bold;
+}
+
+
+/* ---------- 本文まわり ---------- */
+
+/* 固定の上部バーに見出しが隠れないようにする */
+.layout-3col #header,
+.layout-3col #content :is(h2, h3, h4) {
+  scroll-margin-top: calc(var(--l3-topbar-h) + 1rem);
+}
+
+/* コードブロックと表は、本文幅からはみ出す分を枠の中でスクロールさせる */
+.layout-3col #content pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.layout-3col .table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* 長いインラインコードが本文を突き抜けないように */
+.layout-3col #content :not(pre)>code {
+  overflow-wrap: anywhere;
+}
+
+
+@media print {
+
+  .layout-3col .topbar,
+  .layout-3col .side,
+  .layout-3col .side-backdrop {
+    display: none;
+  }
+
+  .layout-3col .layout {
+    display: block;
+    padding: 0;
+  }
+}
