@@ -150,24 +150,16 @@
       <p>ある顧客について、クーポン配布した場合の購入確率と、クーポン配布しなかった場合の購入確率をそれぞれ予測できたとする。</p>
       <p>クーポンあり: 購入確率 70%　クーポンなし: 購入確率 30%なら、その差である40pointsが、この顧客に対するアップリフト。</p>
       <ul>
-        <li>uplift = prob_t - prob_c</li>
-        <li>prob_t: 処置ありの場合の予測確率</li>
-        <li>prob_c: 処置なしの場合の予測確率<ul>
-            <li>Probability if Treated もしもこの人にクーポン配布したら何％の確率で購入するかという予測値（期待値）</li>
-            <li>Probability if Control もしもこの人に配布しなかったら何％の確率で購入するかという予測値（期待値）</li>
-          </ul>
-        </li>
+        <li>prob_t: 処置した場合の予測確率（Probability if Treated もしもこの人にクーポン配布したら何％の確率で購入するかという期待値）</li>
+        <li>prob_c: 処置しなかった場合の予測確率（Probability if Control もしもこの人に配布しなかったら何％の確率で購入するかという期待値）</li>
+        <li><strong>uplift = prob_t - prob_c</strong></li>
       </ul>
-      <p>アップリフトの値が大きい顧客ほど、<span
-          class='inline-mark'>クーポン配布によって、配布しなかった場合と比べて購入確率が上昇する</span>と解釈できる。このように、ある人に<strong>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</strong>をアップリフト（uplift）と呼ぶ。
-      </p>
+      <p>アップリフトの値が大きい顧客ほど、<span class='inline-mark'>クーポン配布によって、配布しなかった場合と比べて購入確率が上昇する</span>と解釈できる。このように、ある人に<strong>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</strong>をアップリフトと呼ぶ。</p>
 
       <div class="mdc-note-box">
-        <strong>アップリフトのニュアンス</strong>
-        <p>ビジネスやマーケティングの実務においては「買った」「増えた」など上向きの結果・行動への関心が強い。そのため、アップリフト/押し上げ/上積み効果（incremental
-          effect）などと表現されることが多い。だがuplift (modeling) は、当然ながら「増える場合だけ」を指すわけではない。処置によって結果が20points減る（アップリフトがマイナスの値をとる）場合もある。
-        </p>
-        <p>uplift = difference in outcome between treatment and control</p>
+        <p><strong>アップリフトのニュアンス</strong></p>
+        <p>ビジネスやマーケティングの実務においては「買った」「増えた」など上向きの結果・行動への関心が強い。そのため、アップリフト/押し上げ/上積み効果（incremental effect）などと表現されることが多い。だがuplift (modeling) は、当然ながら「増える場合だけ」を指すわけではない。処置によって結果が20points減る（アップリフトがマイナスの値をとる）場合もある。</p>
+        <p>uplift: difference in outcome between treatment and control</p>
         <p>treatment（処置あり）とcontrol（処置なし）の潜在的な結果の<strong>差を推定</strong>したものを、便宜的に上向き表現しているだけである。</p>
       </div>
 
@@ -207,9 +199,7 @@
         <li>特徴量X + 処置変数Tから、目的変数y（購入する/しない）を学習させる（2値分類問題）。</li>
         <li>学習後、顧客全員の処置変数Tを1（クーポン配布）とした場合の購入確率を予測させる（prob_tを得る）。</li>
         <li>同じモデルで、顧客全員のTを0（配布しない）とした場合の購入確率を予測させる（prob_cを得る）。</li>
-        <li>同じ<strong>1つのモデル</strong>から得られた予測値の差分をアップリフトとする。uplift = prob_t - prob_cとして、<strong>条件付き平均処置効果（CATE:
-            Conditional
-            Average Treatment Effect）</strong>を推定している。</li>
+        <li>同じ<strong>1つのモデル</strong>から得られた予測値の差分をアップリフトとする。uplift = prob_t - prob_cとして、<strong>条件付き平均処置効果（CATE: Conditional Average Treatment Effect）</strong>を推定している。</li>
       </ol>
       <p>S-Learnerは構造がシンプルで、通常の予測モデルを比較的そのまま利用できる。</p>
       <p>
@@ -344,8 +334,7 @@
       <h2 id="history">アップリフトモデリングの歴史</h2>
       <h3 id="concept-development">概念の発展（2000年代初頭）</h3>
       <p>現在のアップリフトモデリングにつながる考え方は、1990年代末から2000年代初頭にかけて、ダイレクトマーケティングの分野で発展した。</p>
-      <p>従来の応答予測モデルでは、「広告やキャンペーンに反応しそうな人」を予測する。しかし、その中には、施策がなくても自発的に購入する顧客も含まれている。そこで、施策によって生じる**増分価値（Incremental
-        Value）**を予測しようという考え方が登場した。</p>
+      <p>従来の応答予測モデルでは、「広告やキャンペーンに反応しそうな人」を予測する。しかし、その中には、施策がなくても自発的に購入する顧客も含まれている。そこで、施策によって生じる<strong>増分価値（Incremental Value）</strong>を予測しようという考え方が登場した。</p>
       <p>Hansotia &amp; Rukstales (2002) は、マーケティング施策による増分価値を扱う Incremental Value Modeling を提案した。</p>
       <p>その後、Nicholas J. Radcliffeらによって、処置群と対照群の反応の差を利用してマーケティング施策の対象者を選ぶ考え方が整理され、Uplift Model / Uplift Modeling
         という呼び方が広まっていった。Radcliffe (2007) は、アップリフトモデルの構築方法だけでなく、モデルの評価方法や実際のマーケティングへの適用についても整理している。</p>

@@ -25,26 +25,26 @@
     {
       group: '解説',
       items: [
-        ['📘 AI 70年', 'https://sasasakaz.github.io/pages/ai_70_years.html'],
-        ['🤖 機械学習の歴史', 'https://sasasakaz.github.io/pages/ml_history.html'],
-        ['🤖 機械学習の手法', 'https://sasasakaz.github.io/pages/ml_for_structured_data.html'],
-        ['🤖 機械学習の評価指標', 'https://sasasakaz.github.io/pages/ml_evaluation.html'],
-        ['🤖 機械学習モデルの解釈', 'https://sasasakaz.github.io/pages/ml_interpretation.html'],
-        ['🎯 アップリフトモデリング（基礎）', 'https://sasasakaz.github.io/pages/uplift_basic.html'],
-        ['🎯 アップリフトモデリング（実践）', 'https://sasasakaz.github.io/pages/uplift_advanced.html']
+        ['📘 AI 70年', 'pages/ai_70_years.html'],
+        ['🤖 機械学習の歴史', 'pages/ml_history.html'],
+        ['🤖 機械学習の手法', 'pages/ml_for_structured_data.html'],
+        ['🤖 機械学習の評価指標', 'pages/ml_evaluation.html'],
+        ['🤖 機械学習モデルの解釈', 'pages/ml_interpretation.html'],
+        ['🎯 アップリフトモデリング（基礎）', 'pages/uplift_basic.html'],
+        ['🎯 アップリフトモデリング（実践）', 'pages/uplift_advanced.html']
       ]
     },
     {
       group: 'ツール',
       items: [
-        ['💬 Dify', 'https://sasasakaz.github.io/pages/dify.html'],
+        ['💬 Dify', 'pages/dify.html'],
         ['🦊 Easy Bayesian Estimation for Means', 'https://app-rjeavrnuhlwfgk3qornjgr.streamlit.app'],
-        ['🦁 Easy Bayesian Estimation for Proportions', 'https://sasasakaz.github.io/pages/beat_5g.html'],
-        ['🐶 Markdown Converter', 'https://sasasakaz.github.io/pages/markdown_converter.html'],
-        ['🐯 Diff Viewer', 'https://sasasakaz.github.io/pages/diff_viewer.html'],
-        ['🦄 Amazon URL Shortener', 'https://sasasakaz.github.io/pages/amazon_url_shortener.html'],
-        ['🐹 QR Contact URL Generator', 'https://sasasakaz.github.io/pages/qr_contact_url_generator.html'],
-        ['🐼 URL to QR', 'https://sasasakaz.github.io/pages/url_to_qr_code.html']
+        ['🦁 Easy Bayesian Estimation for Proportions', 'pages/beat_5g.html'],
+        ['🐶 Markdown Converter', 'pages/markdown_converter.html'],
+        ['🐯 Diff Viewer', 'pages/diff_viewer.html'],
+        ['🦄 Amazon URL Shortener', 'pages/amazon_url_shortener.html'],
+        ['🐹 QR Contact URL Generator', 'pages/qr_contact_url_generator.html'],
+        ['🐼 URL to QR', 'pages/url_to_qr_code.html']
       ]
     }
   ];
