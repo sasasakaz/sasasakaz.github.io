@@ -221,7 +221,7 @@ blockquote {
   background-color: #eef2f6; /* ほんのり青みのあるうすいグレー */
   color: #374151; /* ダークグレー（黒すぎない上品な色） */
   font-size: 0.9em;
-  /* padding: 0.15em 0.4em; */
+  padding: 0.15em 0.4em;
   border-radius: 0.3em;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
