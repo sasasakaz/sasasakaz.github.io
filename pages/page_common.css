@@ -216,7 +216,7 @@ blockquote {
   -webkit-box-decoration-break: clone;
 }
 
-/* 注釈のインライン版 */
+/* 注釈のインライン版やちょっとしたフレーズ用 */
 .inline-gray {
   background-color: #eef2f6; /* ほんのり青みのあるうすいグレー */
   color: #374151; /* ダークグレー（黒すぎない上品な色） */

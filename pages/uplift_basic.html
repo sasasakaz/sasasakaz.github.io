@@ -83,9 +83,9 @@
         <li>だが、その人はクーポンがなくても購入するかもしれない。</li>
         <li>この場合、クーポン配布する費用のぶん利益が減ることになる。</li>
       </ol>
-      <p>つまり、施策をより効果的、効率的におこなうためには、<span class='inline-mark'>クーポンがないと買わなそうだが、クーポンがあると買いやすそう</span>な人を選びたい。</p>
+      <p>つまり、施策をより効果的、効率的におこなうためには「クーポンがないと買わなそうだが、クーポンがあると買いやすそうな人」を選びたい。</p>
       <p>
-        クーポンを配ることで、購入する確率がどれだけ変化する人なのかが知りたい。このように、<span class='inline-marker'>処置によって、処置しなかった場合と比べて結果がどの程度変化するかを予測する</span>ための方法をアップリフトモデリング（Uplift
+        クーポンを配ることで、購入する確率がどれだけ変化する人なのかが知りたい。このように、<span class='inline-mark'>処置によって、処置しなかった場合と比べて結果がどの程度変化するかを予測する</span>ための方法をアップリフトモデリング（Uplift
         Modeling）と呼ぶ。</p>
 
 
@@ -95,7 +95,7 @@
         <li>顧客A: クーポンを配った場合 → 購入する　クーポンを配らなかった場合 → 購入する</li>
         <li>顧客B: クーポンを配った場合 → 購入する　クーポンを配らなかった場合 → 購入しない</li>
       </ul>
-      <p>顧客Aは購入する確率は高いが、クーポンが購入を後押ししたわけではなさそう。顧客Bには<span class='inline-marker'>クーポンが購入を促す効果</span>がありそう。つまり「購入確率が高い人」と「施策の効果が高い人」は同じではない。
+      <p>顧客Aは購入する確率は高いが、クーポンが購入を後押ししたわけではなさそう。顧客Bにはクーポンが購入を促す効果がありそう。つまり<span class='inline-marker'>「購入確率が高い人」と「施策の効果が高い人」は同じではない。</span>
       </p>
       <p>アップリフトモデリングでは後者を見つけて、優先的に施策対象とすることを目指している（通常の購入予測モデルではAとBを判別しにくい）。</p>
       <table>
@@ -148,19 +148,18 @@
 
       <h3 id="what-is-uplift">アップリフトとは</h3>
       <p>ある顧客について、クーポン配布した場合の購入確率と、クーポン配布しなかった場合の購入確率をそれぞれ予測できたとする。</p>
-      <p>クーポンあり: 購入確率 70%　クーポンなし: 購入確率 30%なら、その差である40pointsが、この顧客に対するアップリフト。</p>
+      <p>クーポンあり: 購入確率 70%　クーポンなし: 購入確率 30%なら、その差である40pointsが、この顧客におけるアップリフト。</p>
       <ul>
-        <li>prob_t: 処置した場合の予測確率（Probability if Treated もしもこの人にクーポン配布したら何％の確率で購入するかという期待値）</li>
-        <li>prob_c: 処置しなかった場合の予測確率（Probability if Control もしもこの人に配布しなかったら何％の確率で購入するかという期待値）</li>
-        <li><span class='inline-code'>uplift = prob_t - prob_c</span></li>
+        <li><span class='inline-gray'>prob_t</span>: 処置した場合の予測確率（Probability if Treated もしもこの人にクーポン配布したら何％の確率で購入するかという期待値）</li>
+        <li><span class='inline-gray'>prob_c</span>: 処置しなかった場合の予測確率（Probability if Control もしもこの人に配布しなかったら何％の確率で購入するかという期待値）</li>
+        <li><span class='inline-gray'>uplift = prob_t - prob_c</span></li>
       </ul>
-      <p>アップリフトの値が大きい顧客ほど、<span class='inline-marker'>クーポン配布によって、配布しなかった場合と比べて購入確率が上昇する</span>と解釈できる。このように、ある人に<span class='inline-mark'>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</span>をアップリフトと呼ぶ。</p>
+      <p>アップリフトの値が大きい顧客ほど、クーポン配布によって、配布しなかった場合と比べて購入確率が上昇すると解釈できる。このように、ある人に<span class='inline-mark'>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</span>をアップリフトと呼ぶ。</p>
 
       <div class="mdc-note-box">
         <p><strong>アップリフトのニュアンス</strong></p>
         <p>ビジネスやマーケティングの実務においては「買った」「増えた」など上向きの結果・行動への関心が強い。そのため、アップリフト/押し上げ/上積み効果（incremental effect）などと表現されることが多い。だがuplift (modeling) は、当然ながら「増える場合だけ」を指すわけではない。処置によって結果が20points減る（アップリフトがマイナスの値をとる）場合もある。</p>
-        <p><span class='inline-code'>uplift: difference in outcome between treatment and control</span></p>
-        <p>treatment（処置あり）とcontrol（処置なし）の潜在的な結果の<strong>差を推定</strong>したものを、便宜的に上向き表現しているだけである。</p>
+        <p>treatment（処置あり）とcontrol（処置なし）の潜在的な結果の<strong>差を推定</strong>したものを、便宜的に上向き表現しているだけである。 <span class='inline-gray'>uplift: difference in outcome between treatment and control</span></p>
       </div>
 
 
@@ -169,7 +168,7 @@
       <ul>
         <li>クーポンを配った顧客が「クーポンを配らなかった場合に購入したか？」は分からない。</li>
         <li>クーポンを配らなかった顧客が「クーポンを配っていたら購入したか？」も分からない。</li>
-        <li>この実際には観測できない結果を<span class='inline-marker'>反実仮想（counterfactual）</span>と呼ぶ。</li>
+        <li>この<span class='inline-marker'>実際には観測できない結果</span>を反実仮想（counterfactual）と呼ぶ。</li>
       </ul>
       <p>アップリフトモデリングでは、観測されたデータから処置ありの場合と処置なしの場合の結果を推定し、その差から顧客ごとの施策効果を推定する。</p>
 
@@ -196,27 +195,26 @@
 
 
       <h3 id="s-learner">S-Learner</h3>
-      <p><span class='inline-mark'>処置の有無も特徴量の1つとして扱い</span>、1つのモデルで学習させる（Single-Learner）。</p>
+      <p><span class='inline-marker'>処置の有無も特徴量の1つとして扱い</span>、1つのモデルで学習させる（Single-Learner）。</p>
       <ol>
         <li>特徴量X + 処置変数Tから、目的変数y（購入する/しない）を学習させる（2値分類問題）。</li>
         <li>学習後、顧客全員の処置変数Tを1（クーポン配布）とした場合の購入確率を予測させる（prob_tを得る）。</li>
         <li>同じモデルで、顧客全員のTを0（配布しない）とした場合の購入確率を予測させる（prob_cを得る）。</li>
-        <li>同じ<strong>1つのモデル</strong>から得られた予測値の差分をアップリフトとする。uplift = prob_t - prob_cとして、<strong>条件付き平均処置効果（CATE: Conditional Average Treatment Effect）</strong>を推定している。</li>
+        <li>同じ<strong>1つのモデル</strong>から得られた予測値の差分をアップリフトとする。<span class='inline-gray'>uplift = prob_t - prob_c として、条件付き平均処置効果（CATE: Conditional Average Treatment Effect）を推定</span>している。</li>
       </ol>
       <p>S-Learnerは構造がシンプルで、通常の予測モデルを比較的そのまま利用できる。</p>
       <p>
-        一方で、<span class='inline-marker'>処置変数Tを他の特徴量と同じように扱う</span>構造であるがゆえに、処置効果が小さい場合などには、その効果を十分に捉えられないことがある（処置変数Tの目的変数yへの影響が他の特徴量に比べて小さいと、処置効果はゼロに向かってバイアスがかかる可能性がある）。
+        一方で、処置変数Tを他の特徴量と同じように扱う構造であるがゆえに、処置効果が小さい場合などには、その効果を十分に捉えられないことがある（処置変数Tの目的変数yへの影響が他の特徴量に比べて小さいと、処置効果はゼロに向かってバイアスがかかる可能性がある）。
       </p>
 
 
       <h3 id="t-learner">T-Learner</h3>
-      <p>処置の有無によってデータを分け、<span class='inline-mark'>2つのモデルを別々に学習させる</span>（Two-Learner）。</p>
+      <p>処置の有無によってデータを分け、<span class='inline-marker'>2つのモデルを別々に学習させる</span>（Two-Learner）。</p>
       <ol>
         <li>データを処置あり/なしで物理的に分け、処置群と対照群を用意。</li>
         <li>処置群だけでTreatモデルを作成、処置をした場合の購入確率を予測（prob_t）。</li>
         <li>対照群だけでControlモデルを作成、処置しなかった場合の購入確率を予測（prob_c）。</li>
-        <li>同じ顧客をそれぞれのモデルに入力し、<strong>2つのモデル</strong>から得られた予測値の差分をアップリフトとする。uplift = prob_t - prob_c
-          として<strong>CATE</strong>を推定。</li>
+        <li>同じ顧客をそれぞれのモデルに入力し、<strong>2つのモデル</strong>から得られた予測値の差分をアップリフトとする。<span class='inline-gray'></span>uplift = prob_t - prob_c としてCATEを推定</span>。</li>
       </ol>
       <p>T-Learnerも構造はシンプル。そしてS-Learner同様に、正則化バイアス（偏り）が発生する場合がある。</p>
       <ul>
@@ -232,11 +230,11 @@
           </ul>
         </li>
       </ul>
-      <p>以上から、<span class='inline-marker'>2モデルに分割する</span>構造であるがゆえに、バイアス発生の懸念がある。</p>
+      <p>以上から、2モデルに分割する構造であるがゆえに、バイアス発生の懸念がある。</p>
 
 
       <h3 id="x-learner">X-Learner</h3>
-      <p>T-Learnerをベースにしたうえで、<span class='inline-marker'>反実仮想から疑似ITEを作り、回帰モデルで学習</span>させる（Cross-Learner）。</p>
+      <p>T-Learnerをベースにしたうえで、反実仮想から疑似ITEを作り、回帰モデルで学習させる（Cross-Learner）。</p>
       <ol>
         <li>データを処置あり/なしで物理的に分け、2モデルをそれぞれ別々に学習（T-Learnerと同じ）。</li>
         <li>観測された実際の結果と、上記2モデルが反実仮想として予測した結果との差分から、疑似ITE（Individual Treatment Effect 個別単位の処置効果）をそれぞれ算出。<ul>
@@ -250,11 +248,11 @@
             <li>対照群の疑似ITEを学習した回帰モデルから得られた予測値（tau_c）</li>
           </ul>
         </li>
-        <li>2つの予測値を、後述する傾向スコアpsで重み付けして、uplift = ps * tau_c + (1 - ps) * tau_t としてCATEを推定。</li>
+        <li>2つの予測値を、後述する傾向スコアpsで重み付けして、<span class='inline-gray'>uplift = ps * tau_c + (1 - ps) * tau_t としてCATEを推定</span>。</li>
       </ol>
       <p>各群の観測結果と反対側のモデルによる予測を組み合わせることで、処置群・対照群の両方の情報を処置効果の推定に利用する。</p>
       <p>X-Learnerは、購入する/しないという結果ではなく、段階を踏んで最終的には<span
-          class='inline-mark'>施策によってどれだけ結果が変動するかを直接モデル化</span>する点が、S-LearnerやT-Learnerとの大きな違い。</p>
+          class='inline-marker'>施策によってどれだけ結果が変動するかを直接モデル化</span>する点が、S-LearnerやT-Learnerとの大きな違い。</p>
 
 
       <h3 id="differences">S/T/X-Learnerの違い</h3>
@@ -294,12 +292,12 @@
         <li>例えばクーポンをランダムに配布していれば、（RCTとみなしやすいので）処置群と対照群を比較しやすい。</li>
         <li>しかし現実世界では、ラテをあまり買わない人にクーポンを配るなど、顧客の特性に応じて処置することがある（ランダムではない）。</li>
         <li>この場合、処置群と対照群では顧客構成が異なってしまう。</li>
-        <li>そこで<strong>傾向スコア（Propensity Score）</strong>が登場する。</li>
+        <li>そこで傾向スコア（Propensity Score）が登場する。</li>
       </ol>
 
 
       <h3 id="propensity-score">傾向スコアとは</h3>
-      <p>簡単には、<span class='inline-mark'>その人が処置を受ける確率</span>。</p>
+      <p>簡単には、<span class='inline-marker'>その人が処置を受ける確率</span>。</p>
       <p>顧客の特徴量をXとすると、<em>P(Treatment = 1 | X)</em> を推定したものが傾向スコア。顧客A: 傾向スコア 0.8　顧客B: 傾向スコア
         0.3　であれば、顧客Aは特徴量から見ると処置を受ける可能性が高く、顧客Bは低かったと想定している。</p>
 
@@ -312,7 +310,7 @@
 
       <h3 id="ipw">IPW（逆確率重み付け）</h3>
       <p>傾向スコアを利用した代表的な方法の1つが、IPW（Inverse Probability Weighting: 逆確率重み付け）。<span
-          class='inline-mark'>実際に処置を受ける確率が低かった人ほど、大きな重みを与える</span>という考え方。</p>
+          class='inline-marker'>実際に処置を受ける確率が低かった人ほど、大きな重みを与える</span>という考え方。</p>
       <ol>
         <li>処置を受ける確率が0.8だった人と、0.2だった人が、どちらも実際に処置を受けていたとする。</li>
         <li>後者は、本来なら処置を受けにくかった人なので、IPWではより大きな重みを与える。</li>
