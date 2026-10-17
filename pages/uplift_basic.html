@@ -157,7 +157,6 @@
       <p>アップリフトの値が大きい顧客ほど、クーポン配布によって、配布しなかった場合と比べて購入確率が上昇すると解釈できる。このように、ある人に<span class='inline-mark'>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</span>をアップリフトと呼ぶ。</p>
 
       <div class="mdc-note-box">
-        <p><strong>アップリフトのニュアンス</strong></p>
         <p>ビジネスやマーケティングの実務においては「買った」「増えた」など上向きの結果・行動への関心が強い。そのため、アップリフト/押し上げ/上積み効果（incremental effect）などと表現されることが多い。だがuplift (modeling) は、当然ながら「増える場合だけ」を指すわけではない。処置によって結果が20points減る（アップリフトがマイナスの値をとる）場合もある。</p>
         <p>treatment（処置あり）とcontrol（処置なし）の潜在的な結果の<strong>差を推定</strong>したものを、便宜的に上向き表現しているだけである。 <span class='inline-gray'>uplift: difference in outcome between treatment and control</span></p>
       </div>
@@ -214,7 +213,7 @@
         <li>データを処置あり/なしで物理的に分け、処置群と対照群を用意。</li>
         <li>処置群だけでTreatモデルを作成、処置をした場合の購入確率を予測（prob_t）。</li>
         <li>対照群だけでControlモデルを作成、処置しなかった場合の購入確率を予測（prob_c）。</li>
-        <li>同じ顧客をそれぞれのモデルに入力し、<strong>2つのモデル</strong>から得られた予測値の差分をアップリフトとする。<span class='inline-gray'></span>uplift = prob_t - prob_c としてCATEを推定</span>。</li>
+        <li>同じ顧客をそれぞれのモデルに入力し、<strong>2つのモデル</strong>から得られた予測値の差分をアップリフトとする。<span class='inline-gray'>uplift = prob_t - prob_c としてCATEを推定</span>。</li>
       </ol>
       <p>T-Learnerも構造はシンプル。そしてS-Learner同様に、正則化バイアス（偏り）が発生する場合がある。</p>
       <ul>

@@ -193,7 +193,7 @@ model.fit(X, y)
 </code></pre>
 
       <div class="mdc-note-box">
-        <p><span class='inline-gray'>ensemble=True（デフォルト値）の場合</span></p>
+        <p>ensemble=True（デフォルト値）の場合</p>
         <ol>
           <li>分類器を学習: cv=3なのでデータセットを3分割し、そのうち2つのfoldを使って分類器を学習。</li>
           <li>較正用の予測を作成: 学習に使っていない残り1つのfoldについて、分類器で予測確率を出力する。</li>
@@ -202,7 +202,7 @@ model.fit(X, y)
           <li>予測時には、3組のモデルがそれぞれ出力した予測確率を平均する。</li>
         </ol>
         <p>3-foldの場合、予測時には3組の「分類器＋較正器」の予測確率を平均する。複数のモデルを組み合わせることで、予測性能や確率の安定性が改善する場合がある。一方、複数の分類器を学習するため計算量が増える。</p>
-        <p><span class='inline-gray'>ensemble=Falseの場合</span></p>
+        <p>ensemble=Falseの場合</p>
         <ol>
           <li>データセットを3分割し、各foldについて、残りのデータで学習した分類器から予測確率を得る。</li>
           <li>すべてのfoldの予測確率を集め、実際の発生結果と組み合わせて較正器を1つ学習する。</li>
