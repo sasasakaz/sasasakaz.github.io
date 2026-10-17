@@ -1,11 +1,10 @@
 /*!
- * layout.js — 3カラムレイアウト（左: ページ一覧 / 中央: 本文 / 右: 目次）
+ * page_layout.js — 3カラムレイアウト（左: ページ一覧 / 中央: 本文 / 右: 目次）
  *
  * 使い方（各ページ）
  *   1. <body class="layout-3col"> にする
- *   2. <head> に <script src="layout.js" defer></script> を入れる
+ *   2. <head> に <script src="page_layout.js" defer></script> を入れる
  *   3. 本文を <main id="content"> で囲み、左右に <nav id="site-nav"> / <nav id="page-toc"> を置く
- *      （骨組みは uplift_advanced.html を参照）
  *
  * ページを追加したとき: 下の SITE_NAV に1行足すだけでよい。
  */
@@ -19,11 +18,11 @@
   // （トップページ側で使う場合は '' にする）
   var LINK_BASE = '../';
 
-  var HOME = ['🏠 トップページ', ''];
+  var HOME = ['🏠 Home', ''];
 
   var SITE_NAV = [
     {
-      group: '解説',
+      group: 'Articles',
       items: [
         ['📘 AI 70年', 'pages/ai_70_years.html'],
         ['🤖 機械学習の歴史', 'pages/ml_history.html'],
@@ -35,7 +34,7 @@
       ]
     },
     {
-      group: 'ツール',
+      group: 'Tools',
       items: [
         ['💬 Dify', 'pages/dify.html'],
         ['🦊 Easy Bayesian Estimation for Means', 'https://app-rjeavrnuhlwfgk3qornjgr.streamlit.app'],
@@ -52,7 +51,7 @@
   var TOC_SELECTOR = 'h2, h3';              // 目次に出す見出し
   var ACTIVE_OFFSET = 80;                   // この位置(px)より上に来た最後の見出しを「現在地」とする
   var STORAGE_KEY = 'layout3col.v1';        // <head> の早期スクリプトと同じキーにする
-  var WIDE_QUERY = '(min-width: 1280px)';   // CSS のブレークポイントと揃える
+  var WIDE_QUERY = '(min-width: 1150px)';   // CSS のブレークポイントと揃える
 
   /* ===================== 共通 ===================== */
 
@@ -162,7 +161,7 @@
     });
 
     box.textContent = '';
-    box.appendChild(el('div', { 'class': 'side-title' }, '目次'));
+    box.appendChild(el('div', { 'class': 'side-title' }, 'Contents'));
     box.appendChild(list);
 
     // 狭い画面では、目次をタップしたら閉じる
@@ -252,9 +251,31 @@
     updateAria();
   }
 
+  // 左右を開閉すると中央の幅が変わり、本文の折り返しが変わる。
+  // 画面上部あたりにある要素の位置を覚えておき、開閉後に同じ位置へ戻す。
+  function keepReadingPosition(change) {
+    var content = document.getElementById('content');
+    var anchor = null;
+    var before = 0;
+    if (content) {
+      var r = content.getBoundingClientRect();
+      anchor = document.elementFromPoint(r.left + r.width / 2, 80);
+      if (anchor && !content.contains(anchor)) anchor = null;
+      if (anchor) before = anchor.getBoundingClientRect().top;
+    }
+    change();
+    if (anchor) {
+      var diff = anchor.getBoundingClientRect().top - before;
+      // behavior:'instant' … CSS の scroll-behavior:smooth を無視して即座に移動する
+      if (Math.abs(diff) > 1) window.scrollTo({ top: window.scrollY + diff, left: 0, behavior: 'instant' });
+    }
+  }
+
   function toggle(side) {
     if (mq.matches) {
-      state[side] = root.classList.toggle(side + '-closed');
+      keepReadingPosition(function () {
+        state[side] = root.classList.toggle(side + '-closed');
+      });
       saveState();
     } else {
       var cls = side + '-open';
@@ -265,7 +286,29 @@
     updateAria();
   }
 
+  // ボタンの見た目: 左 = ハンバーガー、右 = 行頭に点の付いたリスト
+  var SVG_OPEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">';
+  var ICONS = {
+    left: SVG_OPEN + '<path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+    right: SVG_OPEN + '<path d="M10 6h10M10 12h10M10 18h10"/>' +
+      '<circle cx="4.5" cy="6" r="1.2" fill="currentColor" stroke="none"/>' +
+      '<circle cx="4.5" cy="12" r="1.2" fill="currentColor" stroke="none"/>' +
+      '<circle cx="4.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>'
+  };
+  var LABELS = { left: 'Toggle Primary Sidebar', right: 'Toggle Secondary Sidebar' };
+
+  function decorateButtons() {
+    ['left', 'right'].forEach(function (side) {
+      var b = buttons[side];
+      if (!b) return;
+      b.innerHTML = ICONS[side];
+      b.setAttribute('aria-label', LABELS[side]);
+      b.setAttribute('data-tooltip', LABELS[side]);   // ツールチップは CSS(::after)で表示
+    });
+  }
+
   function setupToggles() {
+    decorateButtons();
     ['left', 'right'].forEach(function (side) {
       if (buttons[side]) buttons[side].addEventListener('click', function () { toggle(side); });
     });
