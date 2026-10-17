@@ -167,7 +167,7 @@ img {
 blockquote {
   margin: 1em 0;
   padding: 0.5em 1em;
-  border-left: 0.25em solid #ccc;
+  /* border-left: 0.25em solid #ccc; */
   background-color: #f9f9f9;
   color: #666;
 }
@@ -175,21 +175,34 @@ blockquote {
 
 /* インラインコード用 */
 .inline-code {
-  background-color: #eef2f6; /* ほんのり青みのあるうすいグレー */
-  color: #374151; /* ダークグレー（黒すぎない上品な色） */
+  background-color: #f4f4f4; /* ほんのりグレー */
+  color: #9b2c2c; /* 赤系の色 */
   font-size: 0.9em;
   padding: 0.15em 0.4em;
   border-radius: 0.3em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 .inline-mark {
-  background-color: #fff200;
-  color: #000000;
+  background-color: #ffeb3b;
+  color: #1a1a1a; /* 本文の #333 よりほんの少しだけ濃いダークグレー */
   /* font-size: 0.9em; */
   /* padding: 0.1em 0.3em; */
   border-radius: 0.3em;
-  /* display: inline-block; */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
+
+/* ポイント・弱: 蛍光ペン風の下線 */
+.inline-marker {
+  background: linear-gradient(transparent 55%, #fff3a0 55%);
+  /* font-weight: bold; */
+  /* 2行にまたがっても、各行に下線が付くようにする */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
 
 /* markよりも目立たせたいとき用、だがあまり使わないかも */
 .inline-pink {
@@ -199,25 +212,27 @@ blockquote {
   /* font-weight: bold; */
   /* padding: 0.1em 0.3em; */
   border-radius: 0.3em;
-  /* display: inline-block; */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
-/* markほどではないがインラインでちょっと目立たせたいとき */
+/* 注釈のインライン版 */
 .inline-gray {
-  background-color: #fefce8; /* ほとんど白に近い、超うすいクリーム色 */
-  color: #374151; /* ダークグレーでスッキリ引き締める */
+  background-color: #eef2f6; /* ほんのり青みのあるうすいグレー */
+  color: #374151; /* ダークグレー（黒すぎない上品な色） */
   font-size: 0.9em;
-  padding: 0.15em 0.4em;
+  /* padding: 0.15em 0.4em; */
   border-radius: 0.3em;
-  /* display: inline-block; */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 
 /* 装飾ボックス */
 .mdc-info-box {
   background-color: #e8f5e9;
-  /* border-left: 5px solid #4caf50;
-  border: 1px solid #4caf50; */
+  border-left: 5px solid #4caf50;
+  /* border: 1px solid #4caf50; */
   /* margin: 0.5em 1em; */
   padding: 0.2em 0.8em;
   border-radius: 4px;
@@ -225,21 +240,21 @@ blockquote {
 
 .mdc-warn-box {
   background-color: #fff3e0;
-  /* border-left: 5px solid #ff9800;
-  margin: 1em 1.5em;
+  border-left: 5px solid #ff9800;
+  /* margin: 1em 1.5em;
   padding: 0.8em 1em; */
   border-radius: 4px;
 }
 
 .mdc-alert-box {
   background-color: #ffebee;
-  /* border-left: 5px solid #f44336; */
+  border-left: 5px solid #f44336;
   /* margin: 0em 0.5em; */
   padding: 0.1em 0.3em;
   border-radius: 4px;
 }
 
-/* infoほどではないが注釈情報をひとまとめでスッキリ見せたいとき */
+/* 注釈のボックス版 */
 .mdc-note-box {
   background-color: #f5f5f5;
   /* border-left: 5px solid #f44336; */
@@ -248,7 +263,6 @@ blockquote {
   border-radius: 4px;
   font-size: 0.9em;
 }
-
 
 
 /* table装飾 */
