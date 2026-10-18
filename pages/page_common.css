@@ -23,18 +23,32 @@ html {
 }
 
 
-/* pとulをひとかたまりで見せたいとき用 */
-/* ul のすぐ上にある p（導入文）の下余白をキュッと詰める */
-p:has(+ ul) {
+/* pとul,olをひとかたまりで見せたいとき用 */
+/* ul,olのすぐ上にある pの下余白を詰める */
+p:has(+ ul),
+p:has(+ ol) {
   margin-top: 1.6em;
   /* 上とは開ける */
-  margin-bottom: 0.3em;
+  margin-bottom: 0.4em;
   /* 下のulに引き寄せる */
 }
-
-/* その直後の ul の上余白もゼロにする */
-p+ul {
+/* その直後の ul,olの上余白もゼロにする */
+p+ul,
+p+ol {
   margin-top: 0;
+}
+
+
+/* リストの下に余白を多めに取る */
+ul,
+ol {
+  margin-bottom: 1.5em;
+}
+
+/* 入れ子のリストは、外側のリストの一部として余白なし */
+li>ul,
+li>ol {
+  margin-bottom: 0;
 }
 
 
@@ -88,6 +102,8 @@ h4+p {
 img {
   max-width: 100%;
   height: auto;
+  display: block; /* ブロック要素にして中央寄せを効きやすくする */
+  margin: 1.5em auto; /* 上下に 1.5em、左右は自動で中央配置 */
 }
 
 #footer {

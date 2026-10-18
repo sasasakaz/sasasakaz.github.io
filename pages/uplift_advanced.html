@@ -307,7 +307,7 @@ model.fit(X, y)
       </ol>
 
 
-      <h3 id="calibration-before-after">Calibration before/after</h3>
+      <h3 id="calibration-before-after">キャリブレーション前後</h3>
       <p>モデルが出力した予測確率と実際の発生率の対応関係を、<strong>キャリブレーション前後で比較</strong>する。</p>
       <p>単純化したイメージとしては、</p>
       <ul>
@@ -475,7 +475,7 @@ model.fit(X, y)
       <p>次からは、反実仮想も含めた全データを対象に（較正後を所与として）、予測値の分布や平均、変動などを、処置した場合/しなかった場合を対比させながら確認していく。</p>
 
 
-      <h3 id="prob-distribution">Prob Distribution</h3>
+      <h3 id="prob-distribution">予測値の分布</h3>
       <p>モデルの出力した予測値の分布や水準に不自然な点がないかを確認する。</p>
       <p>分布に極端な偏りがないかを把握することで、<span class='inline-marker'>モデル作成や予測値の導出に不具合が生じていないかを確認</span>することを企図している。</p>
       <p>分布の偏りの一例</p>
@@ -592,7 +592,7 @@ model.fit(X, y)
 
 
 
-      <h3 id="propensity-score-overlap">Propensity Score Overlap</h3>
+      <h3 id="propensity-score-overlap">傾向スコアの重なり</h3>
       <p>傾向スコアの分布の重なり（overlap）を確認する。</p>
       <p>
         傾向スコアモデル（<code>g</code>）の<code>predict_proba()</code>から、処置を受ける確率を取り出し、処置群/対照群別に傾向スコア（PS）の分布をプロットする。2群の分布がどの程度重なっているかを確認することで、似たような特徴を持つ顧客について、<span class='inline-marker'>処置群と対照群を比較できるだけのデータがあるか</span>を把握する。X-LearnerやIPWを含む因果効果推定で重要な診断のひとつ。
@@ -652,7 +652,7 @@ model.fit(X, y)
 
 
 
-      <h3 id="covariate-balance">Covariate Balance</h3>
+      <h3 id="covariate-balance">共変量バランス</h3>
       <p>傾向スコアを用いた重み付け（IPW）などの共変量調整をおこなっている場合は、共変量バランスを確認する。共変量調整の前後で、ASMDなどの指標を比較し、Love plotなどで可視化する。</p>
       <div class="mdc-note-box">
         <p>※共変量バランス: 処置群と対照群で、共変量（顧客属性や過去の購入回数などの特徴量）の分布がどの程度そろっているかを表す。</p>
