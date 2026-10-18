@@ -388,8 +388,8 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       left: 0;
       margin-top: 0.25rem;
       min-width: 15rem;
-      max-height: 70vh;
-      max-height: 70dvh;
+      max-height: calc(100vh - var(--bar-h, 3.5rem) - 1rem); /* version1 70vh */
+      max-height: calc(100dvh - var(--bar-h, 3.5rem) - 1rem); /* version1 70vh */
       overflow-y: auto;
       background: #fff;
       border: 1px solid #ccc;
@@ -407,6 +407,11 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       color: #999;
       font-weight: bold;
       padding: 0.4rem 0.5rem 0.1rem;
+    }
+
+    .dd-sep {
+      border-top: 1px solid #eee;
+      margin: 0.2rem 0;
     }
 
     .dd-item {
@@ -488,7 +493,7 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
           MD</button>
       </div>
     </div>
-    <h1 id="page-title">MarkdownをHTMLに変換するにゃん</h1>
+    <h2 id="page-title">MarkdownをHTMLに変換するにゃん</h2>
     <span class="mode-badge" id="mode-badge">MD→HTML</span>
     <div class="tools" id="tag-controls">
       <div class="dd">
@@ -757,15 +762,17 @@ mark { background-color: #fff176; }
     const pinnedEl = document.getElementById('pinned-btns');
     PINNED.forEach(([id, icon, title]) => pinnedEl.appendChild(makeBtn(id, icon, title, false)));
     const insertPanel = document.getElementById('insert-panel');
-    MENU.forEach(([group, items]) => {
-      const t = document.createElement('div');
-      t.className = 'dd-title';
-      t.textContent = group;
-      insertPanel.appendChild(t);
-      items.forEach(([id, icon, title]) => insertPanel.appendChild(makeBtn(id, icon, title, true)));
-    });
+      MENU.forEach(([group, items], i) => {
+        // グループ名は出さず、グループの切れ目に薄い区切り線だけ入れる
+        if (i > 0) {
+          const s = document.createElement('div');
+          s.className = 'dd-sep';
+          insertPanel.appendChild(s);
+        }
+        items.forEach(([id, icon, title]) => insertPanel.appendChild(makeBtn(id, icon, title, true)));
+      });
 
-    // --- ドロップダウン（☰ / 挿入 ▾） ---
+      // --- ドロップダウン（☰ / 挿入 ▾） ---
     function closeDropdowns() {
       document.querySelectorAll('.dd-panel.open').forEach(p => p.classList.remove('open'));
     }
