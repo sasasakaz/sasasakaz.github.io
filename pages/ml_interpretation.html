@@ -75,9 +75,13 @@
         <p>複雑な機械学習モデルを解釈するための手法を紹介。</p>
       </header>
 
-      <p>Accuracy, Precision, Recall,
-        F1,ROC曲線,PR曲線などは、モデルの予測精度、識別性能を評価する指標。だが、高い予測精度を求めて複雑なモデルを使うほど、「なぜその予測になったのか」「モデルがどのような特徴量を利用しているのか」がわかりにくくなる。そこで、<strong>複雑なモデルを解釈するための技術</strong>が必要になってくる。
-      </p>
+<div class="mdc-info-box">
+  <ul>
+    <li>Accuracy, Precision, Recall, F1,ROC曲線,PR曲線などは、モデルの予測精度、識別性能を評価する指標。</li>
+    <li>だが、高い予測精度を求めて複雑なモデルを使うほど、「なぜその予測になったのか」「モデルがどのような特徴量を利用しているのか」がわかりにくくなる。</li>
+    <li>そこで、<strong>複雑なモデルを解釈するための技術</strong>が必要になってくる。ここではPFI, SHAP, PDP/ICEを取り上げる。</li>
+  </ul>
+</div>
 
       <table>
         <thead>
@@ -132,8 +136,8 @@
       </div>
 
 
-      <h2 id="pfi">PFI（Permutation Feature Importance）</h2>
-      <p><span class='inline-mark'>特徴量の重要度を知る</span> </p>
+      <h2 id="pfi">PFI</h2>
+      <p>Permutation Feature Importance <span class='inline-mark'>特徴量の重要度を知る</span></p>
       <ul>
         <li>特徴量が、モデルの予測にどの程度「重要な役割を果たしたか」を表す指標。</li>
         <li>ある特徴量の値を<strong>シャッフル</strong>（してその特徴量が使いものにならない状態に）したときに、モデルの評価指標がどれだけ悪化するか、この悪化度合いを重要度とみなしている。</li>
@@ -178,8 +182,8 @@
 
 
 
-      <h2 id="shap">SHAP（SHapley Additive exPlanations）</h2>
-      <p><span class='inline-mark'>予測の理由を考える、理解する</span></p>
+      <h2 id="shap">SHAP</h2>
+      <p>SHapley Additive exPlanations <span class='inline-mark'>予測の理由を考える、理解する</span></p>
       <ul>
         <li>各特徴量が、予測にどれだけ影響を与えているか（寄与度）を表す指標。</li>
         <li>平均的な予測値を出発点（ベースライン）として、各インスタンスの予測値がそこからどのように変化したかを、特徴量ごとに分解している（寄与度を各特徴量に割り当てる）。</li>

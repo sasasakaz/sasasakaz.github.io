@@ -48,7 +48,7 @@
     }
   ];
 
-  var TOC_SELECTOR = 'h1, h2, h3, h4';              // 目次に出す見出し
+  var TOC_SELECTOR = 'h1, h2, h3';              // 目次に出す見出し
   var ACTIVE_OFFSET = 80;                   // この位置(px)より上に来た最後の見出しを「現在地」とする
   var STORAGE_KEY = 'layout3col.v1';        // <head> の早期スクリプトと同じキーにする
   var WIDE_QUERY = '(min-width: 1150px)';   // CSS のブレークポイントと揃える
