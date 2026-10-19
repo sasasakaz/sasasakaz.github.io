@@ -119,7 +119,7 @@
       <p>例えば、70, 15, 15に分けたり、まず80と20（Test用）に分けて、その80をさらにTrain 80, Validation 20（つまりTrain64, Val16, Test20）に分けたりする。</p>
 
 
-      <h3>Validation（検証用）を設ける意義とは？</h3>
+      <h3 id="validation-importance">Validationを設ける意義</h3>
       <ul>
         <li>Early Stopping<ul>
             <li>LightGBMなどでは、学習を繰り返すほど学習データに対する性能は向上しますが、学習しすぎると過学習が起こり、未知のデータに対する性能が低下することがある。</li>
@@ -141,7 +141,7 @@
       <p>このように、ValidationやTestを適切に分けることで、学習に使っていない未知のデータに対してもモデルがどの程度通用するのかを確認できる。</p>
 
 
-      <h3>Validationを設けない場合もある</h3>
+      <h3 id="no-validation">Validationを設けない場合</h3>
       <ul>
         <li>Validationは必ず独立したデータとして用意しなければならないわけではない。</li>
         <li>モデルの調整をおこなわず、TrainデータとTestデータだけで構成する場合もある。</li>
@@ -150,7 +150,7 @@
       </ul>
 
 
-      <h3>評価指標を計算するデータ</h3>
+      <h3 id="evaluation-data">評価指標用のデータ</h3>
       <p>モデルの調整中に評価指標を見る場合は、基本的にはValidationデータを用いる。</p>
       <pre><code># 検証データで評価
 y_pred_val = model.predict_proba(X_val)[:, 1]
@@ -163,6 +163,7 @@ y_pred_train = model.predict_proba(X_train)[:, 1]
 </code></pre>
       <p>ただし、学習データでの評価結果は、モデルが実際に学習したデータに対する性能。未知のデータに対する性能を見るValidationやTestとは意味が異なる。</p>
       <p>Trainの評価結果を見てモデルをチューニングすることは通常ない。学習データに対して良い結果になるよう調整してしまうと、過学習を見逃す可能性があるため。</p>
+
 
 
       <h2 id="classification">分類性能の評価</h2>
@@ -700,6 +701,7 @@ J 0.10（実際：0）※間違い、空振り
       <p>ラテ購入などのように人間の気まぐれな行動に左右されやすい予測が困難な場面もあれば、品質管理や命に関わる場面などもある。</p>
 
 
+
       <h3 id="roc-auc-caution">ROC-AUCの強みと注意点</h3>
       <ul>
         <li>正例と負例を独立させて等しく扱っているぶん、<span class="inline-mark">モデルの基本的な予測性能（純粋な識別能力）</span>が理解しやすい。</li>
@@ -725,6 +727,7 @@ J 0.10（実際：0）※間違い、空振り
       <p>となると、Recallは据え置きつつ、正例を正確に予測したい→Precisionも重視したい、との観点が台頭してくる。</p>
 
 
+
       <h3 id="pr-curve">PR曲線</h3>
       <p>PR曲線（Precision-Recall Curve）は、分類のしきい値を変化させたときの、</p>
       <ul>
@@ -741,6 +744,7 @@ J 0.10（実際：0）※間違い、空振り
       </ul>
 
 
+      
       <h3 id="pr-auc">PR-AUC</h3>
       <p>ROC曲線を描いて、その下の面積を全部足し算（積分）した値。<span class="inline-mark">正例を見つける能力に焦点を当てた識別性能</span>を表す指標。</p>
 
