@@ -74,17 +74,25 @@
           </span>
         </div>
 
-        <p>機械学習のモデルをどう評価するか。ここでは2値分類を中心に「分類性能の評価」「閾値によらない識別性能」について代表的な評価指標を紹介。</p>
+        <p>機械学習のモデルを評価するための方法や指標を紹介。</p>
       </header>
 
-      <div class="mdc-note-box">
+<div class="mdc-info-box">
+  <ul>
+    <li>2値分類モデルの検証、評価方法</li>
+    <li>分類性能の評価指標（Accuracy, Precision, Recall, F1-scoreなど）</li>
+    <li>識別性能の評価指標（ROC-AUC, PR-AUC）</li>
+  </ul>
+</div>
 
         <p>サンプル事例</p>
         <ul>
           <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
-          <li>誰がラテを購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
+          <li>誰が「ラテ」を購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
           <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
         </ul>
+
+      <div class="mdc-note-box">
         <blockquote>
           <pre>
     Python 3.11.15
@@ -822,6 +830,9 @@ J 0.10（実際：0）※間違い、空振り
       <p>なども考慮して、最終的なしきい値を決めることになる。</p>
 
       <p>評価指標は、モデルに「何点だったか」を付けるためだけのものではない。<span class='inline-mark'>「このモデルを実際にどう使うのか」を考え、その目的に合った指標を選ぶことが重要。</span></p>
+      <p>またモデルの評価とは別に、モデルを「解釈する技術」も重要性が高まっている。詳細は<a href="https://sasasakaz.github.io/pages/ml_interpretation.html">機械学習モデルの解釈</a>を参照。
+      </p>
+
 
       <footer id="footer">
         <div class="footer-links">
