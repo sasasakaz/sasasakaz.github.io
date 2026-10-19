@@ -331,7 +331,8 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       flex-wrap: wrap;
       padding: 0.4rem 0;
       margin-bottom: 0.5rem;
-      background: #fff;
+      /* background: #fff; */
+      background: #f4f4f4;
       border-bottom: 1px solid #e0e0e0;
     }
 
@@ -731,9 +732,9 @@ mark { background-color: #fff176; }
     // --- 上部バー：ボタン定義（ここを編集すれば並び・内容を変えられる） ---
     const PINNED = [ // [id, アイコン, 説明] 常時表示
       ['strong', '🅱️', '強調 <strong>'],
-      ['mark', '🖍️', 'ハイライト 黄 (inline-mark)'],
-      ['marker', '🖊️', 'マーカー (inline-marker)'],
-      ['gray', '🩶', 'グレー (inline-gray)'],
+      ['mark', '🌻', 'ハイライト 黄 (inline-mark)'],
+      ['marker', '🖍️', 'マーカー (inline-marker)'],
+      ['gray', '◽️', 'グレー (inline-gray)'],
       ['pink', '🌸', 'ハイライト ピンク (inline-pink)']
     ];
     const MENU = [ // [グループ名, [[id, アイコン, 説明], ...]] 「挿入 ▾」の中身
