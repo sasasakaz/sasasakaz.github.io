@@ -37,7 +37,7 @@
       group: 'Tools',
       items: [
         ['💬 Dify', 'pages/dify.html'],
-        ['🦊 Easy Bayesian Estimation for Means', 'https://app-rjeavrnuhlwfgk3qornjgr.streamlit.app'],
+        ['🦊 Easy Bayesian Estimation for Means', 'https://app-gmfa6rlw5mydwwb7bpqurf.streamlit.app'],
         ['🦁 Easy Bayesian Estimation for Proportions', 'pages/beat_5g.html'],
         ['🐶 Markdown Converter', 'pages/markdown_converter.html'],
         ['🐯 Diff Viewer', 'pages/diff_viewer.html'],
