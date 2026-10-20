@@ -12,8 +12,8 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown to HTML</title>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-  <script src="https://unpkg.com/turndown/dist/turndown.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
 
   <!-- Google Tag Manager -->
   <!-- Google tag (gtag.js) -->
@@ -389,8 +389,10 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       left: 0;
       margin-top: 0.25rem;
       min-width: 15rem;
-      max-height: calc(100vh - var(--bar-h, 3.5rem) - 1rem); /* version1 70vh */
-      max-height: calc(100dvh - var(--bar-h, 3.5rem) - 1rem); /* version1 70vh */
+      max-height: calc(100vh - var(--bar-h, 3.5rem) - 1rem);
+      /* version1 70vh */
+      max-height: calc(100dvh - var(--bar-h, 3.5rem) - 1rem);
+      /* version1 70vh */
       overflow-y: auto;
       background: #fff;
       border: 1px solid #ccc;
@@ -763,17 +765,17 @@ mark { background-color: #fff176; }
     const pinnedEl = document.getElementById('pinned-btns');
     PINNED.forEach(([id, icon, title]) => pinnedEl.appendChild(makeBtn(id, icon, title, false)));
     const insertPanel = document.getElementById('insert-panel');
-      MENU.forEach(([group, items], i) => {
-        // グループ名は出さず、グループの切れ目に薄い区切り線だけ入れる
-        if (i > 0) {
-          const s = document.createElement('div');
-          s.className = 'dd-sep';
-          insertPanel.appendChild(s);
-        }
-        items.forEach(([id, icon, title]) => insertPanel.appendChild(makeBtn(id, icon, title, true)));
-      });
+    MENU.forEach(([group, items], i) => {
+      // グループ名は出さず、グループの切れ目に薄い区切り線だけ入れる
+      if (i > 0) {
+        const s = document.createElement('div');
+        s.className = 'dd-sep';
+        insertPanel.appendChild(s);
+      }
+      items.forEach(([id, icon, title]) => insertPanel.appendChild(makeBtn(id, icon, title, true)));
+    });
 
-      // --- ドロップダウン（☰ / 挿入 ▾） ---
+    // --- ドロップダウン（☰ / 挿入 ▾） ---
     function closeDropdowns() {
       document.querySelectorAll('.dd-panel.open').forEach(p => p.classList.remove('open'));
     }
