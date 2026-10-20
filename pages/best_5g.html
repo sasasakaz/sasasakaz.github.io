@@ -28,17 +28,14 @@
 
   <link rel="stylesheet" href="page_common.css">
   <style>
-    :root {
-      color-scheme: light;
-      font-family: "Source Sans 3", "Noto Sans JP", sans-serif;
-      color: #31333f;
+    body {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      padding: 0;
       background: #fff;
-      font-synthesis: none;
-      text-rendering: optimizeLegibility;
     }
 
-    * { box-sizing: border-box; }
-    body { margin: 0; }
     button, select, textarea { font: inherit; }
     button { cursor: pointer; }
 
@@ -46,24 +43,14 @@
       display: grid;
       grid-template-columns: minmax(270px, 330px) minmax(0, 1fr);
       min-height: 100vh;
+      width: 100%;
     }
 
     .sidebar {
+      min-width: 0;
       padding: 28px 24px;
       background: #f0f2f6;
       border-right: 1px solid #e6e8eb;
-    }
-
-    .sidebar h1 {
-      margin: 0 0 8px;
-      font-size: 1.55rem;
-      line-height: 1.35;
-    }
-
-    .sidebar-intro {
-      margin: 0 0 24px;
-      color: #626570;
-      line-height: 1.6;
     }
 
     .sidebar h2 { margin: 20px 0 12px; font-size: 1.1rem; }
@@ -114,9 +101,10 @@
       background: #fff;
     }
 
-    .main { width: 100%; max-width: 1180px; padding: 42px clamp(20px, 5vw, 72px); }
+    .main { min-width: 0; width: 100%; max-width: none; padding: 42px clamp(20px, 5vw, 72px); }
     .main > h1 { margin: 0 0 12px; font-size: clamp(1.7rem, 3vw, 2.25rem); }
     .lead { margin: 0 0 24px; color: #555966; line-height: 1.65; }
+    .main h2 { margin: 24px 0 12px; font-size: 1.45rem; }
     .message { margin: 16px 0; }
     .notice, .error, .success {
       padding: 12px 16px;
@@ -140,7 +128,6 @@
     .tab-button[aria-selected="true"] { border-bottom-color: #ff4b4b; color: #31333f; }
     .tab-panel { padding: 4px 0 28px; }
     .tab-panel[hidden], [hidden] { display: none !important; }
-    .tab-panel h2 { margin: 16px 0 8px; font-size: 1.45rem; }
     .tab-panel h3 { margin: 24px 0 8px; font-size: 1.15rem; }
     .tab-panel p, .tab-panel li { line-height: 1.7; }
     .plot { display: block; width: 100%; height: auto; margin: 16px auto 24px; }
@@ -171,9 +158,6 @@
 <body>
   <div class="layout">
     <aside class="sidebar">
-      <h1>📊 平均の差のベイズ推定</h1>
-      <p class="sidebar-intro">A/Bテストなどの観測データを入力して、群ごとの平均値と差を推定します。</p>
-
       <h2>データ入力</h2>
       <div class="button-row">
         <button id="sample-button" class="button" type="button">⚡️ サンプルデータ</button>
@@ -202,23 +186,25 @@
         </label>
       </details>
 
-      <button id="estimate-button" class="button button-primary" type="button">🚀 Click to Estimate</button>
     </aside>
 
     <main class="main">
-      <h1>推定結果</h1>
-      <p class="lead">データを入力して「Click to Estimate」を押してください。推定には時間がかかることがあります。</p>
-      <div id="message" class="message" role="status" aria-live="polite"></div>
+      <h1>📊 平均の差のベイズ推定</h1>
+      <p id="intro" class="lead">A/Bテストなどの観測データを入力して、群ごとの平均値と差を推定します。</p>
+      <button id="estimate-button" class="button button-primary" type="button">🚀 Click to Estimate</button>
+      <div id="running-message" class="message notice" role="status" aria-live="polite" hidden></div>
+      <div id="completion-message" class="message success" role="status" aria-live="polite" hidden></div>
+      <div id="error-message" class="message error" role="alert" hidden></div>
       <p id="large-values" class="notice" hidden>
         ⚠️ 入力値に大きな数字が含まれています。推定がうまくいかない場合は、データを一律で桁下げすることを推奨します。
       </p>
 
-      <div id="results" hidden>
-        <div class="table-wrap">
-          <h2>入力データの集計値</h2>
-          <table id="observations"></table>
-        </div>
+      <section id="observations-section" class="table-wrap" hidden>
+        <h2>入力データの集計値</h2>
+        <table id="observations"></table>
+      </section>
 
+      <div id="results" hidden>
         <div class="tabs" role="tablist" aria-label="推定結果">
           <button class="tab-button" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" type="button">📈 全体俯瞰</button>
           <button class="tab-button" id="tab-differences" role="tab" aria-selected="false" aria-controls="panel-differences" type="button">🔍 全組み合わせ比較</button>
@@ -379,12 +365,6 @@
       table.appendChild(body);
     }
 
-    function showMessage(text, kind = "") {
-      const message = document.getElementById("message");
-      message.textContent = text;
-      message.className = kind ? `message ${kind}` : "message";
-    }
-
     function showPlots(plots) {
       const plotIds = {
         means: "means-plot",
@@ -401,10 +381,17 @@
       const button = document.getElementById("estimate-button");
       const results = document.getElementById("results");
       const largeValues = document.getElementById("large-values");
+      const intro = document.getElementById("intro");
+      const observationsSection = document.getElementById("observations-section");
+      const runningMessage = document.getElementById("running-message");
+      const completionMessage = document.getElementById("completion-message");
+      const errorMessage = document.getElementById("error-message");
       button.disabled = true;
       results.hidden = true;
       largeValues.hidden = true;
-      showMessage("ベイズ推定を実行中です。サンプリング完了までお待ちください…");
+      intro.hidden = true;
+      completionMessage.hidden = true;
+      errorMessage.hidden = true;
 
       try {
         // Replace the placeholder above before publishing this page.
@@ -416,6 +403,44 @@
           name,
           document.getElementById(`group-${name}`).value
         ]));
+        const parsedGroups = Object.entries(groups).map(([name, raw]) => {
+          const cleaned = raw.replace(/(?<=\d),(?=\d)/g, "");
+          const tokens = cleaned.split(/[^0-9.-]+/).filter(token => token.trim());
+          const values = tokens.map(token => Number(token));
+          if (values.some(value => !Number.isFinite(value))) {
+            throw new Error(`Group ${name} の入力に数値として解釈できない部分があります。`);
+          }
+          return [name, values];
+        }).filter(([, values]) => values.length > 0);
+
+        if (parsedGroups.length < 2) {
+          throw new Error("推定には少なくとも2つの群にデータ入力が必要です。");
+        }
+        const observationRows = parsedGroups.map(([name, values]) => {
+          const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+          const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
+          return {
+            Group: name,
+            "データ件数": values.length,
+            "平均値 (Mean)": mean,
+            "標準偏差 (Std)": Math.sqrt(variance),
+            "最小値": Math.min(...values),
+            "最大値": Math.max(...values)
+          };
+        });
+        renderTable("observations", observationRows, [
+          ["Group", "Group"],
+          ["データ件数", "データ件数"],
+          ["平均値 (Mean)", "平均値 (Mean)"],
+          ["標準偏差 (Std)", "標準偏差 (Std)"],
+          ["最小値", "最小値"],
+          ["最大値", "最大値"]
+        ]);
+        observationsSection.hidden = false;
+        const groupCount = parsedGroups.length;
+        runningMessage.textContent = `${groupCount}群でベイズ推定の実行中... MCMCサンプリングが終わるまで待ってにゃん`;
+        runningMessage.hidden = false;
+
         const response = await fetch(`${API_BASE_URL}/api/estimate`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -431,14 +456,6 @@
           throw new Error(detail || `HTTP ${response.status}`);
         }
 
-        renderTable("observations", data.observations, [
-          ["Group", "Group"],
-          ["データ件数", "データ件数"],
-          ["平均値 (Mean)", "平均値 (Mean)"],
-          ["標準偏差 (Std)", "標準偏差 (Std)"],
-          ["最小値", "最小値"],
-          ["最大値", "最大値"]
-        ]);
         renderTable("means-summary", data.means_summary, [
           ["parameter", "Group"],
           ["mean", "mean"],
@@ -464,9 +481,13 @@
         showPlots(data.plots);
         largeValues.hidden = !data.large_values;
         results.hidden = false;
-        showMessage("推定完了！解説やPointを参考にしながら推定結果を読み解いてください。", "success");
+        runningMessage.hidden = true;
+        completionMessage.textContent = "推定完了！解説やPointを参考にしながら推定結果を読み解いてください。";
+        completionMessage.hidden = false;
       } catch (error) {
-        showMessage(`推定に失敗しました: ${error.message}`, "error");
+        runningMessage.hidden = true;
+        errorMessage.textContent = `推定に失敗しました: ${error.message}`;
+        errorMessage.hidden = false;
       } finally {
         button.disabled = false;
       }
