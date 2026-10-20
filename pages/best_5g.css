@@ -102,6 +102,7 @@ button { cursor: pointer; }
   border-top-color: #9a7200;
   border-radius: 50%;
   animation: spinner-rotation .8s linear infinite;
+  display: inline-block;
 }
 
 @keyframes spinner-rotation {
