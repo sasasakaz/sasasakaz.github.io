@@ -12,6 +12,37 @@ const API_BASE_URL = "https://web-tools-app-697789875302.asia-northeast1.run.app
 let activeRequestController = null;
 let requestVersion = 0;
 
+class EstimateInputError extends Error {}
+
+function setupParameterStepper(name) {
+  const valueElement = document.getElementById(`${name}-value`);
+  const decrementButton = document.getElementById(`${name}-decrement`);
+  const incrementButton = document.getElementById(`${name}-increment`);
+  let value = 1000;
+
+  const render = () => {
+    valueElement.value = String(value);
+    valueElement.textContent = String(value);
+    decrementButton.disabled = value <= 1000;
+    incrementButton.disabled = value >= 4000;
+  };
+
+  decrementButton.addEventListener("click", () => {
+    value = Math.max(1000, value - 1000);
+    render();
+  });
+  incrementButton.addEventListener("click", () => {
+    value = Math.min(4000, value + 1000);
+    render();
+  });
+  render();
+
+  return () => value;
+}
+
+const getTune = setupParameterStepper("tune");
+const getDraws = setupParameterStepper("draws");
+
 const groupInputs = document.getElementById("group-inputs");
 GROUPS.forEach(name => {
   const label = document.createElement("label");
@@ -117,6 +148,7 @@ function resetView() {
   document.getElementById("running-message").hidden = true;
   document.getElementById("completion-message").hidden = true;
   document.getElementById("error-message").hidden = true;
+  document.getElementById("footer").hidden = true;
   document.getElementById("running-message-text").textContent = "";
   tabs.forEach((tab, index) => {
     const selected = index === 0;
@@ -150,6 +182,7 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
   completionMessage.hidden = true;
   errorMessage.hidden = true;
   runningMessage.hidden = true;
+  document.getElementById("footer").hidden = true;
 
   try {
     if (API_BASE_URL.includes("YOUR_CLOUD_RUN_SERVICE")) {
@@ -171,7 +204,7 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
     }).filter(([, values]) => values.length > 0);
 
     if (parsedGroups.length < 2) {
-      throw new Error("推定には少なくとも2つの群にデータ入力が必要です。");
+      throw new EstimateInputError("推定には少なくとも2つの群にデータ入力が必要です。");
     }
     const observationRows = parsedGroups.map(([name, values]) => {
       const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -202,8 +235,8 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         groups,
-        tune: Number(document.getElementById("tune").value),
-        draws: Number(document.getElementById("draws").value)
+        tune: getTune(),
+        draws: getDraws()
       }),
       signal: controller.signal
     });
@@ -243,10 +276,13 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
     runningMessage.hidden = true;
     completionMessage.textContent = "推定完了！解説やPointを参考にしながら推定結果を読み解いてください。";
     completionMessage.hidden = false;
+    document.getElementById("footer").hidden = false;
   } catch (error) {
     if (error.name === "AbortError" || version !== requestVersion) return;
     runningMessage.hidden = true;
-    errorMessage.textContent = `推定に失敗しました: ${error.message}`;
+    errorMessage.textContent = error instanceof EstimateInputError
+      ? error.message
+      : `推定に失敗しました: ${error.message}`;
     errorMessage.hidden = false;
   } finally {
     if (version === requestVersion) {

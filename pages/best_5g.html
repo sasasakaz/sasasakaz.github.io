@@ -48,32 +48,32 @@
       <details>
         <summary>推定がうまくいかないとき用</summary>
         <p class="muted">TuneやDrawsを増やすと改善する場合がありますが、推定時間も長くなります。</p>
-        <label class="parameter-select">Tune
-          <select id="tune">
-            <option value="1000">1000</option>
-            <option value="2000">2000</option>
-            <option value="3000">3000</option>
-            <option value="4000">4000</option>
-          </select>
-        </label>
-        <label class="parameter-select">Draws
-          <select id="draws">
-            <option value="1000">1000</option>
-            <option value="2000">2000</option>
-            <option value="3000">3000</option>
-            <option value="4000">4000</option>
-          </select>
-        </label>
+        <div class="parameter-select">
+          <span id="tune-label">Tune</span>
+          <div class="stepper">
+            <button id="tune-decrement" class="button stepper-button" type="button" aria-label="Tuneを1000減らす" aria-describedby="tune-label">−</button>
+            <output id="tune-value" class="stepper-value" for="tune-decrement tune-increment">1000</output>
+            <button id="tune-increment" class="button stepper-button" type="button" aria-label="Tuneを1000増やす" aria-describedby="tune-label">+</button>
+          </div>
+        </div>
+        <div class="parameter-select">
+          <span id="draws-label">Draws</span>
+          <div class="stepper">
+            <button id="draws-decrement" class="button stepper-button" type="button" aria-label="Drawsを1000減らす" aria-describedby="draws-label">−</button>
+            <output id="draws-value" class="stepper-value" for="draws-decrement draws-increment">1000</output>
+            <button id="draws-increment" class="button stepper-button" type="button" aria-label="Drawsを1000増やす" aria-describedby="draws-label">+</button>
+          </div>
+        </div>
       </details>
 
     </aside>
 
     <main class="main">
-      <p id="intro" class="lead">A/Bテスト結果を入力して、クリックボタンを押してください。平均の差のベイズ推定ができます。</p>
       <div class="action-buttons">
         <button id="estimate-button" class="button button-primary" type="button">🚀 Click to Estimate</button>
         <button id="reset-button" class="button" type="button">↩️ Reset</button>
       </div>
+      <p id="intro" class="lead">A/Bテスト結果を入力して、クリックボタンを押してください。平均の差のベイズ推定ができます。</p>
       <div id="running-message" class="message notice" role="status" aria-live="polite" hidden>
         <span class="spinner" aria-hidden="true"></span>
         <span id="running-message-text"></span>
@@ -166,7 +166,7 @@
         </section>
       </div>
 
-      <footer id="footer">
+      <footer id="footer" hidden>
         <div class="footer-links">
           <a href="https://sasasakaz.github.io/">🏠 Home</a>
           <span class="separator">|</span>
