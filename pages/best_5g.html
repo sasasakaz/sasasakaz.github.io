@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>平均の差のベイズ推定</title>
+  <link href='https://sasasakaz.github.io/pages/best_5g.html' rel='canonical'>
+  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <meta name="description" content="5群までの平均値の差をベイズ推定します。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="平均の差のベイズ推定">
+  <meta property="og:description" content="5群までの平均値の差をベイズ推定します。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/best_5g.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+
+  <!-- Google Tag Manager -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script><!-- End Google Tag Manager -->
+
+  <link rel="stylesheet" href="page_common.css">
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: "Source Sans 3", "Noto Sans JP", sans-serif;
+      color: #31333f;
+      background: #fff;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    button, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(270px, 330px) minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      padding: 28px 24px;
+      background: #f0f2f6;
+      border-right: 1px solid #e6e8eb;
+    }
+
+    .sidebar h1 {
+      margin: 0 0 8px;
+      font-size: 1.55rem;
+      line-height: 1.35;
+    }
+
+    .sidebar-intro {
+      margin: 0 0 24px;
+      color: #626570;
+      line-height: 1.6;
+    }
+
+    .sidebar h2 { margin: 20px 0 12px; font-size: 1.1rem; }
+    .group-input { display: block; margin: 14px 0; font-weight: 600; }
+    .group-input textarea {
+      display: block;
+      width: 100%;
+      min-height: 88px;
+      margin-top: 6px;
+      padding: 10px;
+      resize: vertical;
+      border: 1px solid #c9cbd2;
+      border-radius: 6px;
+      background: white;
+      color: #31333f;
+      font-weight: 400;
+      line-height: 1.45;
+    }
+
+    .button-row { display: flex; gap: 8px; }
+    .button {
+      min-height: 40px;
+      padding: 8px 12px;
+      border: 1px solid #b8bbc4;
+      border-radius: 6px;
+      background: #fff;
+      color: #31333f;
+    }
+
+    .button:hover { border-color: #4b6bfb; color: #2546d4; }
+    .button-primary {
+      border-color: #ff4b4b;
+      background: #ff4b4b;
+      color: white;
+      font-weight: 600;
+    }
+
+    .button-primary:hover { border-color: #e33b3b; background: #e33b3b; color: white; }
+    .button:disabled { cursor: wait; opacity: .6; }
+    .parameter-select { display: block; margin: 14px 0; font-weight: 600; }
+    .parameter-select select {
+      display: block;
+      width: 100%;
+      margin-top: 6px;
+      padding: 8px;
+      border: 1px solid #c9cbd2;
+      border-radius: 6px;
+      background: #fff;
+    }
+
+    .main { width: 100%; max-width: 1180px; padding: 42px clamp(20px, 5vw, 72px); }
+    .main > h1 { margin: 0 0 12px; font-size: clamp(1.7rem, 3vw, 2.25rem); }
+    .lead { margin: 0 0 24px; color: #555966; line-height: 1.65; }
+    .message { margin: 16px 0; }
+    .notice, .error, .success {
+      padding: 12px 16px;
+      border-radius: 6px;
+      line-height: 1.55;
+    }
+
+    .notice { background: #fff4d6; color: #594500; }
+    .error { background: #ffe5e5; color: #8b1e18; }
+    .success { background: #e7f4e8; color: #205b29; }
+    .tabs { display: flex; gap: 8px; margin: 24px 0 18px; border-bottom: 1px solid #d9dce2; }
+    .tab-button {
+      padding: 10px 14px;
+      border: 0;
+      border-bottom: 3px solid transparent;
+      background: transparent;
+      color: #555966;
+      font-weight: 600;
+    }
+
+    .tab-button[aria-selected="true"] { border-bottom-color: #ff4b4b; color: #31333f; }
+    .tab-panel { padding: 4px 0 28px; }
+    .tab-panel[hidden], [hidden] { display: none !important; }
+    .tab-panel h2 { margin: 16px 0 8px; font-size: 1.45rem; }
+    .tab-panel h3 { margin: 24px 0 8px; font-size: 1.15rem; }
+    .tab-panel p, .tab-panel li { line-height: 1.7; }
+    .plot { display: block; width: 100%; height: auto; margin: 16px auto 24px; }
+    .table-wrap { width: 100%; overflow-x: auto; margin: 12px 0 22px; }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    th, td { padding: 9px 10px; border-bottom: 1px solid #e2e4e9; text-align: right; white-space: nowrap; }
+    th { background: #f5f6f8; font-weight: 600; }
+    th:first-child, td:first-child { text-align: left; }
+    details { margin: 14px 0; border-radius: 6px; background: #f7f8fa; }
+    summary { padding: 12px 14px; cursor: pointer; font-weight: 600; }
+    .details-content { padding: 0 16px 12px; }
+    .point { padding: 14px 16px; border-left: 4px solid #ffb000; background: #fff8e6; }
+    .point p:first-child { margin-top: 0; }
+    .point p:last-child { margin-bottom: 0; }
+    .muted { color: #626570; }
+
+    @media (max-width: 760px) {
+      .layout { display: block; }
+      .sidebar { padding: 22px 18px; border-right: 0; border-bottom: 1px solid #e6e8eb; }
+      .main { padding: 28px 18px; }
+      .group-input textarea { min-height: 72px; }
+      .tabs { overflow-x: auto; }
+      .tab-button { flex: 0 0 auto; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <h1>📊 平均の差のベイズ推定</h1>
+      <p class="sidebar-intro">A/Bテストなどの観測データを入力して、群ごとの平均値と差を推定します。</p>
+
+      <h2>データ入力</h2>
+      <div class="button-row">
+        <button id="sample-button" class="button" type="button">⚡️ サンプルデータ</button>
+        <button id="clear-button" class="button" type="button">🗑️ clear all</button>
+      </div>
+      <div id="group-inputs"></div>
+
+      <details>
+        <summary>推定がうまくいかないとき用</summary>
+        <p class="muted">TuneやDrawsを増やすと改善する場合がありますが、推定時間も長くなります。</p>
+        <label class="parameter-select">Tune
+          <select id="tune">
+            <option value="1000">1000</option>
+            <option value="2000">2000</option>
+            <option value="3000">3000</option>
+            <option value="4000">4000</option>
+          </select>
+        </label>
+        <label class="parameter-select">Draws
+          <select id="draws">
+            <option value="1000">1000</option>
+            <option value="2000">2000</option>
+            <option value="3000">3000</option>
+            <option value="4000">4000</option>
+          </select>
+        </label>
+      </details>
+
+      <button id="estimate-button" class="button button-primary" type="button">🚀 Click to Estimate</button>
+    </aside>
+
+    <main class="main">
+      <h1>推定結果</h1>
+      <p class="lead">データを入力して「Click to Estimate」を押してください。推定には時間がかかることがあります。</p>
+      <div id="message" class="message" role="status" aria-live="polite"></div>
+      <p id="large-values" class="notice" hidden>
+        ⚠️ 入力値に大きな数字が含まれています。推定がうまくいかない場合は、データを一律で桁下げすることを推奨します。
+      </p>
+
+      <div id="results" hidden>
+        <div class="table-wrap">
+          <h2>入力データの集計値</h2>
+          <table id="observations"></table>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="推定結果">
+          <button class="tab-button" id="tab-overview" role="tab" aria-selected="true" aria-controls="panel-overview" type="button">📈 全体俯瞰</button>
+          <button class="tab-button" id="tab-differences" role="tab" aria-selected="false" aria-controls="panel-differences" type="button">🔍 全組み合わせ比較</button>
+          <button class="tab-button" id="tab-diagnostics" role="tab" aria-selected="false" aria-controls="panel-diagnostics" type="button">🛠️ 診断</button>
+        </div>
+
+        <section id="panel-overview" class="tab-panel" role="tabpanel" aria-labelledby="tab-overview">
+          <h2>平均値の事後分布</h2>
+          <p>各群の平均値がとりそうな値の範囲を表します（meanもmuも平均のことです）。</p>
+          <img id="means-plot" class="plot" alt="平均値の事後分布">
+          <div class="table-wrap"><table id="means-summary"></table></div>
+          <details>
+            <summary>解説</summary>
+            <div class="details-content">
+              <p>表のmean列は、各群の平均値がとりそうな値を点で推定した結果です。hdi_3%列とhdi_97%列は、事後分布の中で密度が高い94%の範囲（Highest Density Interval）です。</p>
+              <div class="point">
+                <p><strong>✅ Point</strong></p>
+                <p>観測データ件数が十分に多い、あるいはばらつきが小さい場合は、mean列の値と入力データの平均値はほぼ一致します。分布は尖った形になりやすく、推定結果の確からしさを表します。</p>
+                <p>観測データ件数が少ない、あるいはばらつきが大きい場合は違いが生じることがあります。分布は裾が広くなりやすく、推定結果の不確かさを表します。</p>
+              </div>
+              <p><strong>推定結果の不確かさが大きいとき：</strong></p>
+              <ol>
+                <li>入力データが正しく読み取られているか、集計値を確認する</li>
+                <li>観測データ件数を増やす</li>
+                <li>推定方法を調整して再度実行する</li>
+              </ol>
+            </div>
+          </details>
+        </section>
+
+        <section id="panel-differences" class="tab-panel" role="tabpanel" aria-labelledby="tab-differences" hidden>
+          <h2>2群間の平均値の差分</h2>
+          <p>2群間の平均値の差がとりそうな値の範囲を表します。横棒がオレンジ線をまたいでいない（94% HDIが0を含まない）場合は、2群間の平均値に十分な差があると解釈しやすいです。</p>
+          <p><code>diff_A_B</code>はA群の平均値からB群の平均値を差し引いた値です（以降同様です）。</p>
+          <img id="forest-plot" class="plot" alt="2群間の平均値差のフォレストプロット">
+          <img id="differences-plot" class="plot" alt="群間差の事後分布">
+          <details>
+            <summary>解説</summary>
+            <div class="details-content">
+              <div class="point">
+                <p><strong>✅ Point</strong></p>
+                <p>下段グラフのオレンジ色の数値は、片方の群の平均値がもう片方を上回る（下回る）確率を表します。差が0を上回る（下回る）確率を示せることは、ベイズ推定の利点の一つです。</p>
+                <p>この値が50%に近い場合は差の方向が不確かで、100%（0%）に近い場合は方向の確からしさが高まります。p値のような決まった判断基準はありません。推定結果だけに固執せず、関連する周辺情報も考慮してください。</p>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <section id="panel-diagnostics" class="tab-panel" role="tabpanel" aria-labelledby="tab-diagnostics" hidden>
+          <h2>収束診断</h2>
+          <div class="point">
+            <p><strong>✅ Point</strong></p>
+            <p>サンプリングが正常にできているかを確認します。診断項目に問題がなさそうであれば、適切な推定結果と解釈しやすいです。</p>
+          </div>
+          <details open>
+            <summary>Summary</summary>
+            <div class="details-content">
+              <p>目安として、r_hatが1.05以下（理想は1.00）、mcse_meanが0.01以下（パラメータの変動範囲が0〜1の場合）またはパラメータのsdの5%以下（できれば2%以下）、ess_bulkとess_tailが400以上（できれば数千）あれば概ね問題ないと考えてください。</p>
+              <h3>基本パラメータの要約統計量</h3>
+              <div class="table-wrap"><table id="diagnostics"></table></div>
+              <h3>MCSE(mean) / SD 比率チェック</h3>
+              <p><code>mcse_mean / sd (%)</code> が5%以下（できれば2%以下）という基準値に収まっているか確認してください。</p>
+              <div class="table-wrap"><table id="mcse-ratios"></table></div>
+            </div>
+          </details>
+          <details>
+            <summary>Trace Plot</summary>
+            <div class="details-content">
+              <p>各グラフには4本の線が表示されます。左側のグラフでは4本の線がだいたい同じ形に、右側のグラフでは値が一定範囲を何度も行き来し、変動幅がだいたい同じくらいになっていれば概ね問題ないと考えてください。</p>
+              <p>グラフ下部に縦のバーが表示される場合は注意が必要です。推定方法を調整しても改善しない場合は、作成者に相談してください。</p>
+              <img id="trace-plot" class="plot" alt="Trace plot">
+            </div>
+          </details>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const GROUPS = ["A", "B", "C", "D", "E"];
+    const SAMPLE_DATA = [
+      "14.63, 20.18, 19.85, 20.86, 20.01, 16.96, 17.66, 18.46, 16.19, 15.76, 14.84, 20.56, 15.09, 17.18",
+      "14.34, 13.09, 14.62, 14.31, 19.25, 13.03, 13.56, 13.07, 17.93, 15.09, 14.56, 15.51, 15.06, 17.36",
+      "20.43, 24.43, 24.2, 17.74, 20.75, 18.87, 18.13, 17.01, 19.4, 17.37, 17.67, 23.76, 18.99, 23.72",
+      "6.75, 17.33, 18.26, 20.43, 17.38, 17.34, 20.08, 16.26, 16.19, 18.88, 16.96, 20.56, 15.53, 16.75",
+      "14.54, 15.4, 12.52, 18.74, 12.64, 16.48, 13.61, 16.12, 13.93, 17.89, 12.44, 12.51, 17.24, 14.29"
+    ];
+
+    // TODO: Replace with the deployed Cloud Run service URL (without a trailing slash).
+    const API_BASE_URL = "https://web-tools-app-697789875302.asia-northeast1.run.app";
+
+    const groupInputs = document.getElementById("group-inputs");
+    GROUPS.forEach(name => {
+      const label = document.createElement("label");
+      label.className = "group-input";
+      label.htmlFor = `group-${name}`;
+      label.append(`Group ${name}`);
+      const textarea = document.createElement("textarea");
+      textarea.id = `group-${name}`;
+      textarea.name = `group-${name}`;
+      textarea.setAttribute("aria-label", `Group ${name} のデータ`);
+      label.appendChild(textarea);
+      groupInputs.appendChild(label);
+    });
+
+    document.getElementById("sample-button").addEventListener("click", () => {
+      GROUPS.forEach((name, index) => {
+        document.getElementById(`group-${name}`).value = SAMPLE_DATA[index];
+      });
+    });
+
+    document.getElementById("clear-button").addEventListener("click", () => {
+      GROUPS.forEach(name => {
+        document.getElementById(`group-${name}`).value = "";
+      });
+    });
+
+    const tabs = [...document.querySelectorAll('[role="tab"]')];
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => {
+        tabs.forEach(item => {
+          const selected = item === tab;
+          item.setAttribute("aria-selected", String(selected));
+          document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
+        });
+      });
+    });
+
+    function renderTable(tableId, rows, columns, digits = 2) {
+      const table = document.getElementById(tableId);
+      table.replaceChildren();
+      if (!rows.length) return;
+
+      const header = document.createElement("thead");
+      const headerRow = document.createElement("tr");
+      columns.forEach(([, label]) => {
+        const cell = document.createElement("th");
+        cell.scope = "col";
+        cell.textContent = label;
+        headerRow.appendChild(cell);
+      });
+      header.appendChild(headerRow);
+      table.appendChild(header);
+
+      const body = document.createElement("tbody");
+      rows.forEach(row => {
+        const tableRow = document.createElement("tr");
+        columns.forEach(([key]) => {
+          const cell = document.createElement("td");
+          const value = row[key];
+          cell.textContent = typeof value === "number"
+            ? (Number.isFinite(value) ? value.toFixed(digits) : "—")
+            : String(value ?? "—");
+          tableRow.appendChild(cell);
+        });
+        body.appendChild(tableRow);
+      });
+      table.appendChild(body);
+    }
+
+    function showMessage(text, kind = "") {
+      const message = document.getElementById("message");
+      message.textContent = text;
+      message.className = kind ? `message ${kind}` : "message";
+    }
+
+    function showPlots(plots) {
+      const plotIds = {
+        means: "means-plot",
+        forest: "forest-plot",
+        differences: "differences-plot",
+        trace: "trace-plot"
+      };
+      Object.entries(plotIds).forEach(([key, elementId]) => {
+        document.getElementById(elementId).src = `data:image/png;base64,${plots[key]}`;
+      });
+    }
+
+    document.getElementById("estimate-button").addEventListener("click", async () => {
+      const button = document.getElementById("estimate-button");
+      const results = document.getElementById("results");
+      const largeValues = document.getElementById("large-values");
+      button.disabled = true;
+      results.hidden = true;
+      largeValues.hidden = true;
+      showMessage("ベイズ推定を実行中です。サンプリング完了までお待ちください…");
+
+      try {
+        // Replace the placeholder above before publishing this page.
+        if (API_BASE_URL.includes("YOUR_CLOUD_RUN_SERVICE")) {
+          throw new Error("HTML内のAPI_BASE_URLをCloud RunのURLに変更してください。");
+        }
+
+        const groups = Object.fromEntries(GROUPS.map(name => [
+          name,
+          document.getElementById(`group-${name}`).value
+        ]));
+        const response = await fetch(`${API_BASE_URL}/api/estimate`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            groups,
+            tune: Number(document.getElementById("tune").value),
+            draws: Number(document.getElementById("draws").value)
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          const detail = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+          throw new Error(detail || `HTTP ${response.status}`);
+        }
+
+        renderTable("observations", data.observations, [
+          ["Group", "Group"],
+          ["データ件数", "データ件数"],
+          ["平均値 (Mean)", "平均値 (Mean)"],
+          ["標準偏差 (Std)", "標準偏差 (Std)"],
+          ["最小値", "最小値"],
+          ["最大値", "最大値"]
+        ]);
+        renderTable("means-summary", data.means_summary, [
+          ["parameter", "Group"],
+          ["mean", "mean"],
+          ["hdi_3%", "hdi_3%"],
+          ["hdi_97%", "hdi_97%"]
+        ]);
+        renderTable("diagnostics", data.diagnostics, [
+          ["parameter", "パラメータ"],
+          ["mean", "mean"],
+          ["sd", "sd"],
+          ["mcse_mean", "mcse_mean"],
+          ["ess_bulk", "ess_bulk"],
+          ["ess_tail", "ess_tail"],
+          ["r_hat", "r_hat"]
+        ]);
+        renderTable("mcse-ratios", data.mcse_ratios, [
+          ["parameter", "パラメータ"],
+          ["sd", "sd"],
+          ["mcse_mean", "mcse_mean"],
+          ["mcse_mean / sd", "mcse_mean / sd"],
+          ["mcse_mean / sd (%)", "mcse_mean / sd (%)"]
+        ], 4);
+        showPlots(data.plots);
+        largeValues.hidden = !data.large_values;
+        results.hidden = false;
+        showMessage("推定完了！解説やPointを参考にしながら推定結果を読み解いてください。", "success");
+      } catch (error) {
+        showMessage(`推定に失敗しました: ${error.message}`, "error");
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+      </main>
+
+</body>
+</html>
