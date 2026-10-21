@@ -3,6 +3,7 @@
 <!-- 
 QR Contact & URL Generator
 Created: 2026-02-11
+Updated: 2026-10-18
 Description: QRコード生成ツールにゃん。
 Note: 
 -->
@@ -11,18 +12,17 @@ Note:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR Contact & URL Generator</title>
-
-  <!-- Google Tag Manager -->
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="../common.css">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/qr_contact_url_generator.html">
+  <link rel="icon" href="https://sasasakaz.github.io/pages/sasasakaz.png">
+  <meta name="description" content="連絡先QRコードを生成するツールにゃん。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="QR Contact & URL Generator">
+  <meta property="og:description" content="連絡先QRコードを生成するツールにゃん。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/qr_contact_url_generator.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
   <style>
     .container {
       max-width: 450px;
@@ -38,7 +38,8 @@ Note:
       margin-bottom: 2rem;
     }
 
-    .header h2 {
+    .header h1 {
+      all: revert;
       font-size: 1.6rem;
       color: #007aff;
       margin: 0;
@@ -49,7 +50,7 @@ Note:
     .header p {
       font-size: 0.75rem;
       color: #8e8e93;
-      margin-top: -0.25rem;
+      margin-top: 0.1rem;
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 0.05em;
@@ -137,60 +138,89 @@ Note:
       line-height: 1.4;
     }
   </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
-<body>
+<body class="layout-3col l3-2col">
 
-  <div class="container">
-    <div class="header">
-      <h2>QRコード生成にゃん</h2>
-      <p>Contact & URL Generator</p>
-    </div>
+  <header class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+  </header>
+  <div id="side-backdrop" class="side-backdrop"></div>
 
-    <div class="field-row">
-      <div class="field-group"><label>苗字 Last Name</label><input id="lastName" placeholder="田中"></div>
-      <div class="field-group"><label>名前 First Name</label><input id="firstName" placeholder="太郎"></div>
-    </div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
-    <div class="field-row">
-      <div class="field-group"><label>苗字（カナ）Last Kana</label><input id="lastNameKana" placeholder="タナカ"></div>
-      <div class="field-group"><label>名前（カナ）First Kana</label><input id="firstNameKana" placeholder="タロウ"></div>
-    </div>
+    <main id="content">
+      <div class="container">
+        <div class="header">
+          <h1>QRコード生成にゃん</h1>
+          <p>Contact & URL Generator</p>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group"><label>苗字 Last Name</label><input id="lastName" placeholder="田中"></div>
+          <div class="field-group"><label>名前 First Name</label><input id="firstName" placeholder="太郎"></div>
+        </div>
+
+        <div class="field-row">
+          <div class="field-group"><label>苗字（カナ）Last Kana</label><input id="lastNameKana" placeholder="タナカ"></div>
+          <div class="field-group"><label>名前（カナ）First Kana</label><input id="firstNameKana" placeholder="タロウ"></div>
+        </div>
 
 
-    <div class="field-group"><label>Email</label><input id="email1" type="email" placeholder="mail@example.com"></div>
-    <div class="field-group"><label>Phone Number</label><input id="tel" type="tel" placeholder="09012345678"></div>
+        <div class="field-group"><label>Email</label><input id="email1" type="email" placeholder="mail@example.com">
+        </div>
+        <div class="field-group"><label>Phone Number</label><input id="tel" type="tel" placeholder="09012345678"></div>
 
 
-    <div class="field-row">
-      <div class="field-group" style="flex: 0.4;"><label>郵便番号</label><input id="zip" placeholder="123-4567"></div>
-      <div class="field-group"><label>都道府県</label><input id="pref" placeholder="東京都"></div>
-    </div>
-    <div class="field-group"><label>住所（市区町村・番地）</label><input id="addr" placeholder="世田谷区..."></div>
+        <div class="field-row">
+          <div class="field-group" style="flex: 0.4;"><label>郵便番号</label><input id="zip" placeholder="123-4567"></div>
+          <div class="field-group"><label>都道府県</label><input id="pref" placeholder="東京都"></div>
+        </div>
+        <div class="field-group"><label>住所（市区町村・番地）</label><input id="addr" placeholder="世田谷区..."></div>
 
-    <div class="field-group">
-      <label style="color: #007aff;">Website / SNS（URL）</label>
-      <input id="webUrl" placeholder="https://example.com">
-    </div>
+        <div class="field-group">
+          <label style="color: #007aff;">Website / SNS（URL）</label>
+          <input id="webUrl" placeholder="https://example.com">
+        </div>
 
-    <button type="button" class="btn-generate" onclick="generate()">QRコードを生成するにゃ!</button>
+        <button type="button" class="btn-generate" onclick="generate()">QRコードを生成するにゃ!</button>
 
-    <div class="security-note">
-      💡 名前を入れると<strong>連絡先登録用</strong>に、URLだけなら<strong>サイト表示用</strong>になるにゃ!
-    </div>
+        <div class="security-note">
+          💡 名前を入れると<strong>連絡先登録用</strong>に、URLだけなら<strong>サイト表示用</strong>になるにゃ!
+        </div>
 
-    <div class="security-note">
-      🛡️ <strong>Privacy First</strong> ブラウザのみでQRコード生成するから安心にゃ!
-    </div>
+        <div class="security-note">
+          🛡️ <strong>Privacy First</strong> ブラウザのみでQRコード生成するから安心にゃ!
+        </div>
 
-    <div id="qrcode-area">
-      <div id="qrcode"></div>
-      <button id="downloadBtn" class="btn-download">画像を保存する</button>
-    </div>
+        <div id="qrcode-area">
+          <div id="qrcode"></div>
+          <button id="downloadBtn" class="btn-download">画像を保存する</button>
+        </div>
+      </div>
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/gh/ushelp/EasyQRCodeJS@master/dist/easy.qrcode.min.js"></script>
-
   <script>
     function generate() {
       const getValue = (id) => document.getElementById(id).value.trim();

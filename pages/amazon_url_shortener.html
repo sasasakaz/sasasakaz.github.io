@@ -3,6 +3,7 @@
 <!-- 
 Amazon URL Shortener
 Created: 2025-10-05
+Updated: 2026-10-18
 Description: Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。
 Note: 
 -->
@@ -11,21 +12,24 @@ Note:
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Amazon URL Shortener</title>
-
-  <!-- Google Tag Manager -->
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <!-- <link rel="stylesheet" href="../common.css"> -->
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/amazon_url_shortener.html">
+  <link rel="icon" href="https://sasasakaz.github.io/pages/sasasakaz.png">
+  <meta name="description" content="Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Amazon URL Shortener">
+  <meta property="og:description" content="Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/amazon_url_shortener.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
   <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
+  <style>
+    h1 {
+      /* margin-top: 0; */
+      margin-bottom: revert;
+      font-size: 1.75em;
+    }
 
-<style>
     .card {
       background: #fff;
       border-radius: 0.5rem;
@@ -149,59 +153,89 @@ Note:
       word-break: break-all
     }
   </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
-<body>
-  <div class="card">
-    <h2>Amazon URL Shortener</h2>
-    <p class="muted">Extracts the ASIN from Amazon's long URL and converts it into a simple product page URL.</p>
-    <p class="muted">Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。</p>
+<body class="layout-3col l3-2col">
 
-    <label for="url">Long URL</label>
-    <div class="url-row">
-      <input id="url" />
-      <button class="clear-btn" id="clearUrl" title="clear">✕</button>
-    </div>
+  <header class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+  </header>
+  <div id="side-backdrop" class="side-backdrop"></div>
 
-    <div class="row" style="margin-top:8px">
-      <div>
-        <label for="domain">domain</label>
-        <select id="domain">
-          <option value="co.jp">amazon.co.jp</option>
-          <option value="com">amazon.com</option>
-          <option value="co.uk">amazon.co.uk</option>
-          <option value="de">amazon.de</option>
-          <option value="fr">amazon.fr</option>
-          <option value="it">amazon.it</option>
-          <option value="ca">amazon.ca</option>
-        </select>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <div class="card">
+        <h1>Amazon URL Shortener</h1>
+        <p class="muted">Extracts the ASIN from Amazon's long URL and converts it into a simple product page URL.</p>
+        <p class="muted">Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。</p>
+
+        <label for="url">Long URL</label>
+        <div class="url-row">
+          <input id="url" />
+          <button class="clear-btn" id="clearUrl" title="clear">✕</button>
+        </div>
+
+        <div class="row" style="margin-top:8px">
+          <div>
+            <label for="domain">domain</label>
+            <select id="domain">
+              <option value="co.jp">amazon.co.jp</option>
+              <option value="com">amazon.com</option>
+              <option value="co.uk">amazon.co.uk</option>
+              <option value="de">amazon.de</option>
+              <option value="fr">amazon.fr</option>
+              <option value="it">amazon.it</option>
+              <option value="ca">amazon.ca</option>
+            </select>
+          </div>
+          <div>
+            <label for="style">URL style</label>
+            <select id="style">
+              <option value="dp">/dp/ASIN</option>
+              <option value="gp">/gp/product/ASIN</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="shorten" class="btn">Shorten</button>
+        </div>
+
+        <div id="resultArea">
+          <label>Short URL</label>
+          <div id="cleanOut" class="out"> — </div>
+          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+            <button id="copyClean" class="btn small">Copy</button>
+            <span id="copyMsg">Copied!</span>
+          </div>
+        </div>
+
+        <div id="history" class="muted">
+          <strong>History</strong>
+          <ul id="historyList"></ul>
+        </div>
       </div>
-      <div>
-        <label for="style">URL style</label>
-        <select id="style">
-          <option value="dp">/dp/ASIN</option>
-          <option value="gp">/gp/product/ASIN</option>
-        </select>
-      </div>
-    </div>
 
-    <div class="actions">
-      <button id="shorten" class="btn">Shorten</button>
-    </div>
-
-    <div id="resultArea">
-      <label>Short URL</label>
-      <div id="cleanOut" class="out"> — </div>
-      <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-        <button id="copyClean" class="btn small">Copy</button>
-        <span id="copyMsg">Copied!</span>
-      </div>
-    </div>
-
-    <div id="history" class="muted">
-      <strong>History</strong>
-      <ul id="historyList"></ul>
-    </div>
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
   </div>
 
   <script>
