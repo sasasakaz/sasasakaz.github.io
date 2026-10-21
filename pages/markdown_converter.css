@@ -1,0 +1,495 @@
+/* markdown_converter.css
+   markdown_converter.html 専用。page_common.css（2カラム版 <body class="layout-3col l3-2col">）の「後」に読み込むこと。
+   ・上書きは page_common.css と同じ詳細度で書き、読み込み順で勝たせている。
+   ・旧 common.css から移した設定（body の背景・文字サイズ、a、button）もここにある。 */
+
+/* ===== 旧 common.css から移した設定 ===== */
+
+.layout-3col {
+  /* 本文の最大幅。min(95%, 1400px) = 上限1400px。端まで使うなら none */
+  /* --l3-content-max: min(95%, 1400px); */
+  --l3-content-max: none;
+  /* 旧 body の設定のうち、余白・中央寄せ・幅以外（背景・文字サイズなど） */
+  background: #f4f4f4;
+  font-size: 0.9rem;
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 旧 body の余白・下マージン。横の余白は .layout の padding(1rem) が担当 */
+.layout-3col.l3-2col #content {
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+}
+
+/* リンク要素（page_common.css には無い設定）。詳細度は最低にして、他の指定を邪魔しない */
+a {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ボタン要素（同上）。サイドバー開閉ボタン(.topbar-btn)は専用の指定があるので除外。
+   :where() で詳細度を 0 にして、.dd-item の display:block などが従来どおり勝つようにする */
+button:where(:not(.topbar-btn)) {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+/* ===== このページ専用 ===== */
+
+/* メインの左右配置 */
+.main-container {
+  display: flex;
+  gap: 1.25rem;
+  /* 上揃え */
+  align-items: flex-start;
+}
+
+.editor-section {
+  flex: 1;
+  /* 長いURL等の中身がflexアイテムの最小幅を押し広げてしまうのを防ぐ（主にSafari対策） */
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* テキストエリア共通 */
+textarea,
+.output {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  background: white;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 0.9rem;
+  overflow-y: auto;
+  /* 改行できない長いURL等も強制的に折り返す */
+  overflow-wrap: anywhere;
+}
+
+/* 入力と出力の高さを固定 */
+#markdown-input,
+#html-output {
+  height: calc(100vh - var(--l3-topbar-h, 3.5rem) - 1.5rem);
+  height: calc(100dvh - var(--l3-topbar-h, 3.5rem) - 1.5rem);
+  min-height: 18rem;
+}
+
+#html-output {
+  white-space: pre-wrap;
+}
+
+/* 下部コントロール（ボタン類） */
+.bottom-controls {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* 左側の設定エリア */
+.settings-wrapper {
+  display: flex;
+  flex-direction: column;
+  /* 設定エリア同士の間隔 */
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* 設定エリア（左下） */
+.settings-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.settings-area label {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #666;
+}
+
+.settings-area textarea {
+  height: 80px;
+  background: #fafafa;
+}
+
+/* 予備欄（迷ってるmdの避難用メモ） */
+.draft-label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #999;
+  margin: 0.6rem 0 0.25rem;
+}
+
+#draft-input {
+  height: 70vh;
+  background: #fffdf5;
+}
+
+/* CSSプリセット切り替えボタン */
+.css-preset-buttons {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
+}
+
+.css-preset-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #666;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.6rem;
+}
+
+.css-preset-btn.active {
+  background: #0288d1;
+  border-color: #0288d1;
+  color: white;
+}
+
+.css-mode-hint {
+  font-size: 0.75rem;
+  color: #f57c00;
+  margin-bottom: 0.3rem;
+}
+
+.css-mode-hint.hidden {
+  display: none;
+}
+
+/* 他タブでの更新を知らせるバナー */
+.sync-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #fff3e0;
+  border: 1px solid #ff9800;
+  color: #7a4a00;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.sync-banner.hidden {
+  display: none;
+}
+
+.sync-banner-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.sync-banner button {
+  font-size: 0.75rem;
+  padding: 0.35rem 0.7rem;
+}
+
+.btn-sync-reload {
+  background: #ff9800;
+  color: white;
+}
+
+.btn-sync-dismiss {
+  background: #fff;
+  border: 1px solid #ccc;
+  color: #666;
+}
+
+/* 変換方向のスライドスイッチ */
+.mode-switch-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.switch-label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #aaa;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+
+.switch-label.active {
+  color: #0288d1;
+}
+
+.mode-switch-track {
+  position: relative;
+  width: 48px;
+  height: 22px;
+  background: #cfd8dc;
+  border-radius: 11px;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  flex-shrink: 0;
+}
+
+.mode-switch-track.dragging {
+  cursor: grabbing;
+  background: #b0bec5;
+}
+
+.mode-switch-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: left 0.2s ease;
+}
+
+/* 共通ボタン・タグ */
+.controls {
+  margin-bottom: 0.5rem;
+  display: flex;
+  /* ボタン同士のすき間を少しキュッと詰める */
+  gap: 0.5rem;
+  /* 万が一画面からはみ出た時用の保険 */
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.controls button {
+  width: 3.5rem;
+  /* 内側の余白をなくして絵文字を真ん中に */
+  padding: 0;
+  font-size: 1rem;
+}
+
+.copy-msg {
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 0.9rem;
+  min-width: 120px;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.25rem;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+/* 共通のボタンスタイル */
+.btn-tag {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #555;
+  /* 左側に少し太めの線を入れて、色分けの目印にする */
+  border-left-width: 0.25rem;
+}
+
+/* Markdown形式のボタン（控えめなグレー） */
+.btn-md {
+  border-left-color: #ccc;
+}
+
+/* HTML形式のボタン（鮮やかなブルー） */
+.btn-html {
+  border-left-color: #0288d1;
+}
+
+.btn-tag:hover {
+  background: #f8f8f8;
+}
+
+.btn-copy {
+  background: #f57c00;
+  color: white;
+}
+
+.btn-preview {
+  background: #0288d1;
+  color: white;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+/* ===== 上部バー（site の .topbar に、このツールの操作ボタンを同居させる） =====
+   page_common.css の .layout-3col .topbar（高さ44px固定・白背景）を、折り返せる高さと
+   旧デザイン（#f4f4f4）に上書きする。詳細度を同じ(0,2,0)にして、後から読み込む本ファイルで勝たせる。 */
+.layout-3col .topbar {
+  /* 設定パネル(40)・ドロワー(40)より上。バー内のドロップダウンが隠れないように */
+  z-index: 50;
+  height: auto;
+  /* 固定値。実測した高さは --l3-topbar-h に入れる（min-height に使うと縮まなくなる） */
+  min-height: 44px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  margin-bottom: 0.5rem;
+  background: #f4f4f4;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* 共通の button:hover { opacity: .8 } が、サイドバー開閉ボタンとツールチップまで薄くしないように */
+.layout-3col .topbar-btn:hover {
+  opacity: 1;
+}
+
+/* ページ名。page_common.css の h2 装飾（青い左線・背景・余白）を打ち消す */
+.layout-3col .topbar h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: none;
+  border-radius: 0;
+  white-space: nowrap;
+}
+
+.mode-badge {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #0288d1;
+  border: 1px solid #0288d1;
+  border-radius: 1rem;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+}
+
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.right-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.icon-btn {
+  background: #fff;
+  border: 1px solid #ddd;
+  color: #555;
+  padding: 0.4rem 0.6rem;
+  font-size: 1rem;
+}
+
+.pin-btn {
+  padding: 0.4rem 0.6rem;
+  font-size: 1rem;
+}
+
+.dd {
+  position: relative;
+}
+
+.dd-panel {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.25rem;
+  min-width: 15rem;
+  max-height: calc(100vh - var(--l3-topbar-h, 3.5rem) - 1rem);
+  /* version1 70vh */
+  max-height: calc(100dvh - var(--l3-topbar-h, 3.5rem) - 1rem);
+  /* version1 70vh */
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 0.3rem;
+}
+
+.dd-panel.open {
+  display: block;
+}
+
+.dd-title {
+  font-size: 0.7rem;
+  color: #999;
+  font-weight: bold;
+  padding: 0.4rem 0.5rem 0.1rem;
+}
+
+.dd-sep {
+  border-top: 1px solid #eee;
+  margin: 0.2rem 0;
+}
+
+.dd-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  color: #333;
+  font-weight: normal;
+  padding: 0.4rem 0.5rem;
+}
+
+.dd-item:hover,
+.dd-item.current {
+  background: #e3f2fd;
+  opacity: 1;
+}
+
+.dd-item.current::after {
+  content: ' ✓';
+}
+
+/* ===== 右側の設定パネル（Preview用CSS / HTML） ===== */
+.settings-panel {
+  position: fixed;
+  right: 0;
+  top: var(--l3-topbar-h, 3.5rem);
+  bottom: 0;
+  width: min(440px, 92vw);
+  z-index: 40;
+  background: #fff;
+  border-left: 1px solid #ccc;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.12);
+  padding: 0.75rem;
+  overflow-y: auto;
+  box-sizing: border-box;
+  margin: 0;
+  visibility: hidden;
+  transform: translateX(100%);
+  transition: transform 0.2s, visibility 0.2s;
+}
+
+.settings-panel.open {
+  visibility: visible;
+  transform: none;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings-panel .settings-area textarea {
+  height: 32vh;
+  height: 32dvh;
+}

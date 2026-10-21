@@ -3,7 +3,7 @@
 <!-- 
 MarkdownをHTMLに変換するツール
 Created: 2026-04-25
-Updated: 2026-10-18
+Updated: 2026-10-21
 Description: MarkdownをHTMLに変換する。逆も可能。
 Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に編集可能。hilight.js利用時はペースト先のHTMLにhighlight.jsとCSSの追加が必要。
 -->
@@ -12,10 +12,22 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Markdown to HTML</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/markdown_converter.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="MarkdownをHTMLに変換するツールにゃん。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Markdown to HTML">
+  <meta property="og:description" content="MarkdownをHTMLに変換するツールにゃん。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/markdown_converter.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <link rel="stylesheet" href="markdown_converter.css">
+
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+  <script src="page_layout.js" defer></script>
 
-  <!-- Google Tag Manager -->
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -23,471 +35,18 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="../common.css">
-  <style>
-    body {
-      font-size: 0.9rem;
-    }
-
-    h2 {
-      margin-top: 0;
-    }
-
-    /* メインの左右配置 */
-    .main-container {
-      display: flex;
-      gap: 1.25rem;
-      /* 上揃え */
-      align-items: flex-start;
-    }
-
-    .editor-section {
-      flex: 1;
-      /* 長いURL等の中身がflexアイテムの最小幅を押し広げてしまうのを防ぐ（主にSafari対策） */
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* テキストエリア共通 */
-    textarea,
-    .output {
-      width: 100%;
-      padding: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      background: white;
-      box-sizing: border-box;
-      font-family: monospace;
-      font-size: 0.9rem;
-      overflow-y: auto;
-      /* 改行できない長いURL等も強制的に折り返す */
-      overflow-wrap: anywhere;
-    }
-
-    /* 入力と出力の高さを固定 */
-    #markdown-input,
-    #html-output {
-      height: calc(100vh - var(--bar-h, 3.5rem) - 1.5rem);
-      height: calc(100dvh - var(--bar-h, 3.5rem) - 1.5rem);
-      min-height: 18rem;
-    }
-
-    #html-output {
-      white-space: pre-wrap;
-    }
-
-    /* 下部コントロール（ボタン類） */
-    .bottom-controls {
-      margin-top: 0.5rem;
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    /* 左側の設定エリア */
-    .settings-wrapper {
-      display: flex;
-      flex-direction: column;
-      /* 設定エリア同士の間隔 */
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-
-    /* 設定エリア（左下） */
-    .settings-area {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-
-    .settings-area label {
-      font-size: 0.9rem;
-      font-weight: bold;
-      color: #666;
-    }
-
-    .settings-area textarea {
-      height: 80px;
-      background: #fafafa;
-    }
-
-    /* 予備欄（迷ってるmdの避難用メモ） */
-    .draft-label {
-      font-size: 0.75rem;
-      font-weight: bold;
-      color: #999;
-      margin: 0.6rem 0 0.25rem;
-    }
-
-    #draft-input {
-      height: 70vh;
-      background: #fffdf5;
-    }
-
-    /* CSSプリセット切り替えボタン */
-    .css-preset-buttons {
-      display: flex;
-      gap: 0.4rem;
-      margin-bottom: 0.3rem;
-    }
-
-    .css-preset-btn {
-      background: #fff;
-      border: 1px solid #ddd;
-      color: #666;
-      font-size: 0.75rem;
-      padding: 0.3rem 0.6rem;
-    }
-
-    .css-preset-btn.active {
-      background: #0288d1;
-      border-color: #0288d1;
-      color: white;
-    }
-
-    .css-mode-hint {
-      font-size: 0.75rem;
-      color: #f57c00;
-      margin-bottom: 0.3rem;
-    }
-
-    .css-mode-hint.hidden {
-      display: none;
-    }
-
-    /* 他タブでの更新を知らせるバナー */
-    .sync-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-      background: #fff3e0;
-      border: 1px solid #ff9800;
-      color: #7a4a00;
-      border-radius: 0.5rem;
-      padding: 0.6rem 1rem;
-      margin-bottom: 0.75rem;
-      font-size: 0.85rem;
-    }
-
-    .sync-banner.hidden {
-      display: none;
-    }
-
-    .sync-banner-buttons {
-      display: flex;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-
-    .sync-banner button {
-      font-size: 0.75rem;
-      padding: 0.35rem 0.7rem;
-    }
-
-    .btn-sync-reload {
-      background: #ff9800;
-      color: white;
-    }
-
-    .btn-sync-dismiss {
-      background: #fff;
-      border: 1px solid #ccc;
-      color: #666;
-    }
-
-    /* 変換方向のスライドスイッチ */
-    .mode-switch-wrap {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      margin-left: auto;
-    }
-
-    .switch-label {
-      font-size: 0.75rem;
-      font-weight: bold;
-      color: #aaa;
-      transition: color 0.2s;
-      white-space: nowrap;
-    }
-
-    .switch-label.active {
-      color: #0288d1;
-    }
-
-    .mode-switch-track {
-      position: relative;
-      width: 48px;
-      height: 22px;
-      background: #cfd8dc;
-      border-radius: 11px;
-      cursor: grab;
-      user-select: none;
-      touch-action: none;
-      flex-shrink: 0;
-    }
-
-    .mode-switch-track.dragging {
-      cursor: grabbing;
-      background: #b0bec5;
-    }
-
-    .mode-switch-knob {
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: white;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-      transition: left 0.2s ease;
-    }
-
-    /* 共通ボタン・タグ */
-    .controls {
-      margin-bottom: 0.5rem;
-      display: flex;
-      /* ボタン同士のすき間を少しキュッと詰める */
-      gap: 0.5rem;
-      /* 万が一画面からはみ出た時用の保険 */
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .controls button {
-      width: 3.5rem;
-      /* 内側の余白をなくして絵文字を真ん中に */
-      padding: 0;
-      font-size: 1rem;
-    }
-
-    .copy-msg {
-      color: #4caf50;
-      font-weight: bold;
-      font-size: 0.9rem;
-      min-width: 120px;
-    }
-
-    button {
-      padding: 0.5rem 1rem;
-      border: none;
-      border-radius: 0.25rem;
-      font-weight: bold;
-      font-size: 0.8rem;
-    }
-
-    /* 共通のボタンスタイル */
-    .btn-tag {
-      background: #fff;
-      border: 1px solid #ddd;
-      color: #555;
-      /* 左側に少し太めの線を入れて、色分けの目印にする */
-      border-left-width: 0.25rem;
-    }
-
-    /* Markdown形式のボタン（控えめなグレー） */
-    .btn-md {
-      border-left-color: #ccc;
-    }
-
-    /* HTML形式のボタン（鮮やかなブルー） */
-    .btn-html {
-      border-left-color: #0288d1;
-    }
-
-    .btn-tag:hover {
-      background: #f8f8f8;
-    }
-
-    .btn-copy {
-      background: #f57c00;
-      color: white;
-    }
-
-    .btn-preview {
-      background: #0288d1;
-      color: white;
-    }
-
-    button:hover {
-      opacity: 0.8;
-    }
-
-    /* ===== 上部バー ===== */
-    .topbar {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-      padding: 0.4rem 0;
-      margin-bottom: 0.5rem;
-      /* background: #fff; */
-      background: #f4f4f4;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .topbar h2 {
-      font-size: 1.5rem;
-      margin: 0;
-      white-space: nowrap;
-    }
-
-    .mode-badge {
-      font-size: 0.7rem;
-      font-weight: bold;
-      color: #0288d1;
-      border: 1px solid #0288d1;
-      border-radius: 1rem;
-      padding: 0.1rem 0.5rem;
-      white-space: nowrap;
-    }
-
-    .tools {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-    }
-
-    .right-tools {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .icon-btn {
-      background: #fff;
-      border: 1px solid #ddd;
-      color: #555;
-      padding: 0.4rem 0.6rem;
-      font-size: 1rem;
-    }
-
-    .pin-btn {
-      padding: 0.4rem 0.6rem;
-      font-size: 1rem;
-    }
-
-    .dd {
-      position: relative;
-    }
-
-    .dd-panel {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      margin-top: 0.25rem;
-      min-width: 15rem;
-      max-height: calc(100vh - var(--bar-h, 3.5rem) - 1rem);
-      /* version1 70vh */
-      max-height: calc(100dvh - var(--bar-h, 3.5rem) - 1rem);
-      /* version1 70vh */
-      overflow-y: auto;
-      background: #fff;
-      border: 1px solid #ccc;
-      border-radius: 0.5rem;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      padding: 0.3rem;
-    }
-
-    .dd-panel.open {
-      display: block;
-    }
-
-    .dd-title {
-      font-size: 0.7rem;
-      color: #999;
-      font-weight: bold;
-      padding: 0.4rem 0.5rem 0.1rem;
-    }
-
-    .dd-sep {
-      border-top: 1px solid #eee;
-      margin: 0.2rem 0;
-    }
-
-    .dd-item {
-      display: block;
-      width: 100%;
-      text-align: left;
-      background: #fff;
-      color: #333;
-      font-weight: normal;
-      padding: 0.4rem 0.5rem;
-    }
-
-    .dd-item:hover,
-    .dd-item.current {
-      background: #e3f2fd;
-      opacity: 1;
-    }
-
-    .dd-item.current::after {
-      content: ' ✓';
-    }
-
-    /* ===== 右側の設定パネル（Preview用CSS / HTML） ===== */
-    .settings-panel {
-      position: fixed;
-      right: 0;
-      top: var(--bar-h, 3.5rem);
-      bottom: 0;
-      width: min(440px, 92vw);
-      z-index: 40;
-      background: #fff;
-      border-left: 1px solid #ccc;
-      box-shadow: -4px 0 12px rgba(0, 0, 0, 0.12);
-      padding: 0.75rem;
-      overflow-y: auto;
-      box-sizing: border-box;
-      margin: 0;
-      visibility: hidden;
-      transform: translateX(100%);
-      transition: transform 0.2s, visibility 0.2s;
-    }
-
-    .settings-panel.open {
-      visibility: visible;
-      transform: none;
-    }
-
-    .panel-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .settings-panel .settings-area textarea {
-      height: 32vh;
-      height: 32dvh;
-    }
-  </style>
+  </script>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
-<body>
+<body class="layout-3col l3-2col">
 
-  <div class="sync-banner hidden" id="sync-banner">
-    <span>⚠️ 別のタブでこの内容が更新されました。今の編集内容は保存すると上書きされます。</span>
-    <div class="sync-banner-buttons">
-      <button type="button" class="btn-sync-reload" onclick="reloadFromOtherTab()">最新を読み込む</button>
-      <button type="button" class="btn-sync-dismiss" onclick="dismissSyncBanner()">このまま続ける</button>
-    </div>
-  </div>
-
+  <!-- 上部バー: 左ボタン（ページ一覧を開く）＋ このツールの操作ボタン。
+       #topbar-title は置かない（ページ名は下の h2。目次がないので章名の更新も不要） -->
   <header class="topbar" id="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div class="dd">
-      <button type="button" class="icon-btn" title="メニュー" aria-label="メニュー">☰</button>
+      <button type="button" class="icon-btn" title="変換方向" aria-label="変換方向">⇄</button>
       <div class="dd-panel">
         <div class="dd-title">変換方向（切り替えると入力欄は空になります）</div>
         <button type="button" class="dd-item current" data-mode="md2html" onclick="requestModeChange('md2html')">MD →
@@ -505,7 +64,6 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       </div>
       <span class="tools" id="pinned-btns"></span>
     </div>
-    </div>
     <div class="right-tools">
       <span id="copy-message" class="copy-msg" style="display: none;">コピーしたにゃん！</span>
       <button type="button" class="btn-preview" id="preview-btn" onclick="openPreview()">Preview</button>
@@ -514,19 +72,42 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
         aria-expanded="false">⚙</button>
     </div>
   </header>
+  <div id="side-backdrop" class="side-backdrop"></div>
 
-  <div class="main-container">
-    <!-- 左側：入力と予備欄 -->
-    <div class="editor-section">
-      <textarea id="markdown-input" placeholder="Input Markdown..."></textarea>
-      <div class="draft-label">📝 予備欄（迷ってる文案の避難用メモ・自動保存されます）</div>
-      <textarea id="draft-input" placeholder="採用するか迷っているmdをここに置いておけます..."></textarea>
-    </div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
-    <!-- 右側：出力とボタン、設定欄 -->
-    <div class="editor-section">
-      <div id="html-output" class="output"></div>
-    </div>
+    <main id="content">
+
+      <div class="sync-banner hidden" id="sync-banner">
+        <span>⚠️ 別のタブでこの内容が更新されました。今の編集内容は保存すると上書きされます。</span>
+        <div class="sync-banner-buttons">
+          <button type="button" class="btn-sync-reload" onclick="reloadFromOtherTab()">最新を読み込む</button>
+          <button type="button" class="btn-sync-dismiss" onclick="dismissSyncBanner()">このまま続ける</button>
+        </div>
+      </div>
+
+      <div class="main-container">
+        <!-- 左側：入力と予備欄 -->
+        <div class="editor-section">
+          <textarea id="markdown-input" placeholder="Input Markdown..."></textarea>
+          <div class="draft-label">📝 予備欄（迷ってる文案の避難用メモ・自動保存されます）</div>
+          <textarea id="draft-input" placeholder="採用するか迷っているmdをここに置いておけます..."></textarea>
+        </div>
+
+        <!-- 右側：出力とボタン、設定欄 -->
+        <div class="editor-section">
+          <div id="html-output" class="output"></div>
+        </div>
+      </div>
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/" target="_blank">🏠 Home</a>
+        </div>
+        <p>Coded by sasasakaz 2022-2026</p>
+      </footer>
+    </main>
   </div>
 
   <aside class="settings-wrapper settings-panel" id="settings-wrapper" aria-label="Preview設定">
@@ -809,10 +390,11 @@ mark { background-color: #fff176; }
       applyCssPreset('inline'); // wrapperも初期化して保存まで行う
     }
 
-    // 上部バーの高さをCSS変数に反映（入力欄の高さ・設定パネルの位置に使う）
+    // 上部バーの高さをCSS変数に反映（入力欄の高さ・設定パネル・左ドロワーの位置に使う）
+    // --l3-topbar-h は body.layout-3col に定義されているため、同じ body に設定して上書きする
     const topbar = document.getElementById('topbar');
     new ResizeObserver(() => {
-      document.documentElement.style.setProperty('--bar-h', topbar.offsetHeight + 'px');
+      document.body.style.setProperty('--l3-topbar-h', topbar.offsetHeight + 'px');
     }).observe(topbar);
 
     // --- モード切り替え ---
@@ -1052,16 +634,6 @@ mark { background-color: #fff176; }
       syncBanner.classList.add('hidden');
     }
   </script>
-  <footer id="footer">
-    <div class="footer-links">
-      <a href="https://sasasakaz.github.io/" target="_blank">🏠 View Other Tools</a>
-      <span class="separator">|</span>
-      <a href="https://github.com/sasasakaz/sasasakaz.github.io/blob/main/pages/markdown_converter.html"
-        target="_blank">View source
-        on GitHub</a>
-    </div>
-    <p>Coded by sasasakaz 2022-2026</p>
-  </footer>
 </body>
 
 </html>
