@@ -5,8 +5,8 @@
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>機械学習の歴史</title>
-  <link href='https://sasasakaz.github.io/pages/ml_history.html' rel='canonical'>
-  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/ml_history.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="決定木、バギング、ブースティング、GBDT, 正則化、XGBoost, LightGBM, CatBoostなど機械学習の歴史を簡単に紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="機械学習の歴史">
@@ -14,9 +14,17 @@
   <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_history.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
 
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
-  <!-- Google Tag Manager -->
+  <style>
+  </style>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -24,17 +32,8 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="page_common.css">
-  <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
-    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
-  <script src="page_layout.js" defer></script>
-
-  <style>
-  </style>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
 <body class="layout-3col">
@@ -281,7 +280,6 @@
 
       <p>ただし、どの手法が常に最も優れているというわけではない。データの性質やデータ量、目的、計算資源などに応じて手法を選び、実際のデータで性能を比較することが重要になる。</p>
 
-
       <footer id="footer">
         <div class="footer-links">
           <a href="https://sasasakaz.github.io/">🏠 Home</a>
@@ -295,4 +293,5 @@
     <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 </body>
+
 </html>

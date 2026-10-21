@@ -5,20 +5,39 @@
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>機械学習の評価指標</title>
-  <link href='https://sasasakaz.github.io/pages/ml_evaluation.html' rel='canonical'>
-  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/ml_evaluation.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description"
-    content="機械学習の分類モデルをどう評価するかを解説。Accuracy, Precision, Recall, F1-score, MCC, ROC-AUC, PR-AUCなどの意味や違い、クラス不均衡データにおける使い分けを紹介します。">
+    content="機械学習の分類モデルをどう評価するかを解説。Accuracy, Precision, Recall, F1-score, ROC-AUC, PR-AUCなどの意味や違いなどなど紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="機械学習の評価指標">
   <meta property="og:description"
-    content="機械学習の分類モデルをどう評価するかを解説。Accuracy, Precision, Recall, F1-score, MCC, ROC-AUC, PR-AUCなどの意味や違い、クラス不均衡データにおける使い分けを紹介します。">
+    content="機械学習の分類モデルをどう評価するかを解説。Accuracy, Precision, Recall, F1-score, ROC-AUC, PR-AUCなどの意味や違いなどなど紹介します。">
   <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_evaluation.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
 
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
-  <!-- Google Tag Manager -->
+  <!-- syntax highlighter start -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <script>
+    // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
+    window.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+    });
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -26,28 +45,8 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="page_common.css">
-  <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
-    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
-  <script src="page_layout.js" defer></script>
-
-<!-- syntax highlighter start -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
-<script>
-  // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
-  window.addEventListener('DOMContentLoaded', () => {
-    hljs.highlightAll();
-  });
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
-<!-- syntax highlighter end -->
-
-<style>
-  </style>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
 <body class="layout-3col">
@@ -82,24 +81,23 @@
         <p>機械学習のモデルを評価するための方法や指標を紹介。</p>
       </header>
 
-<div class="mdc-info-box">
-  <ul>
-    <li>2値分類モデルの検証、評価方法</li>
-    <li>分類性能の評価指標（Accuracy, Precision, Recall, F1-scoreなど）</li>
-    <li>識別性能の評価指標（ROC-AUC, PR-AUC）</li>
-  </ul>
-</div>
-
-        <p>サンプル事例</p>
+      <div class="mdc-info-box">
         <ul>
-          <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
-          <li>誰が「ラテ」を購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
-          <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
+          <li>2値分類モデルの検証、評価方法</li>
+          <li>分類性能の評価指標（Accuracy, Precision, Recall, F1-scoreなど）</li>
+          <li>識別性能の評価指標（ROC-AUC, PR-AUC）</li>
         </ul>
+      </div>
 
-      <div class="mdc-note-box">
-        <blockquote>
-          <pre>
+      <p>サンプル事例</p>
+      <ul>
+        <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
+        <li>誰が「ラテ」を購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
+        <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
+      </ul>
+
+      <blockquote>
+        <pre>
     Python 3.11.15
     OS macOS-26.5.1-arm64-arm-64bit
     pandas 3.0.2
@@ -110,8 +108,7 @@
     shap 0.51.0
     lightgbm 4.6.0
     </pre>
-        </blockquote>
-      </div>
+      </blockquote>
 
 
       <h2 id="data-split">データの分割</h2>
@@ -150,7 +147,8 @@
       <ul>
         <li>Validationは必ず独立したデータとして用意しなければならないわけではない。</li>
         <li>モデルの調整をおこなわず、TrainデータとTestデータだけで構成する場合もある。</li>
-        <li>また、Cross Validationを使う場合は、データを複数の組み合わせに分け、それぞれの検証用データを入れ替えながらモデルを評価できる。この場合、固定したValidationデータを別途用意する必要はない。</li>
+        <li>また、Cross Validationを使う場合は、データを複数の組み合わせに分け、それぞれの検証用データを入れ替えながらモデルを評価できる。この場合、固定したValidationデータを別途用意する必要はない。
+        </li>
         <li>一方、モデルのパラメータ調整やEarly Stoppingなどをおこなう場合は、その判断に使うValidationデータと、最終評価に使うTestデータを分けておくことが重要。</li>
       </ul>
 
@@ -289,14 +287,18 @@ FN (False Negative): 713 件
 
       <h3 id="pr-tradeoff">PrecisionとRecallのトレードオフ</h3>
       <p>2値分類モデルは基本的に、正例である確率（0.0〜1.0）を出力する。これを人間が判断しやすい二択のラベル（0/1）に振り分けてる。</p>
-      <p>しきい値（threshold）を0.5（一般的なデフォルト値）にするとは、すなわち、確率0.5以上は「1:購入する」と予測、確率0.5未満は「0:購入しない」と予測したものとみなす、という意味。なお0.5は「正例と予測する確率が半分以上」という直感的な（自然な）基準であり、常に最適なしきい値というわけではない。</p>
+      <p>
+        しきい値（threshold）を0.5（一般的なデフォルト値）にするとは、すなわち、確率0.5以上は「1:購入する」と予測、確率0.5未満は「0:購入しない」と予測したものとみなす、という意味。なお0.5は「正例と予測する確率が半分以上」という直感的な（自然な）基準であり、常に最適なしきい値というわけではない。
+      </p>
       <p>しきい値を高くすると、かなり確信のある人だけを正例とするため、Precisionは高くなりやすい。そのぶん正例と予測する人数が減るので、Recallは低くなりやすい。</p>
       <p>逆に、しきい値を低くすると、少しでも購入可能性があれば正例とするため、Recallは高くなりやすい。ただし実際には買わない人も多く含まれるため、Precisionは低くなりやすい。</p>
       <ul>
         <li>Precision：予測した正例をどれだけ確実に当てられるか</li>
         <li>Recall：実際の正例をどれだけ取りこぼさず見つけられるか</li>
       </ul>
-      <p>例えば、予定しているクーポン配布施策の予算が潤沢にあるなどの理由で、買う確率が0.3ぐらいの人もクーポン配布対象にしたいなどのビジネス判断が先にある、検討余地がある場合には、しきい値を0.5ではなく0.3にして評価するという手もある（詳細後述）。</p>
+      <p>
+        例えば、予定しているクーポン配布施策の予算が潤沢にあるなどの理由で、買う確率が0.3ぐらいの人もクーポン配布対象にしたいなどのビジネス判断が先にある、検討余地がある場合には、しきい値を0.5ではなく0.3にして評価するという手もある（詳細後述）。
+      </p>
       <p>つまり、<strong>しきい値を動かすことでもPrecisionとRecallの値は変わる</strong>ため、<span
           class='inline-mark'>「何のための予測なのか」「何を重視したいのか」が明確になってないと、モデルの評価、判断もしにくい。</span></p>
 
@@ -325,7 +327,8 @@ FN (False Negative): 713 件
         </ol>
         <p>対処策1</p>
         <ol>
-          <li>まず思いつくのは、PrecisionとRecallを<strong>足して2で割る</strong>、つまり平均化する発想。 <span class='inline-code'>(Precision + Recall) / 2</span></li>
+          <li>まず思いつくのは、PrecisionとRecallを<strong>足して2で割る</strong>、つまり平均化する発想。 <span class='inline-code'>(Precision +
+              Recall) / 2</span></li>
           <li>でもこれだと、<span class='inline-gray'>Precision0.95 Recall0.15</span>のときも、<span
               class='inline-gray'>Precision0.15 Recall0.95</span>のときも、平均は0.55となる。</li>
           <li>片方が極端でもまあまあな数値に見えてしまう。足して2で割る発想自体はよくても、欲しい状態を的確に表す指標にはなってない。。。</li>
@@ -334,13 +337,18 @@ FN (False Negative): 713 件
         <ol>
           <li>目指したいのは、両方の値のバランスが良いときは高得点になり、いずれかが極端な値のときはペナルティが大きくなるような仕組み。</li>
           <li>どちらの値も0から1（0%から100%）の範囲内にある。であれば0に近いときは大きく減点すれば、欲しい状態を的確に表せるのではないか。</li>
-          <li>そこで2つの値それぞれの<strong>逆数をとってから平均化</strong>する発想。 <span class='inline-code'>(1/Precision + 1/Recall) / 2</span>
+          <li>そこで2つの値それぞれの<strong>逆数をとってから平均化</strong>する発想。 <span class='inline-code'>(1/Precision + 1/Recall) /
+              2</span>
           </li>
-          <li>これだと、<span class='inline-gray'>Precision0.95 Recall0.15</span>のときは、<span class='inline-code'>(1/0.95 + 1/0.15) / 2 = 3.68</span></li>
+          <li>これだと、<span class='inline-gray'>Precision0.95 Recall0.15</span>のときは、<span class='inline-code'>(1/0.95 +
+              1/0.15) / 2 = 3.68</span></li>
           <li>逆数をとった値の平均値は元の単位と違ってて解釈しにくいので、改めて逆数をとって元の単位に戻す。<span class='inline-code'>1 / 3.68 = 0.27</span></li>
-          <li>同じ計算を<span class='inline-gray'>Precision0.75 Recall0.35</span>でやると、<span class='inline-code'>(1/0.75 + 1/0.35) / 2 = 2.10 の逆数で 0.48</span></li>
-          <li>同じ計算を<span class='inline-gray'>Precision0.65 Recall0.45</span>でやると、<span class='inline-code'>(1/0.65 + 1/0.45) / 2 = 1.88 の逆数で 0.53</span></li>
-          <li>同じ計算を<span class='inline-gray'>Precision0.60 Recall0.55</span>でやると、<span class='inline-code'>(1/0.60 + 1/0.55) / 2 = 1.74 の逆数で 0.57</span></li>
+          <li>同じ計算を<span class='inline-gray'>Precision0.75 Recall0.35</span>でやると、<span class='inline-code'>(1/0.75 +
+              1/0.35) / 2 = 2.10 の逆数で 0.48</span></li>
+          <li>同じ計算を<span class='inline-gray'>Precision0.65 Recall0.45</span>でやると、<span class='inline-code'>(1/0.65 +
+              1/0.45) / 2 = 1.88 の逆数で 0.53</span></li>
+          <li>同じ計算を<span class='inline-gray'>Precision0.60 Recall0.55</span>でやると、<span class='inline-code'>(1/0.60 +
+              1/0.55) / 2 = 1.74 の逆数で 0.57</span></li>
         </ol>
         <ul>
           <li>欲しい状態を的確に表す指標になったっぽい。これがF1-score</li>
@@ -749,7 +757,7 @@ J 0.10（実際：0）※間違い、空振り
       </ul>
 
 
-      
+
       <h3 id="pr-auc">PR-AUC</h3>
       <p>ROC曲線を描いて、その下の面積を全部足し算（積分）した値。<span class="inline-mark">正例を見つける能力に焦点を当てた識別性能</span>を表す指標。</p>
 
@@ -839,7 +847,8 @@ J 0.10（実際：0）※間違い、空振り
       <p>なども考慮して、最終的なしきい値を決めることになる。</p>
 
       <p>評価指標は、モデルに「何点だったか」を付けるためだけのものではない。<span class='inline-mark'>「このモデルを実際にどう使うのか」を考え、その目的に合った指標を選ぶことが重要。</span></p>
-      <p>またモデルの評価とは別に、モデルを「解釈する技術」も重要性が高まっている。詳細は<a href="https://sasasakaz.github.io/pages/ml_interpretation.html">機械学習モデルの解釈</a>を参照。
+      <p>またモデルの評価とは別に、モデルを「解釈する技術」も重要性が高まっている。詳細は<a
+          href="https://sasasakaz.github.io/pages/ml_interpretation.html">機械学習モデルの解釈</a>を参照。
       </p>
 
 
@@ -856,4 +865,5 @@ J 0.10（実際：0）※間違い、空振り
     <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 </body>
+
 </html>

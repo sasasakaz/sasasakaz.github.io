@@ -5,8 +5,8 @@
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>機械学習モデルの解釈</title>
-  <link href='https://sasasakaz.github.io/pages/ml_interpretation.html' rel='canonical'>
-  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/ml_interpretation.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="機械学習モデルをどのように解釈するのかを解説。PFI, SHAP, PDP, ICEなど代表的な手法を紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="機械学習モデルの解釈">
@@ -14,9 +14,28 @@
   <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_interpretation.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
 
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
-  <!-- Google Tag Manager -->
+  <!-- syntax highlighter start -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <script>
+    // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
+    window.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+    });
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -24,28 +43,8 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="page_common.css">
-  <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
-    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
-  <script src="page_layout.js" defer></script>
-
-<!-- syntax highlighter start -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
-<script>
-  // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
-  window.addEventListener('DOMContentLoaded', () => {
-    hljs.highlightAll();
-  });
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
-<!-- syntax highlighter end -->
-
-  <style>
-  </style>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
 <body class="layout-3col">
@@ -80,13 +79,13 @@
         <p>複雑な機械学習モデルを解釈するための手法を紹介。</p>
       </header>
 
-<div class="mdc-info-box">
-  <ul>
-    <li>Accuracy, F1, AUCなどはモデルの予測精度、識別性能を評価する指標。</li>
-    <li>だが複雑なモデルを使うほど「なぜその予測になったのか」「モデルはどの特徴量を利用しているのか」がわかりにくくなる。</li>
-    <li>そこで<strong>複雑なモデルを解釈するための技術</strong>が必要になる。ここではPFI, SHAP, PDP/ICEを取り上げる。</li>
-  </ul>
-</div>
+      <div class="mdc-info-box">
+        <ul>
+          <li>Accuracy, F1, AUCなどはモデルの予測精度、識別性能を評価する指標。</li>
+          <li>だが複雑なモデルを使うほど「なぜその予測になったのか」「モデルはどの特徴量を利用しているのか」がわかりにくくなる。</li>
+          <li>そこで<strong>複雑なモデルを解釈するための技術</strong>が必要になる。ここではPFI, SHAP, PDP/ICEを取り上げる。</li>
+        </ul>
+      </div>
 
       <table>
         <thead>
@@ -117,15 +116,15 @@
       <p>いずれも、モデルのチューニング、特徴量の見直し、その後の施策への提案、仮説の構築
         などに役立てることができる（モデルの評価については、<a href="https://sasasakaz.github.io/pages/ml_evaluation.html">機械学習モデルの評価</a>を参照）。</p>
 
-        <p>サンプル事例</p>
-        <ul>
-          <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
-          <li>誰が「ラテ」を購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
-          <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
-        </ul>
+      <p>サンプル事例</p>
+      <ul>
+        <li>カフェチェーンの顧客別購入データが約3ヶ月分ある。</li>
+        <li>誰が「ラテ」を購入するかを予測したい（買う/買わないの2値分類予測をLightGBMで）。</li>
+        <li>予測結果をもとに、ラテを購入しそうな顧客を次の施策対象としたい。</li>
+      </ul>
 
-        <blockquote>
-          <pre>
+      <blockquote>
+        <pre>
     Python 3.11.15
     OS macOS-26.5.1-arm64-arm-64bit
     pandas 3.0.2
@@ -136,7 +135,7 @@
     shap 0.51.0
     lightgbm 4.6.0
     </pre>
-        </blockquote>
+      </blockquote>
 
 
 
@@ -164,7 +163,8 @@
       <p><strong>特徴量が相関している場合に弱い:</strong>
         特徴量同士に強い相関がある場合、片方をシャッフルしても、もう一方が補ってしまうため、どちらの特徴量も重要度が低く出ることがある（重要度を過小評価してしまう）。
       </p>
-      <p><strong>非現実的なデータが生成される可能性:</strong> データをランダムにシャッフルするため、「雪が降っているのに気温35度」みたいな、現実にはあり得ないデータの組み合わせで評価してしまうことがある。</p>
+      <p><strong>非現実的なデータが生成される可能性:</strong> データをランダムにシャッフルするため、「雪が降っているのに気温35度」みたいな、現実にはあり得ないデータの組み合わせで評価してしまうことがある。
+      </p>
       <p>これらへの対処策の一つとして、強く相関する特徴量や、セットにした方が解釈しやすくなる特徴量をグループとしてまとめて、一緒にシャッフルして重要度を見る、Grouped Permutation Feature
         Importanceという方法もある。</p>
       <div class="mdc-note-box">
@@ -233,7 +233,9 @@
       <p>特徴量の値とSHAP値の関係を散布図（scatter）で表す。</p>
       <ul>
         <li>指定した特徴量について、横軸に特徴量の値、縦軸にSHAP値をプロットする。</li>
-        <li>後述のPDPが「特徴量の値を仮想的に変化させたときの予測値」を見るのに対し、SHAP Dependence Plotは「実際の観測値において、その特徴量が予測にどれだけ寄与したか」を散布図で見る。そして、個々のデータのバラツキが見える」ので、例えばある値を超えるとその特徴量の寄与がプラス側に大きく変わる、といった非線形な動きが見えやすい。</li>
+        <li>後述のPDPが「特徴量の値を仮想的に変化させたときの予測値」を見るのに対し、SHAP Dependence
+          Plotは「実際の観測値において、その特徴量が予測にどれだけ寄与したか」を散布図で見る。そして、個々のデータのバラツキが見える」ので、例えばある値を超えるとその特徴量の寄与がプラス側に大きく変わる、といった非線形な動きが見えやすい。
+        </li>
         <li>基本的にはもっとも交互作用の強い特徴量を探して色付けしてくれる。そのため、予期せぬ発見がある（設定やデータの素性次第では一番強いものが選ばれない場合があったり、直接指定もできる）。</li>
       </ul>
 
@@ -357,7 +359,6 @@
         <li>次に、気になる特徴量はICEを重ねて、インスタンスごとの差や相互作用の可能性を確認する。</li>
       </ol>
 
-
       <footer id="footer">
         <div class="footer-links">
           <a href="https://sasasakaz.github.io/">🏠 Home</a>
@@ -371,4 +372,5 @@
     <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 </body>
+
 </html>

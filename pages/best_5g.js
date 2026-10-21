@@ -45,16 +45,17 @@ const getDraws = setupParameterStepper("draws");
 
 const groupInputs = document.getElementById("group-inputs");
 GROUPS.forEach(name => {
+  const group = document.createElement("div");
+  group.className = "input-group";
   const label = document.createElement("label");
-  label.className = "group-input";
   label.htmlFor = `group-${name}`;
-  label.append(`Group ${name}`);
+  label.textContent = `Group ${name}`;
   const textarea = document.createElement("textarea");
   textarea.id = `group-${name}`;
   textarea.name = `group-${name}`;
   textarea.setAttribute("aria-label", `Group ${name} のデータ`);
-  label.appendChild(textarea);
-  groupInputs.appendChild(label);
+  group.append(label, textarea);
+  groupInputs.appendChild(group);
 });
 
 document.getElementById("sample-button").addEventListener("click", () => {

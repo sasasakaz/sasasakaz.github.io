@@ -5,8 +5,8 @@
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Contact</title>
-  <link href='https://sasasakaz.github.io/pages/contact.html' rel='canonical'>
-  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/contact.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="Contactページです。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Contact">
@@ -15,8 +15,12 @@
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
 
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
 
-  <!-- Google Tag Manager -->
+  <style>
+  </style>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -24,45 +28,58 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="page_common.css">
+  </script>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
-<body>
-  <header id="header">
-    <h1>Contact</h1>
-    <!-- 投稿日・更新日メタ情報 -->
-    <div class="entry-meta">
-      <span class="meta-item published">
-        <span class="meta-icon" aria-hidden="true">🕒</span>
-        <span class="meta-label">公開：</span><time datetime="2026-10-06">2026.10.06</time>
-      </span>
-      <span class="meta-divider" aria-hidden="true">/</span>
-      <span class="meta-item updated">
-        <span class="meta-icon" aria-hidden="true">🔄</span>
-        <span class="meta-label">更新：</span><time datetime="2026-10-06">2026.10.06</time>
-      </span>
-    </div>
-    <p>ご連絡、お問い合わせなどは、こちらからお願いします。</p>
+<body class="layout-3col l3-2col">
+
+  <header class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
   </header>
+  <div id="side-backdrop" class="side-backdrop"></div>
 
-  <iframe
-    src="https://docs.google.com/forms/d/e/1FAIpQLSdDq8QMEu9EqcrPZTJktjoHN06R8OQ3SiHokwwV-51dwS_2Gg/viewform?embedded=true"
-    width="640" height="691" frameborder="0" marginheight="0" marginwidth="0">読み込んでいます…</iframe>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <header id="header">
+        <h1>Contact</h1>
+        <!-- 投稿日・更新日メタ情報 -->
+        <div class="entry-meta">
+          <span class="meta-item published">
+            <span class="meta-icon" aria-hidden="true">🕒</span>
+            <span class="meta-label">公開：</span><time datetime="2026-10-06">2026.10.06</time>
+          </span>
+          <span class="meta-divider" aria-hidden="true">/</span>
+          <span class="meta-item updated">
+            <span class="meta-icon" aria-hidden="true">🔄</span>
+            <span class="meta-label">更新：</span><time datetime="2026-10-06">2026.10.06</time>
+          </span>
+        </div>
+        <p>ご連絡、お問い合わせなどは、こちらからお願いします。</p>
+      </header>
+
+      <iframe
+        src="https://docs.google.com/forms/d/e/1FAIpQLSdDq8QMEu9EqcrPZTJktjoHN06R8OQ3SiHokwwV-51dwS_2Gg/viewform?embedded=true"
+        width="640" height="691" frameborder="0" marginheight="0" marginwidth="0">読み込んでいます…</iframe>
 
 
-  <h2>個人情報の取り扱いについて</h2>
-  <p>当サイトへのお問い合わせの際にご入力いただいたお名前やメールアドレス等の個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどでご連絡する場合にのみ利用いたします。これらの目的以外で利用することはございません。</p>
+      <h2>個人情報の取り扱いについて</h2>
+      <p>当サイトへのお問い合わせの際にご入力いただいたお名前やメールアドレス等の個人情報は、お問い合わせに対する回答や必要な情報を電子メールなどでご連絡する場合にのみ利用いたします。これらの目的以外で利用することはございません。
+      </p>
 
-  <footer id="footer">
-    <div class="footer-links">
-      <a href="https://sasasakaz.github.io/">🏠 Home</a>
-      <span class="separator">|</span>
-      <a href="#header">Back to Top</a>
-    </div>
-    <p>Author: sasasakaz</p>
-  </footer>
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+  </div>
 </body>
 
 </html>

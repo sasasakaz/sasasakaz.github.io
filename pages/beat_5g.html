@@ -1,12 +1,12 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="ja">
 
 <head>
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>比率の差のベイズ推定 | BEAT</title>
-  <link href='https://sasasakaz.github.io/pages/beat_5g.html' rel='canonical'>
-  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/beat_5g.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="A/Bテストの比率の差をベイズ推定し、HDIや分布をブラウザで可視化。Easy Bayesian Estimation tool.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="比率の差のベイズ推定 | BEAT">
@@ -14,15 +14,17 @@
   <meta property="og:url" content="https://sasasakaz.github.io/pages/beat_5g.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
-  <meta property="og:image" content="https://sasasakaz.github.io/pages/beat_5g_dist.png">
+  <meta property="og:image" content="https://sasasakaz.github.io/images/beat_5g_dist.png">
 
-  <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" charset="utf-8"></script>
-  <script src="beat_5g.js" defer></script>
-  <link rel="stylesheet" href="../common.css">
+  <link rel="stylesheet" href="page_common.css">
   <link rel="stylesheet" href="beat_5g.css">
 
-  <!-- Google Tag Manager -->
+  <script src="page_layout.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js" defer></script>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" defer></script>
+  <script src="beat_5g.js" defer></script>
+
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -30,164 +32,177 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-
+  </script>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
-<body>
-  <header id="header">
-    <h1>Bayesian Estimation for the Difference of Proportions</h1>
+<body class="layout-3col l3-2col">
+
+  <!-- 上部バー: 左ボタン（ページ一覧を開く） -->
+  <header class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
   </header>
+  <div id="side-backdrop" class="side-backdrop"></div>
 
-  <div class="main-container">
-    <aside class="sidebar">
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
-      <section id="data-entry">
-        <div class="input-container">
-          <p><strong>⚡️データ入力</strong></p>
-          <form id="input-form">
-            <div class="input-fields">
-              <div class="input-group">
-                <label for="denoms">分母（Users, 配布者数など）</label>
-                <textarea id="denoms" rows="5" cols="33" autocomplete="off">1000 2000 1500 1200 1600</textarea>
+    <main id="content">
+      <header id="header">
+        <h1>Bayesian Estimation for the Difference of Proportions</h1>
+      </header>
+
+      <div class="main-container">
+        <aside class="sidebar">
+
+          <section id="data-entry">
+            <div class="input-container">
+              <p><strong>⚡️データ入力</strong></p>
+              <form id="input-form">
+                <div class="input-fields">
+                  <div class="input-group">
+                    <label for="denoms">分母（Users, 配布者数など）</label>
+                    <textarea id="denoms" rows="5" cols="33" autocomplete="off">1000 2000 1500 1200 1600</textarea>
+                  </div>
+
+                  <div class="input-group">
+                    <label for="numers">分子（Actions, 購入者数など）</label>
+                    <textarea id="numers" rows="5" cols="33" autocomplete="off">70 120 95 110 150</textarea>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <div>
+              <div class="table-container">
+                <table id="confirmation-table">
+                </table>
               </div>
 
-              <div class="input-group">
-                <label for="numers">分子（Actions, 購入者数など）</label>
-                <textarea id="numers" rows="5" cols="33" autocomplete="off">70 120 95 110 150</textarea>
-              </div>
+              <details>
+                <summary>推定がうまくいかないとき用</summary>
+                <div class="setting-group">
+                  <p>
+                    <label for="sample-count">Number of sampling times</label>
+                    <input type="Number" id="sample-count" form="input-form" autocomplete="off" value="10000"
+                      step="5000" min="10000" max="50000" style="text-align: right;">
+                  </p>
+                  <p>増やしてみるとうまくいく場合もあります（スマホでは処理が重いため増やさない方がいいです）</p>
+                </div>
+              </details>
             </div>
-          </form>
-        </div>
+          </section>
 
-        <div>
-          <div class="table-container">
-            <table id="confirmation-table">
-            </table>
-          </div>
+        </aside>
 
-          <details>
-            <summary>推定がうまくいかないとき用</summary>
-            <div class="setting-group">
-              <p>
-                <label for="sample-count">Number of sampling times</label>
-                <input type="Number" id="sample-count" form="input-form" autocomplete="off" value="10000" step="5000"
-                  min="10000" max="50000" style="text-align: right;">
-              <p>増やしてみるとうまくいく場合もあります（スマホでは処理が重いため増やさない方がいいです）</p>
-              </p>
+        <div class="result-area">
+          <section>
+            <div>
+              <p><strong>A/Bテスト結果を入力して、クリックボタンを押してください。比率の差のベイズ推定ができます。</strong></p>
+              <ul>
+                <li>比率（クリック率や購入率のような%指標）の元となるデータをエクセルからコピペ入力などしてください。</li>
+                <li>入力データはどこにも送信されません。ブラウザのみで動作します。</li>
+              </ul>
             </div>
-          </details>
-        </div>
-      </section>
+            <div class="action-buttons">
+              <button type="button" onclick="runBayesianEstimation();" class="btn-primary" id="run-button"
+                title="ベイズ推定実行">🚀 Click to Estimate</button>
+              <button type="reset" form="input-form" class="btn-secondary" title="初期画面に戻す">🗑️ Clear All</button>
+            </div>
+          </section>
 
-    </aside>
+          <section id="result-container">
+            <div class="mdc-info-box">
+              <p>推定完了！ 解説やPointを参考にしながら推定結果を読み解いてください</p>
+            </div>
 
-    <main class="result-area">
-      <section>
-        <div>
-          <p><strong>A/Bテスト結果を入力して、クリックボタンを押してください。比率の差のベイズ推定ができます。</strong></p>
-          <ul>
-            <li>比率（クリック率や購入率のような%指標）の元となるデータをエクセルからコピペ入力などしてください。</li>
-            <li>入力データはどこにも送信されません。ブラウザのみで動作します。</li>
-          </ul>
-        </div>
-        <div class="action-buttons">
-          <button type="button" onclick="runBayesianEstimation();" class="btn-primary" id="run-button"
-            title="ベイズ推定実行">🚀 Click to Estimate</button>
-          <button type="reset" form="input-form" class="btn-secondary" title="初期画面に戻す">🗑️ Clear All</button>
-        </div>
-      </section>
+            <div class="tabs">
+              <button type="button" class="tab-btn active" onclick="switchTab('summary')">📈 全体結果</button>
+              <button type="button" class="tab-btn" onclick="switchTab('diff')">🔍 2群間の比較</button>
+            </div>
 
-      <section id="result-container">
-        <div class="mdc-info-box">
-          <p>推定完了！ 解説やPointを参考にしながら推定結果を読み解いてください</p>
-        </div>
+            <div id="summary-content" class="tab-panel">
+              <h2>比率の事後分布</h2>
+              <ul>
+                <li>各群の比率がとりそうな値の範囲を表します。</li>
+              </ul>
+              <div id='summary-chart'></div>
+              <div id='all-groups-hdi-container'></div>
 
-        <div class="tabs">
-          <button type="button" class="tab-btn active" onclick="switchTab('summary')">📈 全体結果</button>
-          <button type="button" class="tab-btn" onclick="switchTab('diff')">🔍 2群間の比較</button>
-        </div>
-
-        <div id="summary-content" class="tab-panel">
-          <h2>比率の事後分布</h2>
-          <ul>
-            <li>各群の比率がとりそうな値の範囲を表します。</li>
-          </ul>
-          <div id='summary-chart'></div>
-          <div id='all-groups-hdi-container'></div>
-
-          <div>
-            <ul>
-              <li>Mean（平均）は、各群の比率がとりそうな値を<strong>点</strong>で推定した結果です。</li>
-              <li>94%HDIは、各群の比率がとりそうな値を<strong>区間</strong>で推定した結果です。上図各群の分布においてデータ全体100%から中央の94%を取ってきた両端の値です（Highest
-                Density Interval 事後分布の中で最も密度が高い範囲）。</li>
-            </ul>
-          </div>
-
-          <div class="mdc-warn-box">
-            <p>✅ Point:</p>
-            <ul>
-              <li>入力された観測データ件数（分母）が十分に多い場合は、Meanと入力データの比率はほぼ一致します。グラフは尖った形になりやすく、推定結果の確からしさを表します。</li>
-              <li>入力された観測データ件数（分母）が少ない場合はやや違いが生じるときもあります。グラフは裾が広い形になりやすく、推定結果の不確かさを表します。</li>
-            </ul>
-          </div>
-
-          <div class="mdc-info2-box">
-            <p>🏷️ 推定結果の不確かさが大きいときの対応策:</p>
-            <ol>
-              <li>入力データが変な値で読み取られていないか集計値を確認する</li>
-              <li>A/Bテスト実施中であればテスト期間を延長するなどして観測データ件数を増やす</li>
-              <li>左下カラムで推定方法を調整して再度実行してみる</li>
-            </ol>
-          </div>
-
-          <details class="summary-table-details">
-            <summary>データテーブル</summary>
-            <div id="summary-table-container"></div>
-          </details>
-
-        </div>
-
-        <div id="diff-content" class="tab-panel">
-          <h2>2群間の比率の差分</h2>
-          <div>
-            <ul>
-              <li>2群間の比率の差がとりそうな値の範囲を表します。</li>
-              <li>横棒がオレンジ線をまたいでいない（94%HDIが0を含まない）場合は、2群間の比率に十分な差があると解釈しやすいです。</li>
-              <li>diff A - B: A群の比率からB群の比率を差し引いた値（以降同様です）</li>
-            </ul>
-          </div>
-          <div id="all-diffs-summary-container"></div>
-          <div id="diff-charts-container"></div>
-          <div class="mdc-warn-box">
-            <p>✅ Point:</p>
-            <ul>
-              <li>下段グラフのオレンジ色の数値は、片方の群の比率がもう片方の群の比率を上回っている（下回っている）確率を表します。</li>
-              <li>2群間の比率の差が0を上回る（下回る）確率が示唆される、これがベイズ推定の利点の一つです（94%HDIに0が含まれていてもこの値で2群間の比率の差を判断しやすいです）。</li>
-              <li>もしもこの値が50%に近い場合は、比率に差があるかは不確かです。100%（0%）に近い場合は、比率の差の確からしさが高まります。</li>
-              <li>この値の判断基準にはp値のような決まりはありません。<ul>
-                  <li>例えばこの値が80%以上のとき（20%未満のとき）、80%を確からしいとみなして比率に差があると判断してもよいです。</li>
-                  <li>80%は不確かとみなして比率に差はないと判断してもよいです。</li>
-                  <li>ここでの推定結果に固執せず、関連する周辺情報も考慮しつつ総合的観点から判断することを強く推奨します。</li>
+              <div>
+                <ul>
+                  <li>Mean（平均）は、各群の比率がとりそうな値を<strong>点</strong>で推定した結果です。</li>
+                  <li>94%HDIは、各群の比率がとりそうな値を<strong>区間</strong>で推定した結果です。上図各群の分布においてデータ全体100%から中央の94%を取ってきた両端の値です（Highest
+                    Density Interval 事後分布の中で最も密度が高い範囲）。</li>
                 </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
+              </div>
 
+              <div class="mdc-warn-box">
+                <p>✅ Point:</p>
+                <ul>
+                  <li>入力された観測データ件数（分母）が十分に多い場合は、Meanと入力データの比率はほぼ一致します。グラフは尖った形になりやすく、推定結果の確からしさを表します。</li>
+                  <li>入力された観測データ件数（分母）が少ない場合はやや違いが生じるときもあります。グラフは裾が広い形になりやすく、推定結果の不確かさを表します。</li>
+                </ul>
+              </div>
+
+              <div class="mdc-info2-box">
+                <p>🏷️ 推定結果の不確かさが大きいときの対応策:</p>
+                <ol>
+                  <li>入力データが変な値で読み取られていないか集計値を確認する</li>
+                  <li>A/Bテスト実施中であればテスト期間を延長するなどして観測データ件数を増やす</li>
+                  <li>左下カラムで推定方法を調整して再度実行してみる</li>
+                </ol>
+              </div>
+
+              <details class="summary-table-details">
+                <summary>データテーブル</summary>
+                <div id="summary-table-container"></div>
+              </details>
+
+            </div>
+
+            <div id="diff-content" class="tab-panel">
+              <h2>2群間の比率の差分</h2>
+              <div>
+                <ul>
+                  <li>2群間の比率の差がとりそうな値の範囲を表します。</li>
+                  <li>横棒がオレンジ線をまたいでいない（94%HDIが0を含まない）場合は、2群間の比率に十分な差があると解釈しやすいです。</li>
+                  <li>diff A - B: A群の比率からB群の比率を差し引いた値（以降同様です）</li>
+                </ul>
+              </div>
+              <div id="all-diffs-summary-container"></div>
+              <div id="diff-charts-container"></div>
+              <div class="mdc-warn-box">
+                <p>✅ Point:</p>
+                <ul>
+                  <li>下段グラフのオレンジ色の数値は、片方の群の比率がもう片方の群の比率を上回っている（下回っている）確率を表します。</li>
+                  <li>2群間の比率の差が0を上回る（下回る）確率が示唆される、これがベイズ推定の利点の一つです（94%HDIに0が含まれていてもこの値で2群間の比率の差を判断しやすいです）。</li>
+                  <li>もしもこの値が50%に近い場合は、比率に差があるかは不確かです。100%（0%）に近い場合は、比率の差の確からしさが高まります。</li>
+                  <li>この値の判断基準にはp値のような決まりはありません。<ul>
+                      <li>例えばこの値が80%以上のとき（20%未満のとき）、80%を確からしいとみなして比率に差があると判断してもよいです。</li>
+                      <li>80%は不確かとみなして比率に差はないと判断してもよいです。</li>
+                      <li>ここでの推定結果に固執せず、関連する周辺情報も考慮しつつ総合的観点から判断することを強く推奨します。</li>
+                    </ul>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="https://github.com/sasasakaz/sasasakaz.github.io/blob/main/pages/beat_5g.html">View source on
+            GitHub</a>
+        </div>
+        <p>Coded by sasasakaz 2022-2026</p>
+      </footer>
     </main>
   </div>
-  <footer id="footer">
-    <div class="footer-links">
-      <a href="https://sasasakaz.github.io/">🏠 Home</a>
-      <span class="separator">|</span>
-      <a href="https://github.com/sasasakaz/sasasakaz.github.io/blob/main/pages/beat_5g.html">View source on
-        GitHub</a>
-    </div>
-    <p>Coded by sasasakaz 2022-2026</p>
-  </footer>
 </body>
 
 </html>

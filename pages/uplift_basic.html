@@ -5,8 +5,8 @@
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>アップリフトモデリング（基礎）</title>
-  <link href='https://sasasakaz.github.io/pages/uplift_basic.html' rel='canonical'>
-  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/uplift_basic.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="アップリフトモデリングの基礎情報。歴史やS/T/X-Learnerなどに加えて、傾向スコアやIPWについても紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="アップリフトモデリング（基礎）">
@@ -14,9 +14,28 @@
   <meta property="og:url" content="https://sasasakaz.github.io/pages/uplift_basic.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
 
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
-  <!-- Google Tag Manager -->
+  <!-- syntax highlighter start -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <script>
+    // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
+    window.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+    });
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -24,28 +43,8 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="page_common.css">
-  <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
-    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
-  <script src="page_layout.js" defer></script>
-
-<!-- syntax highlighter start -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
-<script>
-  // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
-  window.addEventListener('DOMContentLoaded', () => {
-    hljs.highlightAll();
-  });
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
-<!-- syntax highlighter end -->
-
-  <style>
-  </style>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
 <body class="layout-3col">
@@ -80,13 +79,13 @@
         <p>マーケティング施策においては、オーソドックスな機械学習モデルで「誰が商品を買いそうか」を予測するだけでは十分ではないことがある。</p>
       </header>
 
-<div class="mdc-info-box">
-  <ul>
-    <li>アップリフトモデリングの考え方、メリットと課題</li>
-    <li>アップリフトを推定する方法</li>
-    <li>あゆみの歴史や、関連技法として傾向スコアとIPWについて</li>
-  </ul>
-</div>
+      <div class="mdc-info-box">
+        <ul>
+          <li>アップリフトモデリングの考え方、メリットと課題</li>
+          <li>アップリフトを推定する方法</li>
+          <li>あゆみの歴史や、関連技法として傾向スコアとIPWについて</li>
+        </ul>
+      </div>
 
 
       <h2 id="what-is-uplift-modeling">アップリフトモデリングとは</h2>
@@ -99,7 +98,8 @@
         <li>施策をより効果的、効率的におこなうためには「クーポンがないと買わなそうだが、クーポンがあると買いやすそうな人」を選びたい。</li>
         <li>そのためには「クーポンを配ることで」購入する確率がどれだけ変化する人なのかが知りたい。</li>
       </ol>
-      <p>このように<span class='inline-mark'>処置によって、処置しなかった場合と比べて結果がどの程度変化するかを予測する</span>ための方法を、アップリフトモデリング（Uplift Modeling）と呼ぶ。</p>
+      <p>このように<span class='inline-mark'>処置によって、処置しなかった場合と比べて結果がどの程度変化するかを予測する</span>ための方法を、アップリフトモデリング（Uplift
+        Modeling）と呼ぶ。</p>
 
 
       <h3 id="target-customer-type">ターゲットにしたい顧客</h3>
@@ -108,7 +108,8 @@
         <li>顧客A: クーポンを配った場合 → 購入する　クーポンを配らなかった場合 → 購入する</li>
         <li>顧客B: クーポンを配った場合 → 購入する　クーポンを配らなかった場合 → 購入しない</li>
       </ul>
-      <p>顧客Aは購入する確率は高いが、クーポンが購入を後押ししたわけではなさそう。顧客Bにはクーポンが購入を促す効果がありそう。つまり<span class='inline-marker'>「購入確率が高い人」と「施策の効果が高い人」は同じではない。</span>
+      <p>顧客Aは購入する確率は高いが、クーポンが購入を後押ししたわけではなさそう。顧客Bにはクーポンが購入を促す効果がありそう。つまり<span
+          class='inline-marker'>「購入確率が高い人」と「施策の効果が高い人」は同じではない。</span>
       </p>
       <table>
         <thead>
@@ -159,12 +160,14 @@
 
       <p>アップリフトモデリングでは顧客Bのような人を見つけて、優先的に施策対象とすることを目指している（通常の購入予測モデルではAとBを判別しにくい）。ただし、アップリフトモデリングには特有の難しさがある。</p>
 
-<p>現実世界では、ある同じ顧客に対して、クーポンを配った場合と配らなかった場合の結果を「同時に」観測することはできない。</p>
-<ul>
-  <li>クーポンを配った顧客が、配らなかった場合に購入したかどうかは分からない。</li>
-  <li>クーポンを配らなかった顧客が、配っていたら購入したかどうかも分からない。</li>
-</ul>
-<p>この<span class='inline-marker'>実際には観測できない結果</span>を反実仮想（counterfactual）と呼ぶ。そこで、アップリフトモデリングでは顧客の特徴量などから、クーポンを配った場合と配らなかった場合の購入確率をそれぞれ推定し、その差を求める。</p>
+      <p>現実世界では、ある同じ顧客に対して、クーポンを配った場合と配らなかった場合の結果を「同時に」観測することはできない。</p>
+      <ul>
+        <li>クーポンを配った顧客が、配らなかった場合に購入したかどうかは分からない。</li>
+        <li>クーポンを配らなかった顧客が、配っていたら購入したかどうかも分からない。</li>
+      </ul>
+      <p>この<span
+          class='inline-marker'>実際には観測できない結果</span>を反実仮想（counterfactual）と呼ぶ。そこで、アップリフトモデリングでは顧客の特徴量などから、クーポンを配った場合と配らなかった場合の購入確率をそれぞれ推定し、その差を求める。
+      </p>
 
 
 
@@ -175,27 +178,31 @@
         <li><span class='inline-gray'>prob_c</span>: 処置しなかった場合の予測確率 30%</li>
         <li><span class='inline-gray'>uplift</span>: prob_tとprob_cの差分 40points</li>
       </ul>
-      <p>差分の値が大きい顧客ほど、クーポン配布したことにより、配布しなかった場合に比べて購入確率が上昇すると解釈できる。このように、ある人に<span class='inline-mark'>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</span>を<strong>アップリフト</strong>と呼ぶ。</p>
+      <p>差分の値が大きい顧客ほど、クーポン配布したことにより、配布しなかった場合に比べて購入確率が上昇すると解釈できる。このように、ある人に<span
+          class='inline-mark'>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</span>を<strong>アップリフト</strong>と呼ぶ。</p>
 
       <div class="mdc-note-box">
-        <p>ビジネスやマーケティングの実務においては「買った」「増えた」など上向きの結果・行動への関心が強い。そのため、アップリフト/押し上げ/上積み効果（incremental effect）などと表現されることが多い。だがuplift (modeling) は、当然ながら「増える場合だけ」を指すわけではない。処置によって結果が20points減る（アップリフトがマイナスの値をとる）場合もある。 Uplift is defined as the difference in outcome between the "Probability if Treated" and the "Probability if Control."</p>
+        <p>ビジネスやマーケティングの実務においては「買った」「増えた」など上向きの結果・行動への関心が強い。そのため、アップリフト/押し上げ/上積み効果（incremental
+          effect）などと表現されることが多い。だがuplift (modeling) は、当然ながら「増える場合だけ」を指すわけではない。処置によって結果が20points減る（アップリフトがマイナスの値をとる）場合もある。
+          Uplift is defined as the difference in outcome between the "Probability if Treated" and the "Probability if
+          Control."</p>
       </div>
 
 
-<h4>アップリフト推定値の解釈</h4>
-<p>アップリフトは一般には、<span class='inline-marker'>その人の特徴量に条件付けた平均処置効果（CATE）の推定値</span>として解釈される。</p>
-<p>実際のモデルでは連続値の特徴量などを条件として推定するため、顧客ごとに異なるアップリフト推定値が出力される。だが、同じ個人について施策あり/なしの両方の結果を同時に観測できないため、
-  個人の真の処置効果（ITE）を直接求めているわけではない。</p>
-<ul>
-  <li><span class='inline-gray'>CATE（Conditional Average Treatment Effect）</span>: 顧客の特徴量などの条件に応じた平均処置効果</li>
-  <li><span class='inline-gray'>ITE（Individual Treatment Effect）</span>: 個人ごとの処置効果</li>
-</ul>
-<div class="mdc-note-box">
+      <h4>アップリフト推定値の解釈</h4>
+      <p>アップリフトは一般には、<span class='inline-marker'>その人の特徴量に条件付けた平均処置効果（CATE）の推定値</span>として解釈される。</p>
+      <p>実際のモデルでは連続値の特徴量などを条件として推定するため、顧客ごとに異なるアップリフト推定値が出力される。だが、同じ個人について施策あり/なしの両方の結果を同時に観測できないため、
+        個人の真の処置効果（ITE）を直接求めているわけではない。</p>
+      <ul>
+        <li><span class='inline-gray'>CATE（Conditional Average Treatment Effect）</span>: 顧客の特徴量などの条件に応じた平均処置効果</li>
+        <li><span class='inline-gray'>ITE（Individual Treatment Effect）</span>: 個人ごとの処置効果</li>
+      </ul>
+      <div class="mdc-note-box">
 
-  <p>個人単位の推定値を individual treatment effect estimate
-    と呼ぶ文献もあるため、個々のアップリフトをITEと表現することは致命的な誤りではない。ただし、モデルの出力が個人単位であることと、個人の真の処置効果を推定できていることは別。</p>
-  <p>ここでいう「平均」は、必ずしも実際に存在する明確な集団の平均を計算しているという意味ではない。モデルは学習データから特徴量と処置効果の関係を推定し、個々の特徴量に対応する条件付き期待値を予測している。</p>
-</div>
+        <p>個人単位の推定値を individual treatment effect estimate
+          と呼ぶ文献もあるため、個々のアップリフトをITEと表現することは致命的な誤りではない。ただし、モデルの出力が個人単位であることと、個人の真の処置効果を推定できていることは別。</p>
+        <p>ここでいう「平均」は、必ずしも実際に存在する明確な集団の平均を計算しているという意味ではない。モデルは学習データから特徴量と処置効果の関係を推定し、個々の特徴量に対応する条件付き期待値を予測している。</p>
+      </div>
 
 
       <h3 id="basic-concept">基本的な考え方</h3>
@@ -218,50 +225,51 @@
 
 
 
-<h3 id="benefits-challenges">メリットと課題</h3>
-<p>アップリフトモデリングについてのここまでのまとめ。</p>
+      <h3 id="benefits-challenges">メリットと課題</h3>
+      <p>アップリフトモデリングについてのここまでのまとめ。</p>
 
-<h4>メリット</h4>
-<p>通常の購買予測モデルとは異なり、施策によって行動が変わる顧客を推定できるという特徴がある。</p>
-<ul>
-  <li><strong>施策効果に基づく対象者の選定</strong>：もともと購入する可能性が高い顧客ではなく、施策によって購入確率が高まる顧客を優先できる。</li>
-  <li><strong>施策コストの効率化</strong>：施策による増分効果が小さい顧客への配布を抑え、限られた予算で効果を高めることを目指せる。</li>
-  <li><strong>顧客に応じた施策の最適化</strong>：顧客の特徴による効果の違いを推定し、対象者の選定や施策の改善に活用できる。</li>
-</ul>
+      <h4>メリット</h4>
+      <p>通常の購買予測モデルとは異なり、施策によって行動が変わる顧客を推定できるという特徴がある。</p>
+      <ul>
+        <li><strong>施策効果に基づく対象者の選定</strong>：もともと購入する可能性が高い顧客ではなく、施策によって購入確率が高まる顧客を優先できる。</li>
+        <li><strong>施策コストの効率化</strong>：施策による増分効果が小さい顧客への配布を抑え、限られた予算で効果を高めることを目指せる。</li>
+        <li><strong>顧客に応じた施策の最適化</strong>：顧客の特徴による効果の違いを推定し、対象者の選定や施策の改善に活用できる。</li>
+      </ul>
 
-<h4>課題</h4>
-<p>一方、通常の予測モデルとは異なる難しさがある。</p>
-<ul>
-  <li><strong>反実仮想の問題</strong>：同じ顧客について、施策を実施した場合と実施しなかった場合の結果を同時に観測することはできない。そのため、個人ごとの施策効果を直接計算することはできない。</li>
-  <li><strong>データと因果推論の重要性</strong>：施策群と対照群の違いが、施策そのものによるものなのか、顧客の特徴や施策の割り当てによるものなのかを考慮する必要がある。</li>
-  <li><strong>推定と評価の難しさ</strong>：個人ごとの効果の正解値がないため、通常の予測モデルと同じ方法では評価できない。また、推定値にはばらつきがあり、モデルの性能を安定して評価するには工夫が必要になる。</li>
-</ul>
-<table>
-  <thead>
-    <tr>
-      <th align="left">メリット</th>
-      <th align="left">それに関係する難しさ</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left">施策によって行動が変わる顧客を見つけられる</td>
-      <td align="left">個人ごとの施策効果は直接観測できない</td>
-    </tr>
-    <tr>
-      <td align="left">施策コストを抑え、増分効果を高められる可能性がある</td>
-      <td align="left">推定値にはばらつきがあり、実際の成果を保証するものではない</td>
-    </tr>
-    <tr>
-      <td align="left">顧客の特徴に応じて施策対象を選べる</td>
-      <td align="left">適切なデータと因果効果を評価するための工夫が必要</td>
-    </tr>
-  </tbody>
-</table>
-<p>アップリフトモデリングは施策対象者の選定を改善するための有用な手法だが、推定された効果がそのまま実際の成果を保証するわけではない。適切なデータによるモデル構築と評価に加え、実際の施策を通じた効果検証が重要となる。</p>
-<p><a
-    href="https://sasasakaz.github.io/pages/uplift_advanced.html">アップリフトモデリング（実践）</a>では、後述する傾向スコアやIPWを使用しながら、モデル評価をより適切におこなうことを目指す。
-</p>
+      <h4>課題</h4>
+      <p>一方、通常の予測モデルとは異なる難しさがある。</p>
+      <ul>
+        <li><strong>反実仮想の問題</strong>：同じ顧客について、施策を実施した場合と実施しなかった場合の結果を同時に観測することはできない。そのため、個人ごとの施策効果を直接計算することはできない。</li>
+        <li><strong>データと因果推論の重要性</strong>：施策群と対照群の違いが、施策そのものによるものなのか、顧客の特徴や施策の割り当てによるものなのかを考慮する必要がある。</li>
+        <li><strong>推定と評価の難しさ</strong>：個人ごとの効果の正解値がないため、通常の予測モデルと同じ方法では評価できない。また、推定値にはばらつきがあり、モデルの性能を安定して評価するには工夫が必要になる。
+        </li>
+      </ul>
+      <table>
+        <thead>
+          <tr>
+            <th align="left">メリット</th>
+            <th align="left">それに関係する難しさ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="left">施策によって行動が変わる顧客を見つけられる</td>
+            <td align="left">個人ごとの施策効果は直接観測できない</td>
+          </tr>
+          <tr>
+            <td align="left">施策コストを抑え、増分効果を高められる可能性がある</td>
+            <td align="left">推定値にはばらつきがあり、実際の成果を保証するものではない</td>
+          </tr>
+          <tr>
+            <td align="left">顧客の特徴に応じて施策対象を選べる</td>
+            <td align="left">適切なデータと因果効果を評価するための工夫が必要</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>アップリフトモデリングは施策対象者の選定を改善するための有用な手法だが、推定された効果がそのまま実際の成果を保証するわけではない。適切なデータによるモデル構築と評価に加え、実際の施策を通じた効果検証が重要となる。</p>
+      <p><a
+          href="https://sasasakaz.github.io/pages/uplift_advanced.html">アップリフトモデリング（実践）</a>では、後述する傾向スコアやIPWを使用しながら、モデル評価をより適切におこなうことを目指す。
+      </p>
 
 
 
@@ -276,7 +284,8 @@
         <li>特徴量X + 処置変数Tから、目的変数y（購入する/しない）を学習させる（2値分類問題）。</li>
         <li>学習後、顧客全員の処置変数Tを1（クーポン配布）とした場合の購入確率 prob_t を予測させる。</li>
         <li>同じモデルで、顧客全員のTを0（配布しない）とした場合の購入確率 prob_c を予測させる。</li>
-        <li>同じ<strong>1つのモデル</strong>から得られた予測値の差分をアップリフトとする。 <span class='inline-gray'>uplift = prob_t - prob_c</span></li>
+        <li>同じ<strong>1つのモデル</strong>から得られた予測値の差分をアップリフトとする。 <span class='inline-gray'>uplift = prob_t - prob_c</span>
+        </li>
       </ol>
       <p>S-Learnerは構造がシンプルで、通常の予測モデルを比較的そのまま利用できる。</p>
       <p>
@@ -290,23 +299,24 @@
         <li>データを処置あり/なしで物理的に分け、処置群と対照群を用意。</li>
         <li>処置群だけでTreatモデルを作成、処置をした場合の購入確率 prob_t を予測。</li>
         <li>対照群だけでControlモデルを作成、処置しなかった場合の購入確率 prob_c を予測。</li>
-        <li>同じ顧客をそれぞれのモデルに入力し、<strong>2つのモデル</strong>から得られた予測値の差分をアップリフトとする。 <span class='inline-gray'>uplift = prob_t - prob_c</span></li>
+        <li>同じ顧客をそれぞれのモデルに入力し、<strong>2つのモデル</strong>から得られた予測値の差分をアップリフトとする。 <span class='inline-gray'>uplift = prob_t -
+            prob_c</span></li>
       </ol>
-<p>T-Learnerも構造はシンプル。そしてS-Learner同様に正則化バイアス（偏り）が発生する場合がある。</p>
-<ul>
-  <li>TreatモデルとControlモデルは独立に学習させる<ol>
-      <li>片方では正則化が強く効き、もう片方は弱めに抑制されるなどバラバラ。</li>
-      <li>差分をとったときにバイアスが残ったり増幅されるリスクがある。</li>
-      <li>アップリフトの分散が大きくなりがち。</li>
-    </ol>
-  </li>
-  <li>TreatとControlに分割する<ol>
-      <li>サンプルサイズは小さく、分散は大きくなり、データが疎の領域が出現。</li>
-      <li>正則化がかかると、データ不足の未知領域においてモデルは安全策として予測値を平均値やゼロに近づけようとする。</li>
-      <li>TreatとControlの両方のモデルが、よくわからないからゼロ（または平均）と予測し、その差分のアップリフトもゼロに。</li>
-    </ol>
-  </li>
-</ul>
+      <p>T-Learnerも構造はシンプル。そしてS-Learner同様に正則化バイアス（偏り）が発生する場合がある。</p>
+      <ul>
+        <li>TreatモデルとControlモデルは独立に学習させる<ol>
+            <li>片方では正則化が強く効き、もう片方は弱めに抑制されるなどバラバラ。</li>
+            <li>差分をとったときにバイアスが残ったり増幅されるリスクがある。</li>
+            <li>アップリフトの分散が大きくなりがち。</li>
+          </ol>
+        </li>
+        <li>TreatとControlに分割する<ol>
+            <li>サンプルサイズは小さく、分散は大きくなり、データが疎の領域が出現。</li>
+            <li>正則化がかかると、データ不足の未知領域においてモデルは安全策として予測値を平均値やゼロに近づけようとする。</li>
+            <li>TreatとControlの両方のモデルが、よくわからないからゼロ（または平均）と予測し、その差分のアップリフトもゼロに。</li>
+          </ol>
+        </li>
+      </ul>
       <p>2モデルに分割する構造であるがゆえに、バイアス発生の懸念がある。</p>
 
 
@@ -333,7 +343,7 @@
 
 
       <h3 id="differences">S/T/X-Learnerの違い</h3>
-            <p>どの方法が常に優れているというわけではなく、データの量や処置有無の均衡性（バランス）、特徴量と処置効果の関係などによって適した方法は変わる。</p>
+      <p>どの方法が常に優れているというわけではなく、データの量や処置有無の均衡性（バランス）、特徴量と処置効果の関係などによって適した方法は変わる。</p>
       <table>
         <thead>
           <tr>
@@ -378,11 +388,11 @@
       <p>顧客の特徴量をXとすると、<em>P(Treatment = 1 | X)</em> を推定したものが傾向スコア。顧客A: 傾向スコア 0.8　顧客B: 傾向スコア
         0.3　であれば、顧客Aは特徴量から見ると処置を受ける可能性が高く、顧客Bは低かったと想定している。</p>
 
-<ol>
-  <li>仮に、処置群には「もともとラテをよく買う人」が多く、対照群には少なかったとする。</li>
-  <li>この状態で単純に「処置群の購入率 - 対照群の購入率」を計算すると、購入率の違いは、クーポンの効果なのか、もともとの顧客特性の違いなのかが判別しにくい。</li>
-  <li>傾向スコアは、こうした処置を受ける確率の違いを考慮するために利用する。</li>
-</ol>
+      <ol>
+        <li>仮に、処置群には「もともとラテをよく買う人」が多く、対照群には少なかったとする。</li>
+        <li>この状態で単純に「処置群の購入率 - 対照群の購入率」を計算すると、購入率の違いは、クーポンの効果なのか、もともとの顧客特性の違いなのかが判別しにくい。</li>
+        <li>傾向スコアは、こうした処置を受ける確率の違いを考慮するために利用する。</li>
+      </ol>
 
 
       <h3 id="ipw">IPW</h3>
@@ -410,7 +420,8 @@
       <h3 id="concept-development">2000年代初頭</h3>
       <p><strong>概念の発展</strong></p>
       <p>現在のアップリフトモデリングにつながる考え方は、1990年代末から2000年代初頭にかけて、ダイレクトマーケティングの分野で発展した。</p>
-      <p>従来の応答予測モデルでは、「広告やキャンペーンに反応しそうな人」を予測する。しかし、その中には、施策がなくても自発的に購入する顧客も含まれている。そこで、施策によって生じる<strong>増分価値（Incremental Value）</strong>を予測しようという考え方が登場した。</p>
+      <p>従来の応答予測モデルでは、「広告やキャンペーンに反応しそうな人」を予測する。しかし、その中には、施策がなくても自発的に購入する顧客も含まれている。そこで、施策によって生じる<strong>増分価値（Incremental
+          Value）</strong>を予測しようという考え方が登場した。</p>
       <p>Hansotia &amp; Rukstales (2002) は、マーケティング施策による増分価値を扱う Incremental Value Modeling を提案した。</p>
       <p>その後、Nicholas J. Radcliffeらによって、処置群と対照群の反応の差を利用してマーケティング施策の対象者を選ぶ考え方が整理され、Uplift Model / Uplift Modeling
         という呼び方が広まっていった。Radcliffe (2007) は、アップリフトモデルの構築方法だけでなく、モデルの評価方法や実際のマーケティングへの適用についても整理している。</p>
@@ -491,4 +502,5 @@
     <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 </body>
+
 </html>

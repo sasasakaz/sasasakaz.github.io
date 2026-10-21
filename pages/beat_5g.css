@@ -1,5 +1,53 @@
 @charset "utf-8";
 
+/* =====================================================================
+   page_common.css 併用のための調整
+   （2カラム版: <body class="layout-3col l3-2col">）
+
+   page_common.css の本文用スタイル（見出し・余白・表など）を、このページでは使わない。
+   ===================================================================== */
+
+/* 本文カラムの上限幅（2カラム版）。広げたい・狭めたいときはここを変える */
+.layout-3col {
+  --l3-content-max: min(95%, 1400px);
+}
+
+/* 旧 common.css の button / a の設定（page_common.css には無い）。
+   :where() で詳細度を 0 にして、旧 common.css と同じ強さのまま、本文内(#content)だけに限定する。
+   （上部バーのボタンなど、本文の外には影響しない） */
+:where(#content) button {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+}
+
+:where(#content) a {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* page_common.css の見出し・余白の設定を打ち消して、ブラウザ標準の見た目に戻す。
+   site共通の見た目にそろえたくなったら、この3ブロックを消す */
+#header h1 {
+  margin-bottom: revert;
+}
+
+#content h2 {
+  all: revert;
+}
+
+#content :is(p, ul, ol) {
+  margin-block: revert;
+}
+
+/* page_common.css の表の設定のうち、このページの表にだけ残る分を打ち消す（個別の設定は下の各表の記述） */
+
 /* 基本は縦並び（スマホ用） */
 .main-container {
   display: flex;
@@ -32,9 +80,15 @@
 
 
 body {
-  font-size: 0.9rem;
-  width: 95%;
   background: #fff;
+  /* 旧 common.css から引き継ぎ（スマホで横に揺れない／文字サイズの自動調整をオフ） */
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* 旧: body の font-size。上部バーやページ一覧には効かないよう、本文(#content)だけに付ける */
+#content {
+  font-size: 0.9rem;
 }
 
 /* 左右に分ける親要素 */
@@ -56,6 +110,7 @@ body {
 
 /* 右カラムは残りの幅を全部使う */
 .result-area {
+  max-width: 100%;
   flex: 1;
 }
 
@@ -124,20 +179,30 @@ input {
 #confirmation-table {
   background-color: #f2f2f2;
   border-collapse: collapse;
+  border: 0;
   width: 100%;
-  margin-top: 1rem;
+  margin: 1rem 0 0;
   font-size: 0.85rem;
+  line-height: normal;
 }
 
 #confirmation-table th,
 #confirmation-table td {
   padding: 0.5rem 0.25rem;
+  border: 0;
   border-bottom: 1px solid #ddd;
+  vertical-align: middle;
 }
 
 #confirmation-table th {
   color: #555;
   text-align: center;
+  background: none;
+}
+
+/* JS が align="right" で出力する右揃えを、page_common.css の td{text-align:left} に負けないようにする */
+#confirmation-table td {
+  text-align: right;
 }
 
 /* 異常値のテキスト用クラス */
@@ -304,8 +369,7 @@ summary {
 #summary-chart {
   width: 640px;
   height: 320px;
-  /* 大きくなりすぎない上限 */
-  max-width: 640px;
+  max-width: 100%;
   margin-bottom: 1.25rem;
   padding: 0.5rem;
   background: #fff;
@@ -315,14 +379,14 @@ summary {
 
 #all-groups-hdi-container {
   width: 720px;
-  max-width: 720px;
+  max-width: 100%;
   padding: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
 .hdi-individual-plot {
   width: 640px;
-  max-width: 640px;
+  max-width: 100%;
   height: 40px;
 }
 
@@ -330,6 +394,8 @@ summary {
 .mdc-warn-box {
   background-color: #FFF3CD;
   border-color: #FFEEBA;
+  border-left: none;
+  /* page_common.css の .mdc-warn-box の左線（橙）を使わない */
   padding: 0.25rem 1rem;
   margin: 1.25rem 0;
   border-radius: 0.5rem;
@@ -350,10 +416,11 @@ summary {
 /* 推定結果テーブルのスタイル */
 .summary-table {
   width: 400px;
-  max-width: 640px;
+  max-width: 100%;
   border-collapse: collapse;
   margin: 0.5rem 3rem;
   font-size: 0.85rem;
+  line-height: normal;
   background-color: #fff;
   border: 1px solid #ddd;
 }
@@ -362,6 +429,12 @@ summary {
 .summary-table td {
   padding: 0.25rem;
   border: 1px solid #ddd;
+  vertical-align: middle;
+}
+
+/* JS が align="right" で出力する右揃え（1列目だけ JS のインライン指定で中央） */
+.summary-table td {
+  text-align: right;
 }
 
 .summary-table th {
@@ -383,9 +456,23 @@ summary {
 }
 
 
+@media (max-width: 767px) {
+  .summary-table {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .summary-table-details {
+    margin-left: 0;
+  }
+}
+
+
+
+
 #all-diffs-summary-container {
   width: 640px;
-  max-width: 640px;
+  max-width: 100%;
   padding: 0.5rem;
   margin-bottom: 0.5rem;
 }

@@ -5,8 +5,8 @@
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>アップリフトモデリング（実践）</title>
-  <link href='https://sasasakaz.github.io/pages/uplift_advanced.html' rel='canonical'>
-  <link rel="icon" href="https://github.com/sasasakaz.png">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/uplift_advanced.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="アップリフトモデリングの実践。キャリブレーション、推定値の妥当性、Qini曲線やAUUCなどモデル評価、期待純利益シミュレーションなどについて紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="アップリフトモデリング（実践）">
@@ -15,9 +15,28 @@
   <meta property="og:url" content="https://sasasakaz.github.io/pages/uplift_advanced.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
 
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
-  <!-- Google Tag Manager -->
+  <!-- syntax highlighter start -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <script>
+    // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
+    window.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+    });
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
   <script>
@@ -25,28 +44,8 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
     gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="page_common.css">
-  <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
-    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
-  <script src="page_layout.js" defer></script>
-
-<!-- syntax highlighter start -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
-<script>
-  // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
-  window.addEventListener('DOMContentLoaded', () => {
-    hljs.highlightAll();
-  });
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
-<!-- syntax highlighter end -->
-
-  <style>
-  </style>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
 <body class="layout-3col">
@@ -81,13 +80,13 @@
         <p>アップリフトモデリングの評価方法などを解説。</p>
       </header>
 
-<div class="mdc-info-box">
-  <ul>
-    <li>Sanity: まずは、モデルの推定値そのものの「健全性」をチェックする。</li>
-    <li>Evaluation: 次にモデルの「選別性能」を評価し、推定値の不確実性を把握する。</li>
-    <li>Profiling: 期待純利益の試算などもおこなうことで、「施策の検討に役立つ」情報を整理する。</li>
-  </ul>
-</div>
+      <div class="mdc-info-box">
+        <ul>
+          <li>Sanity: まずは、モデルの推定値そのものの「健全性」をチェックする。</li>
+          <li>Evaluation: 次にモデルの「選別性能」を評価し、推定値の不確実性を把握する。</li>
+          <li>Profiling: 期待純利益の試算などもおこなうことで、「施策の検討に役立つ」情報を整理する。</li>
+        </ul>
+      </div>
 
       <p>サンプル事例</p>
       <ul>
@@ -147,7 +146,8 @@ lightgbm 4.6.0
         <li>つまり、<strong>処置あり/なしそれぞれの確率のズレ</strong>がアップリフトの推定値にも影響しやすい。</li>
       </ol>
       <p>
-        だからといって、アップリフトモデリングでは必ずキャリブレーションしなければならないわけではない。キャリブレーションなしでも十分な順位付け性能が得られる場合はある。サンプル事例では<span class='inline-marker'>分類モデルの予測確率を実際の発生率により対応させる</span>ことを目的として、キャリブレーションをおこなう。
+        だからといって、アップリフトモデリングでは必ずキャリブレーションしなければならないわけではない。キャリブレーションなしでも十分な順位付け性能が得られる場合はある。サンプル事例では<span
+          class='inline-marker'>分類モデルの予測確率を実際の発生率により対応させる</span>ことを目的として、キャリブレーションをおこなう。
       </p>
 
 
@@ -156,13 +156,15 @@ lightgbm 4.6.0
       <p>分類器（モデル）とは別に、モデルが出力した確率やスコア（CVしやすさ、増分の大きさなど）を、実際の発生率に対応するように変換する較正器（キャリブレーター）を追加する。</p>
       <p>キャリブレーションには複数の手法がある。ここでは、scikit-learnの<code>CalibratedClassifierCV</code>で利用できる手法のうち2つを取り上げる。</p>
       <ul>
-        <li><span class='inline-gray'>Sigmoid（Platt Scaling）</span><ul>
+        <li><span class='inline-gray'>Sigmoid（Platt Scaling）</span>
+          <ul>
             <li>シグモイド関数を使って、モデルの出力を確率に変換する方法。</li>
             <li>確率のズレが、シグモイド関数で十分に表現できる場合に適している（Isotonicよりも較正器の自由度が低い）。</li>
             <li>較正用データが少ない場合にも使いやすい。</li>
           </ul>
         </li>
-        <li><span class='inline-gray'>Isotonic（等調回帰）</span><ul>
+        <li><span class='inline-gray'>Isotonic（等調回帰）</span>
+          <ul>
             <li>データから単調な変換関数を学習する方法。</li>
             <li>特定の関数の形を仮定せず、データに合わせて柔軟に確率を調整できる。</li>
             <li>較正用データが少ないと過学習しやすいため、十分なデータを確保できる場合に検討する。</li>
@@ -363,13 +365,14 @@ model.fit(X, y)
         </p>
       </div>
 
-<img src="../images/uplift_advanced_calibration_before_after.jpg" alt="キャリブレーション前後の比較">
-<img src="../images/uplift_advanced_calibration_metrics.jpg" alt="キャリブレーション前後の指標比較">
+      <img src="../images/uplift_advanced_calibration_before_after.jpg" alt="キャリブレーション前後の比較">
+      <img src="../images/uplift_advanced_calibration_metrics.jpg" alt="キャリブレーション前後の指標比較">
 
 
       <h4>予測確率の分布</h4>
       <p>
-        キャリブレーションによって、予測確率の分布がどのように変化したかを見ておく。変化の仕方はさまざまなので、キャリブレーションの良否を判断するのではなく、<span class='inline-marker'>全体的な変化を把握</span>するための視点の一つ。
+        キャリブレーションによって、予測確率の分布がどのように変化したかを見ておく。変化の仕方はさまざまなので、キャリブレーションの良否を判断するのではなく、<span
+          class='inline-marker'>全体的な変化を把握</span>するための視点の一つ。
       </p>
 
       <div class="mdc-note-box">
@@ -501,11 +504,11 @@ model.fit(X, y)
         <li>アップリフトが極端な正負の値に偏っている</li>
       </ul>
       <p>このような場合、データリーケージやモデルの設定、予測の過度な確信、推定の不安定さなどが考えられる。</p>
-<ol>
-  <li>ただし分布だけで決めつけない（実際のデータや評価結果も確認する）。</li>
-  <li>一方で、極端な偏りがないことが処置効果の推定の正しさを保証するわけでもない。</li>
-  <li>またLearner間や処置群/対照群での分布の違いは、良否を判断するのではなく、各手法の特徴や推定の傾向を把握するために見る。</li>
-</ol>
+      <ol>
+        <li>ただし分布だけで決めつけない（実際のデータや評価結果も確認する）。</li>
+        <li>一方で、極端な偏りがないことが処置効果の推定の正しさを保証するわけでもない。</li>
+        <li>またLearner間や処置群/対照群での分布の違いは、良否を判断するのではなく、各手法の特徴や推定の傾向を把握するために見る。</li>
+      </ol>
 
 
       <h4>S,T-Learnerの分布</h4>
@@ -519,19 +522,19 @@ model.fit(X, y)
       <p>見方の一例</p>
       <ul>
         <li><strong>分布の形状</strong></li>
-          <ul>
-            <li>実際の購入率が低い場合、予測購入確率が低い値に偏ること自体は異常ではない。</li>
-            <li>分布が一極集中するなど顧客間の予測値の違いがほとんどない場合は、特徴量やモデルの設定が購入確率の違いを十分に捉えられていない可能性がある。</li>
-          </ul>
+        <ul>
+          <li>実際の購入率が低い場合、予測購入確率が低い値に偏ること自体は異常ではない。</li>
+          <li>分布が一極集中するなど顧客間の予測値の違いがほとんどない場合は、特徴量やモデルの設定が購入確率の違いを十分に捉えられていない可能性がある。</li>
+        </ul>
         <li><strong>prob_t vs prob_c</strong></li>
-          <ul>
-            <li>処置の有無によって予測購入確率がどのように変化しているか。</li>
-            <li>処置群平均（Treat mean） > 対照群平均（Control mean） であれば、平均的には処置によって購入確率が上昇すると予測している。</li>
-            <li>処置がランダム割り当ての場合は、平均予測値と実際の平均購入率（obs）を比較することで、予測が実際と大きく乖離していないか。</li>
-          </ul>
+        <ul>
+          <li>処置の有無によって予測購入確率がどのように変化しているか。</li>
+          <li>処置群平均（Treat mean） > 対照群平均（Control mean） であれば、平均的には処置によって購入確率が上昇すると予測している。</li>
+          <li>処置がランダム割り当ての場合は、平均予測値と実際の平均購入率（obs）を比較することで、予測が実際と大きく乖離していないか。</li>
+        </ul>
       </ul>
 
-<img src="../images/uplift_advanced_prob_dist_st.jpg" alt="S,T-Learnerの予測確率分布">
+      <img src="../images/uplift_advanced_prob_dist_st.jpg" alt="S,T-Learnerの予測確率分布">
 
 
       <h4>X-Learnerの分布</h4>
@@ -556,7 +559,7 @@ model.fit(X, y)
         <li>差の平均は2つの推定値の系統的なズレ、差の標準偏差は顧客ごとのズレのバラツキを表す。</li>
         <li>ズレが大きい場合は、処置群/対照群のデータ量や特徴量の分布などを確認し、推定が不安定になっていないかを調べる。</li>
       </ul>
-<img src="../images/uplift_advanced_prob_dist_x.jpg" alt="X-Learnerの予測確率分布">
+      <img src="../images/uplift_advanced_prob_dist_x.jpg" alt="X-Learnerの予測確率分布">
 
 
       <h4>S,T,X-Learnerのアップリフト</h4>
@@ -604,7 +607,7 @@ model.fit(X, y)
         </tbody>
       </table>
 
-<img src="../images/uplift_advanced_prob_dist_uplift.jpg" alt="アップリフトの予測分布">
+      <img src="../images/uplift_advanced_prob_dist_uplift.jpg" alt="アップリフトの予測分布">
 
 
 
@@ -614,7 +617,7 @@ model.fit(X, y)
         傾向スコアモデル（<code>g</code>）の<code>predict_proba()</code>から、処置を受ける確率を取り出し、処置群/対照群別に傾向スコア（PS）の分布をプロットする。2群の分布がどの程度重なっているかを確認することで、似たような特徴を持つ顧客について、<strong>処置群と対照群を比較できるだけのデータがあるか</strong>を把握する。X-LearnerやIPWを含む因果効果推定で重要な診断のひとつ。
       </p>
 
-<img src="../images/uplift_advanced_ps_overlap.jpg" alt="傾向スコアの分布の重なり">
+      <img src="../images/uplift_advanced_ps_overlap.jpg" alt="傾向スコアの分布の重なり">
 
 
       <strong>2群の分布が十分に重なっている場合</strong>
@@ -707,207 +710,210 @@ model.fit(X, y)
         <p>※共変量バランスが改善しても、未観測の交絡などが残っている可能性があるため、それだけで因果効果を正しく推定できると保証されるわけではない。</p>
       </div>
 
-<img src="../images/uplift_advanced_covariate_balance.jpg" alt="共変量バランスの可視化">
+      <img src="../images/uplift_advanced_covariate_balance.jpg" alt="共変量バランスの可視化">
 
 
 
 
       <h2 id="evaluation">Evaluation</h2>
-<p><span class='inline-pink'>モデルの選別性能を評価する</span></p>
-<p>アップリフトは個人ごとの正解を直接観測できないため、処置による増分成果を推定して評価する。また、推定値の変動度合い（不確実さ）の把握や、S,T,X-Learner間での比較についても検討する。ここでは以下を見る。</p>
-<ol>
-  <li>Qini曲線とAUUCでモデル性能を評価</li>
-  <li>ブートストラップによる不確実性の把握</li>
-  <li>TrainとValでの選別性能の差を確認（過学習チェック）</li>
-  <li>予測した成果と実際の成果の比較（成果の大きさが合っているか）</li>
-</ol>
+      <p><span class='inline-pink'>モデルの選別性能を評価する</span></p>
+      <p>アップリフトは個人ごとの正解を直接観測できないため、処置による増分成果を推定して評価する。また、推定値の変動度合い（不確実さ）の把握や、S,T,X-Learner間での比較についても検討する。ここでは以下を見る。</p>
+      <ol>
+        <li>Qini曲線とAUUCでモデル性能を評価</li>
+        <li>ブートストラップによる不確実性の把握</li>
+        <li>TrainとValでの選別性能の差を確認（過学習チェック）</li>
+        <li>予測した成果と実際の成果の比較（成果の大きさが合っているか）</li>
+      </ol>
 
 
 
-<h3 id="qini-curve-auuc">Qini曲線とAUUC</h3>
-<p>アップリフトは、クーポンを配布した場合と配布しなかった場合の購入確率の差を、顧客ごとに推定した値。</p>
-<p>クーポンを配布したからこそ購入しやすそうな顧客を優先して施策対象としたい場合、実務では「アップリフトが大きい上位20%の顧客」といった形で選び出すことが多い。</p>
-<p>
-  モデルが適切に顧客を順位付けできていれば、すなわち<strong>アップリフトの大小をうまく選別できていれば</strong>、施策対象には「クーポンないと買わなそうだが、クーポンがあると買いやすそうな人」を多く含んでいる可能性が高い。したがって、<span
-    class='inline-marker'>施策対象を絞った場合でも、より多くの増分購入を期待しやすい</span>と目される。</p>
-<p>モデルの選別性能を評価する指標やその算出方法は、複数の提案がなされている。サンプル事例では代表的なQini曲線（Qini Curve）とAUUCを用いる。</p>
+      <h3 id="qini-curve-auuc">Qini曲線とAUUC</h3>
+      <p>アップリフトは、クーポンを配布した場合と配布しなかった場合の購入確率の差を、顧客ごとに推定した値。</p>
+      <p>クーポンを配布したからこそ購入しやすそうな顧客を優先して施策対象としたい場合、実務では「アップリフトが大きい上位20%の顧客」といった形で選び出すことが多い。</p>
+      <p>
+        モデルが適切に顧客を順位付けできていれば、すなわち<strong>アップリフトの大小をうまく選別できていれば</strong>、施策対象には「クーポンないと買わなそうだが、クーポンがあると買いやすそうな人」を多く含んでいる可能性が高い。したがって、<span
+          class='inline-marker'>施策対象を絞った場合でも、より多くの増分購入を期待しやすい</span>と目される。</p>
+      <p>モデルの選別性能を評価する指標やその算出方法は、複数の提案がなされている。サンプル事例では代表的なQini曲線（Qini Curve）とAUUCを用いる。</p>
 
 
-<h4>Qini曲線</h4>
-<p>施策対象者の範囲をアップリフト上位から<span class='inline-mark'>徐々に変化させたときにどれだけの増分成果が得られそうか</span>を確認するための曲線。</p>
-<ul>
-  <li>グラフ横軸の左から右に、アップリフトの大きい順に顧客が並んでいるイメージ。</li>
-  <li>モデルの選別性能がよければ、左側（上位）ほど、施策による増分成果が大きい顧客が多く含まれると期待できる。</li>
-  <li>このときQini曲線は左上に膨らみ、ランダムに対象者を選んだ場合の基準線から離れる傾向がある。</li>
-  <li>右に進む（施策対象者を広げる）につれて、アップリフトの小さい顧客も対象に含まれていく。</li>
-  <li>例えば、上位20%を対象にした場合、上位40%を対象にした場合……というように、施策対象の割合（人数）を変えたときに、どの程度の増分成果が期待できそうかを視覚的に把握しやすい。</li>
-  <li>効率的な成果を目指して施策対象を絞り込むか、規模を目指して対象を広げるかなどの判断材料となる。</li>
-</ul>
+      <h4>Qini曲線</h4>
+      <p>施策対象者の範囲をアップリフト上位から<span class='inline-mark'>徐々に変化させたときにどれだけの増分成果が得られそうか</span>を確認するための曲線。</p>
+      <ul>
+        <li>グラフ横軸の左から右に、アップリフトの大きい順に顧客が並んでいるイメージ。</li>
+        <li>モデルの選別性能がよければ、左側（上位）ほど、施策による増分成果が大きい顧客が多く含まれると期待できる。</li>
+        <li>このときQini曲線は左上に膨らみ、ランダムに対象者を選んだ場合の基準線から離れる傾向がある。</li>
+        <li>右に進む（施策対象者を広げる）につれて、アップリフトの小さい顧客も対象に含まれていく。</li>
+        <li>例えば、上位20%を対象にした場合、上位40%を対象にした場合……というように、施策対象の割合（人数）を変えたときに、どの程度の増分成果が期待できそうかを視覚的に把握しやすい。</li>
+        <li>効率的な成果を目指して施策対象を絞り込むか、規模を目指して対象を広げるかなどの判断材料となる。</li>
+      </ul>
 
 
-<h4>AUUC: Area Under the Uplift Curve</h4>
-<p>モデルの顧客<span class='inline-mark'>選別性能</span>を、曲線の下側の面積によって評価する指標。</p>
-<ul>
-  <li>Qini曲線などの評価に用いる曲線の下側の面積を表す。</li>
-  <li>曲線全体を1つの数値にまとめることで、モデルの選別性能を比較しやすい。</li>
-  <li>同じデータかつ同じ計算方法で比較する場合、AUUCが大きいモデルほど、対象者の割合全体を通じて、より大きな累積増分成果を得られるように順位付けできている傾向がある。</li>
-  <li>値の大小は計算方法やデータによっても変わるため、ランダムを基準にするなど<span class='inline-marker'>相対的に評価</span>する。</li>
-  <li><strong>モデルが顧客をどの順番に並べるとよいか</strong>を評価する指標であり、各顧客のアップリフトを正確に予測できたかを直接評価するものではない。</li>
-</ul>
+      <h4>AUUC: Area Under the Uplift Curve</h4>
+      <p>モデルの顧客<span class='inline-mark'>選別性能</span>を、曲線の下側の面積によって評価する指標。</p>
+      <ul>
+        <li>Qini曲線などの評価に用いる曲線の下側の面積を表す。</li>
+        <li>曲線全体を1つの数値にまとめることで、モデルの選別性能を比較しやすい。</li>
+        <li>同じデータかつ同じ計算方法で比較する場合、AUUCが大きいモデルほど、対象者の割合全体を通じて、より大きな累積増分成果を得られるように順位付けできている傾向がある。</li>
+        <li>値の大小は計算方法やデータによっても変わるため、ランダムを基準にするなど<span class='inline-marker'>相対的に評価</span>する。</li>
+        <li><strong>モデルが顧客をどの順番に並べるとよいか</strong>を評価する指標であり、各顧客のアップリフトを正確に予測できたかを直接評価するものではない。</li>
+      </ul>
 
-<div class="mdc-note-box">
-  <p><strong>AUUCとROC-AUC</strong></p>
-  <p>面積を表す意味合いは同じだが、評価の対象や単位は全く異なる。そして以下のような違いがあるため、AUUCをROC-AUC感覚で読まないように注意する。</p>
-  <p>ROC-AUC</p>
-  <ul>
-    <li>値の範囲は0〜1で、ランダムな順位付けの期待値は0.5で不変。</li>
-    <li>正例と負例のクラス比率そのものには依存しない。ただしクラスごとのスコア分布が変われば値も変わり得る。</li>
-  </ul>
-  <p>AUUC</p>
-  <ul>
-    <li>値の範囲、基準値、単位は、曲線や面積の計算方法によって変わる。</li>
-    <li>成果の発生率や、処置群/対照群の成果の違いなどが値に影響する。</li>
-    <li>同じ定義かつ同じデータで比較することが重要で、異なる実装で算出した数値をそのまま比較できるとは限らない。</li>
-  </ul>
-  <p>
-    前述の通り、アップリフトモデリングの評価指標やその算出方法は、複数の提案がなされている。また<strong>アップリフトモデリング関連の用語はその指し示すものが明確ではない場合がある</strong>ことから、各指標やグラフが何を表しているかに注意する。
-  </p>
-</div>
-
-
-<h4>Qini曲線やAUUCの注意点</h4>
-<p><strong>Qini値</strong></p>
-<ul>
-  <li>アップリフト推定値の大きい順に顧客を並べ、上位から対象者の範囲を広げたときの累積増分成果を推定した値。</li>
-  <li>基本的には、人数、件数、金額などの実数で表される。</li>
-  <li>顧客一人ひとりに固有の値ではなく、対象者の範囲ごとに計算される。個々の顧客について増分成果を推定した値ではない。</li>
-</ul>
-<p><strong>Qini値の計算方法</strong></p>
-<ul>
-  <li>処置群の発生数から、対照群の行動発生率に基づく推定発生数を引く。 </li>
-  <li>Qini値 = 処置群の購入者数 - (対照群の購入者数 * 処置群の人数 / 対照群の人数)</li>
-  <li>サンプル事例では処置群/対照群の購入者数と人数をIPW重み付けして算出している。</li>
-</ul>
-<p><strong>Qini曲線のプロット</strong></p>
-<ul>
-  <li>グラフ横軸は施策対象者を表す値を、縦軸には累積増分成果を表す。</li>
-  <li><strong>軸の単位</strong>は実数の場合もあれば割り算値（割合や率など）、正規化する場合もある。</li>
-  <li>軸の単位を割り算値とする場合、その計算式には<strong>いろんな方法が提案</strong>されている。</li>
-  <li><span class='inline-marker'>Qini曲線はどんな値で何を表現しているかに注意</span>する。</li>
-</ul>
-<p><strong>Qini曲線のプロット（サンプル事例の場合）</strong></p>
-<ul>
-  <li>横軸に施策対象者の割合、縦軸に全顧客（Valデータ全員約8,100人）あたりの累積増分購入率を示している。上側と右側の軸はそれぞれの実数（対象者数と累積増分購入者数）。</li>
-  <li>例えば、横軸の0.2(20%)の位置では、アップリフトの大きい上位20%の顧客（約1,600人）を施策対象に選んだ場合の、累積増分成果の推定値を確認できる。</li>
-  <li>縦軸左側は、累積増分購入者数の推定値を全顧客数で割った値を表す。上位20%の位置での約7pointsとは、全顧客約8,100人に対して約570人分（右側の補助軸）の増分購入が推定されていることを意味する（570 / 8,100
-    ≒ 0.07）。<ul>
-      <li>処置対象が何人であろうと（横軸の値に関係なく）全員が処置なしの推定購入率（約24% 縦軸0に相当）を基点として購入率が7points増えるとの推定。</li>
-      <li>横軸100%の位置（Qini曲線終端）では、縦軸左側の値 = 推定ATE（約17%）となる。</li>
-      <li>「処置コストがどの顧客も同じ前提」であれば、横軸を予算の投下割合と対応づけての解釈も可能。例えば全員に処置する場合の予算の20%を使うと、全顧客の購入率が約7points増加（約570人）することが期待できる。</li>
-    </ul>
-  </li>
-</ul>
-<p>比較ポイント</p>
-<ul>
-  <li>各LearnerのQini曲線を比較することで、同じ割合の顧客を対象にしたとき、どのモデルがより大きな増分成果を期待できるかを比較できる。</li>
-  <li>ここでのAUUCは、Qini曲線グラフの単位に合わせて計算しているため、AUUCでも比較可能。</li>
-  <li>各Learnerが対角線（ランダムな対象者選定）を上回るだけでなく、ベースライン（通常の購入予測モデル:
-    処置有無を使わずに購入しそうな顧客を予測）よりも累積増分成果が大きければ、<strong>アップリフトモデリングを使って施策対象者を選定する意義</strong>がより明確になる。</li>
-</ul>
-<img src="../images/uplift_advanced_qini_curve.jpg" alt="Qini曲線とAUUC">
+      <div class="mdc-note-box">
+        <p><strong>AUUCとROC-AUC</strong></p>
+        <p>面積を表す意味合いは同じだが、評価の対象や単位は全く異なる。そして以下のような違いがあるため、AUUCをROC-AUC感覚で読まないように注意する。</p>
+        <p>ROC-AUC</p>
+        <ul>
+          <li>値の範囲は0〜1で、ランダムな順位付けの期待値は0.5で不変。</li>
+          <li>正例と負例のクラス比率そのものには依存しない。ただしクラスごとのスコア分布が変われば値も変わり得る。</li>
+        </ul>
+        <p>AUUC</p>
+        <ul>
+          <li>値の範囲、基準値、単位は、曲線や面積の計算方法によって変わる。</li>
+          <li>成果の発生率や、処置群/対照群の成果の違いなどが値に影響する。</li>
+          <li>同じ定義かつ同じデータで比較することが重要で、異なる実装で算出した数値をそのまま比較できるとは限らない。</li>
+        </ul>
+        <p>
+          前述の通り、アップリフトモデリングの評価指標やその算出方法は、複数の提案がなされている。また<strong>アップリフトモデリング関連の用語はその指し示すものが明確ではない場合がある</strong>ことから、各指標やグラフが何を表しているかに注意する。
+        </p>
+      </div>
 
 
-<p><strong>Qini曲線の軸を実数にするか割り算値にするか</strong></p>
-<p>サンプル事例では2軸ともに割り算値を採用しつつ、補助軸で実数も確認できるようにしている。</p>
-<table>
-  <thead>
-    <tr>
-      <th align="left"></th>
-      <th align="left">実数（人数・増分数）</th>
-      <th align="left">割り算値（割合や率など）</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left">メリット</td>
-      <td align="left">「500人に配ると200人増」のように、実際の規模をイメージしやすい</td>
-      <td align="left">データの人数によるスケールの違いを抑え、対象者割合や増分率として比較しやすい</td>
-    </tr>
-    <tr>
-      <td align="left"></td>
-      <td align="left">利益やコストに換算しやすい</td>
-      <td align="left">前提次第で「顧客全体の何%に配るか」という予算配分の比率として読める</td>
-    </tr>
-    <tr>
-      <td align="left">デメリット</td>
-      <td align="left">データの人数が異なると、値をそのまま比較しにくい</td>
-      <td align="left">実際の人数・件数がイメージしにくい</td>
-    </tr>
-    <tr>
-      <td align="left"></td>
-      <td align="left">横軸・縦軸がともに人数の場合、面積は人数の2乗に相当するスケールになり解釈しにくい</td>
-      <td align="left">軸の定義や分母が明記されていないと、何を表しているかわかりにくい</td>
-    </tr>
-  </tbody>
-</table>
-<p><strong>AUUC</strong></p>
-<ul>
-  <li>曲線の下側の面積を表す指標。</li>
-  <li>曲線をプロットしたグラフにおける単位と連動しているとは限らない。</li>
-  <li>どの曲線の、どの範囲の面積か、値を正規化するかなど、<strong>いろんな方法が提案・実装</strong>されている。</li>
-  <li>評価に用いる曲線には、Qini曲線、Uplift曲線、Gain曲線などがある。</li>
-  <li>曲線の下側の総面積を指すことも、なんらかの調整をしたり、ランダム選定の基準線との差の面積や正規化した面積を指すこともある。</li>
-  <li>ランダム選定の基準線との差の面積を、Qini係数（Qini coefficient）と呼ぶ定義もある（Qini係数にも正規化方法などの違いがある）。</li>
-</ul>
-<p><strong>AUUC（サンプル事例の場合）</strong></p>
-<ul>
-  <li>曲線: IPW重み付きのQini曲線（アップリフト上位から累積した増分購入者率）</li>
-  <li>面積: 曲線の下側の総面積（ランダム選定の基準線との差ではない）。</li>
-  <li>単位: 横軸が割合（無次元）なので、縦軸と同じ「率」になる（ランダムのAUUC = ATE/2 になる）。</li>
-</ul>
-<p><strong>Qiniという表現</strong></p>
-<ul>
-  <li>Qiniという用語は、文献やライブラリによって異なる意味で使われることがある。</li>
-  <li>Qini値、Qini曲線、Qini曲線上の値、Qini係数など何を指しているかによって、計算方法や値の解釈も異なる。</li>
-  <li>用語だけで判断せず、<span class='inline-marker'>何をどんな計算方法で表しているかに注意</span>する。</li>
-</ul>
+      <h4>Qini曲線やAUUCの注意点</h4>
+      <p><strong>Qini値</strong></p>
+      <ul>
+        <li>アップリフト推定値の大きい順に顧客を並べ、上位から対象者の範囲を広げたときの累積増分成果を推定した値。</li>
+        <li>基本的には、人数、件数、金額などの実数で表される。</li>
+        <li>顧客一人ひとりに固有の値ではなく、対象者の範囲ごとに計算される。個々の顧客について増分成果を推定した値ではない。</li>
+      </ul>
+      <p><strong>Qini値の計算方法</strong></p>
+      <ul>
+        <li>処置群の発生数から、対照群の行動発生率に基づく推定発生数を引く。 </li>
+        <li>Qini値 = 処置群の購入者数 - (対照群の購入者数 * 処置群の人数 / 対照群の人数)</li>
+        <li>サンプル事例では処置群/対照群の購入者数と人数をIPW重み付けして算出している。</li>
+      </ul>
+      <p><strong>Qini曲線のプロット</strong></p>
+      <ul>
+        <li>グラフ横軸は施策対象者を表す値を、縦軸には累積増分成果を表す。</li>
+        <li><strong>軸の単位</strong>は実数の場合もあれば割り算値（割合や率など）、正規化する場合もある。</li>
+        <li>軸の単位を割り算値とする場合、その計算式には<strong>いろんな方法が提案</strong>されている。</li>
+        <li><span class='inline-marker'>Qini曲線はどんな値で何を表現しているかに注意</span>する。</li>
+      </ul>
+      <p><strong>Qini曲線のプロット（サンプル事例の場合）</strong></p>
+      <ul>
+        <li>横軸に施策対象者の割合、縦軸に全顧客（Valデータ全員約8,100人）あたりの累積増分購入率を示している。上側と右側の軸はそれぞれの実数（対象者数と累積増分購入者数）。</li>
+        <li>例えば、横軸の0.2(20%)の位置では、アップリフトの大きい上位20%の顧客（約1,600人）を施策対象に選んだ場合の、累積増分成果の推定値を確認できる。</li>
+        <li>縦軸左側は、累積増分購入者数の推定値を全顧客数で割った値を表す。上位20%の位置での約7pointsとは、全顧客約8,100人に対して約570人分（右側の補助軸）の増分購入が推定されていることを意味する（570 /
+          8,100
+          ≒ 0.07）。<ul>
+            <li>処置対象が何人であろうと（横軸の値に関係なく）全員が処置なしの推定購入率（約24% 縦軸0に相当）を基点として購入率が7points増えるとの推定。</li>
+            <li>横軸100%の位置（Qini曲線終端）では、縦軸左側の値 = 推定ATE（約17%）となる。</li>
+            <li>
+              「処置コストがどの顧客も同じ前提」であれば、横軸を予算の投下割合と対応づけての解釈も可能。例えば全員に処置する場合の予算の20%を使うと、全顧客の購入率が約7points増加（約570人）することが期待できる。
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <p>比較ポイント</p>
+      <ul>
+        <li>各LearnerのQini曲線を比較することで、同じ割合の顧客を対象にしたとき、どのモデルがより大きな増分成果を期待できるかを比較できる。</li>
+        <li>ここでのAUUCは、Qini曲線グラフの単位に合わせて計算しているため、AUUCでも比較可能。</li>
+        <li>各Learnerが対角線（ランダムな対象者選定）を上回るだけでなく、ベースライン（通常の購入予測モデル:
+          処置有無を使わずに購入しそうな顧客を予測）よりも累積増分成果が大きければ、<strong>アップリフトモデリングを使って施策対象者を選定する意義</strong>がより明確になる。</li>
+      </ul>
+      <img src="../images/uplift_advanced_qini_curve.jpg" alt="Qini曲線とAUUC">
+
+
+      <p><strong>Qini曲線の軸を実数にするか割り算値にするか</strong></p>
+      <p>サンプル事例では2軸ともに割り算値を採用しつつ、補助軸で実数も確認できるようにしている。</p>
+      <table>
+        <thead>
+          <tr>
+            <th align="left"></th>
+            <th align="left">実数（人数・増分数）</th>
+            <th align="left">割り算値（割合や率など）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="left">メリット</td>
+            <td align="left">「500人に配ると200人増」のように、実際の規模をイメージしやすい</td>
+            <td align="left">データの人数によるスケールの違いを抑え、対象者割合や増分率として比較しやすい</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">利益やコストに換算しやすい</td>
+            <td align="left">前提次第で「顧客全体の何%に配るか」という予算配分の比率として読める</td>
+          </tr>
+          <tr>
+            <td align="left">デメリット</td>
+            <td align="left">データの人数が異なると、値をそのまま比較しにくい</td>
+            <td align="left">実際の人数・件数がイメージしにくい</td>
+          </tr>
+          <tr>
+            <td align="left"></td>
+            <td align="left">横軸・縦軸がともに人数の場合、面積は人数の2乗に相当するスケールになり解釈しにくい</td>
+            <td align="left">軸の定義や分母が明記されていないと、何を表しているかわかりにくい</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>AUUC</strong></p>
+      <ul>
+        <li>曲線の下側の面積を表す指標。</li>
+        <li>曲線をプロットしたグラフにおける単位と連動しているとは限らない。</li>
+        <li>どの曲線の、どの範囲の面積か、値を正規化するかなど、<strong>いろんな方法が提案・実装</strong>されている。</li>
+        <li>評価に用いる曲線には、Qini曲線、Uplift曲線、Gain曲線などがある。</li>
+        <li>曲線の下側の総面積を指すことも、なんらかの調整をしたり、ランダム選定の基準線との差の面積や正規化した面積を指すこともある。</li>
+        <li>ランダム選定の基準線との差の面積を、Qini係数（Qini coefficient）と呼ぶ定義もある（Qini係数にも正規化方法などの違いがある）。</li>
+      </ul>
+      <p><strong>AUUC（サンプル事例の場合）</strong></p>
+      <ul>
+        <li>曲線: IPW重み付きのQini曲線（アップリフト上位から累積した増分購入者率）</li>
+        <li>面積: 曲線の下側の総面積（ランダム選定の基準線との差ではない）。</li>
+        <li>単位: 横軸が割合（無次元）なので、縦軸と同じ「率」になる（ランダムのAUUC = ATE/2 になる）。</li>
+      </ul>
+      <p><strong>Qiniという表現</strong></p>
+      <ul>
+        <li>Qiniという用語は、文献やライブラリによって異なる意味で使われることがある。</li>
+        <li>Qini値、Qini曲線、Qini曲線上の値、Qini係数など何を指しているかによって、計算方法や値の解釈も異なる。</li>
+        <li>用語だけで判断せず、<span class='inline-marker'>何をどんな計算方法で表しているかに注意</span>する。</li>
+      </ul>
 
 
 
       <h3 id="auuc-confidence-interval">AUUCの信頼区間</h3>
-<p>ブートストラップで<strong>不確実性</strong>を見る</p>
-<p>AUUCは評価に用いるデータの偶然の偏りによって変動する。そこで、データを繰り返し復元抽出してAUUCを計算し、その分布から信頼区間（Confidence Interval, CI）を求める。</p>
-<ul>
-  <li>サンプル事例では95%CIを使用。</li>
-  <li>同じ顧客のデータが複数行あるため、行単位ではなく顧客単位で復元抽出する（クラスターブートストラップ）。</li>
-  <li>これにより同じ顧客に属するデータの関連性を考慮する。</p>
-  </li>
-</ul>
-<p>信頼区間を用いることで、<span class='inline-mark'>AUUCの推定にどの程度の不確実性があるかを把握</span>する。</p>
-<ul>
-  <li><span class='inline-gray'>CIが狭い</span>: リサンプリングによるAUUCの変動が比較的小さい。</li>
-  <li><span class='inline-gray'>CIが広い</span>: リサンプリングによってAUUCが大きく変動する可能性がある。</li>
-</ul>
-<p>CIはモデルの性能が確実にその範囲に収まることを保証するものではない。またCIが広い場合は、評価データの件数や顧客構成なども踏まえて判断する。</p>
+      <p>ブートストラップで<strong>不確実性</strong>を見る</p>
+      <p>AUUCは評価に用いるデータの偶然の偏りによって変動する。そこで、データを繰り返し復元抽出してAUUCを計算し、その分布から信頼区間（Confidence Interval, CI）を求める。</p>
+      <ul>
+        <li>サンプル事例では95%CIを使用。</li>
+        <li>同じ顧客のデータが複数行あるため、行単位ではなく顧客単位で復元抽出する（クラスターブートストラップ）。</li>
+        <li>これにより同じ顧客に属するデータの関連性を考慮する。</p>
+        </li>
+      </ul>
+      <p>信頼区間を用いることで、<span class='inline-mark'>AUUCの推定にどの程度の不確実性があるかを把握</span>する。</p>
+      <ul>
+        <li><span class='inline-gray'>CIが狭い</span>: リサンプリングによるAUUCの変動が比較的小さい。</li>
+        <li><span class='inline-gray'>CIが広い</span>: リサンプリングによってAUUCが大きく変動する可能性がある。</li>
+      </ul>
+      <p>CIはモデルの性能が確実にその範囲に収まることを保証するものではない。またCIが広い場合は、評価データの件数や顧客構成なども踏まえて判断する。</p>
 
 
-<h4>ランダムターゲティングとの比較</h4>
-<p>各モデルのAUUCだけではランダムに施策対象を選んだ場合と比べて、どの程度の効果が得られるのかはわからない。グラフ上はQini曲線が対角線より上にあるように見えるが偶然の範囲なのでは？</p>
-<p>そこで、ブートストラップの各サンプルで、モデルのAUUCからランダムターゲティングのAUUCを引いた差を計算し、そのCIを確認する。</p>
-<ul>
-  <li><span class='inline-gray'>CIが0より大きい</span>: ランダムターゲティングを上回ることを示す。</li>
-  <li><span class='inline-gray'>CIが0をまたぐ</span>: ランダムターゲティングを上回るとは、十分な根拠をもって判断できない。</li>
-</ul>
+      <h4>ランダムターゲティングとの比較</h4>
+      <p>各モデルのAUUCだけではランダムに施策対象を選んだ場合と比べて、どの程度の効果が得られるのかはわからない。グラフ上はQini曲線が対角線より上にあるように見えるが偶然の範囲なのでは？</p>
+      <p>そこで、ブートストラップの各サンプルで、モデルのAUUCからランダムターゲティングのAUUCを引いた差を計算し、そのCIを確認する。</p>
+      <ul>
+        <li><span class='inline-gray'>CIが0より大きい</span>: ランダムターゲティングを上回ることを示す。</li>
+        <li><span class='inline-gray'>CIが0をまたぐ</span>: ランダムターゲティングを上回るとは、十分な根拠をもって判断できない。</li>
+      </ul>
 
 
-<h4>Learner間の比較</h4>
-<p>各モデルのAUUCのCIが重なっているかどうかだけで、モデル間に差があるかを判断するのは適切ではない。<strong>モデル間の差そのもののCI</strong>を確認する。</p>
-<p>サンプル事例では上記をペアードブートストラップしているので、Learner間の差の比較にも使える。</p>
-<ul>
-  <li><span class='inline-gray'>AUUCの差のCIが0をまたがない</span>: 2つのモデルの性能に差があることを示す結果。</li>
-  <li><span class='inline-gray'>AUUCの差のCIが0をまたぐ</span>: どちらが優れているかを明確に判断する根拠が十分ではない。</li>
-</ul>
-<p>CIが0をまたぐことは、2つのモデルの性能が同じであることを意味しない。また複数のモデルを比較する場合には、多重比較の影響にも注意が必要。</p>
+      <h4>Learner間の比較</h4>
+      <p>各モデルのAUUCのCIが重なっているかどうかだけで、モデル間に差があるかを判断するのは適切ではない。<strong>モデル間の差そのもののCI</strong>を確認する。</p>
+      <p>サンプル事例では上記をペアードブートストラップしているので、Learner間の差の比較にも使える。</p>
+      <ul>
+        <li><span class='inline-gray'>AUUCの差のCIが0をまたがない</span>: 2つのモデルの性能に差があることを示す結果。</li>
+        <li><span class='inline-gray'>AUUCの差のCIが0をまたぐ</span>: どちらが優れているかを明確に判断する根拠が十分ではない。</li>
+      </ul>
+      <p>CIが0をまたぐことは、2つのモデルの性能が同じであることを意味しない。また複数のモデルを比較する場合には、多重比較の影響にも注意が必要。</p>
 
 
 
@@ -923,7 +929,8 @@ model.fit(X, y)
 
 
       <h2 id="interpretation">モデルの解釈</h2>
-      <p>PFI, SHAP, PDP/ICEについてはここでは触れない。<a href="https://sasasakaz.github.io/pages/ml_interpretation.html">機械学習モデルの解釈</a>を参照。</p>
+      <p>PFI, SHAP, PDP/ICEについてはここでは触れない。<a
+          href="https://sasasakaz.github.io/pages/ml_interpretation.html">機械学習モデルの解釈</a>を参照。</p>
 
       <footer id="footer">
         <div class="footer-links">
@@ -938,4 +945,5 @@ model.fit(X, y)
     <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 </body>
+
 </html>
