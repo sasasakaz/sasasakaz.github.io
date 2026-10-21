@@ -32,6 +32,7 @@ p:has(+ ol) {
   margin-bottom: 0.4em;
   /* 下のulに引き寄せる */
 }
+
 /* その直後の ul,olの上余白もゼロにする */
 p+ul,
 p+ol {
@@ -60,9 +61,12 @@ h1 {
 
 h2 {
   font-size: 1.75em;
-  color: #1a365d;  /* 濃いネイビー */
-  border-left: 6px solid #2b5b84;  /* 太い左線 */
-  background-color: #f0f4f8;  /* うすい背景色 */
+  color: #1a365d;
+  /* 濃いネイビー */
+  border-left: 6px solid #2b5b84;
+  /* 太い左線 */
+  background-color: #f0f4f8;
+  /* うすい背景色 */
   padding: 0.4em 0.7em;
   border-radius: 0 4px 4px 0;
   margin-top: 3.0em;
@@ -72,9 +76,10 @@ h2 {
 h3 {
   font-size: 1.5em;
   color: #1a365d;
-  border-left: 4px solid #3182ce;  /* 中太左線、少し明るい青、背景なし */
-  background-color: #f0f4f8; 
-  padding: 0.3em 0.6em;  
+  border-left: 4px solid #3182ce;
+  /* 中太左線、少し明るい青、背景なし */
+  background-color: #f0f4f8;
+  padding: 0.3em 0.6em;
   margin-top: 2.5em;
   margin-bottom: 0.4em;
 }
@@ -85,7 +90,8 @@ h4 {
   border-left: 3px solid #3182ce;
   padding-left: 0.5em;
   margin-top: 2em;
-  margin-bottom: 0em;  /* 下はゼロにする */
+  margin-bottom: 0em;
+  /* 下はゼロにする */
 }
 
 
@@ -102,8 +108,10 @@ h4+p {
 img {
   max-width: 100%;
   height: auto;
-  display: block; /* ブロック要素にして中央寄せを効きやすくする */
-  margin: 1.5em auto; /* 上下に 1.5em、左右は自動で中央配置 */
+  display: block;
+  /* ブロック要素にして中央寄せを効きやすくする */
+  margin: 1.5em auto;
+  /* 上下に 1.5em、左右は自動で中央配置 */
 }
 
 #footer {
@@ -120,9 +128,11 @@ img {
 .toc {
   border: 1px solid #d0e7f5;
   border-radius: 0.5em;
-  padding: 1em 1.5em;  /* 枠線と中の余白 */
+  padding: 1em 1.5em;
+  /* 枠線と中の余白 */
   margin: 2em 0;
-  background-color: #f8fafc;  /* うっすら背景を入れるとカード感が出る */
+  background-color: #f8fafc;
+  /* うっすら背景を入れるとカード感が出る */
 }
 
 /* 目次のタイトル */
@@ -130,8 +140,10 @@ img {
   font-size: 1.05em;
   font-weight: bold;
   color: #1a365d;
-  margin-top: 0; /* デフォルトの大きな余白を全部消す */
-  margin-bottom: 0.2em;  /* 下のリスト（ul）との間のスキマだけ少し開ける */
+  margin-top: 0;
+  /* デフォルトの大きな余白を全部消す */
+  margin-bottom: 0.2em;
+  /* 下のリスト（ul）との間のスキマだけ少し開ける */
 
   /* h2の装飾（左線や背景帯など）が引き継がれないようにクリア */
   border: none;
@@ -191,8 +203,10 @@ blockquote {
 
 /* インラインコード用 */
 .inline-code {
-  background-color: #f4f4f4; /* ほんのりグレー */
-  color: #9b2c2c; /* 赤系の色 */
+  background-color: #f4f4f4;
+  /* ほんのりグレー */
+  color: #9b2c2c;
+  /* 赤系の色 */
   font-size: 0.9em;
   padding: 0.15em 0.4em;
   border-radius: 0.3em;
@@ -202,7 +216,8 @@ blockquote {
 
 .inline-mark {
   background-color: #ffeb3b;
-  color: #1a1a1a; /* 本文の #333 よりほんの少しだけ濃いダークグレー */
+  color: #1a1a1a;
+  /* 本文の #333 よりほんの少しだけ濃いダークグレー */
   /* font-size: 0.9em; */
   /* padding: 0.1em 0.3em; */
   border-radius: 0.3em;
@@ -234,8 +249,10 @@ blockquote {
 
 /* 注釈のインライン版やちょっとしたフレーズ用 */
 .inline-gray {
-  background-color: #eef2f6; /* ほんのり青みのあるうすいグレー */
-  color: #374151; /* ダークグレー（黒すぎない上品な色） */
+  background-color: #eef2f6;
+  /* ほんのり青みのあるうすいグレー */
+  color: #374151;
+  /* ダークグレー（黒すぎない上品な色） */
   font-size: 0.9em;
   padding: 0.15em 0.4em;
   border-radius: 0.3em;
@@ -334,7 +351,8 @@ td {
 /* 用語集の先頭の絵文字 */
 .term::before {
   content: "🦊";
-  margin-right: 0.4em; /* アイコンと文字の間の隙間 */
+  margin-right: 0.4em;
+  /* アイコンと文字の間の隙間 */
   font-size: 0.9em;
   vertical-align: 0.05em;
 }
@@ -411,15 +429,34 @@ td {
      左右どちらかを閉じると、その分を中央が使う。開閉ボタンは中央カラム上部の左端・右端。
    ・1150px未満: 左右は閉じた状態から、ボタンで本文に重ねて開く（ドロワー）
 
+   ・2カラム版（左=ページ一覧のみ、オーバーレイ）は、下の「2カラム版」ブロックを参照。
+     <body class="layout-3col l3-2col"> にする。
+
    ※ブレークポイント(1150px)は page_layout.js の WIDE_QUERY と揃えること。
      目安 = 中央の最低幅(640) + (側幅 + 余白)×2 + 端の余白(2rem) + スクロールバー(約17) + 余裕
    ===================================================================== */
 
+/* =====================================================================
+以降記述の並び順
+
+場所（目安）	内容	対象
+約406〜436行	変数の定義と、bodyの打ち消し	3カラム版・2カラム版の両方（.layout-3col）
+約438〜549行	上部バー、開閉ボタン、ツールチップ、章名	両方
+約551〜660行	広い画面（1150px以上）で左右を並べる3カラム	3カラム版だけ（:where(:not(.l3-2col)) で2カラム版を除外）
+約662〜727行	狭い画面（1150px未満）の左右ドロワー	3カラム版の狭い画面
+約729〜800行	2カラム版のドロワー	2カラム版だけ（.layout-3col.l3-2col）
+その先	ページ一覧、目次、本文まわり、印刷	ページ一覧と本文まわりは両方、目次は3カラム版だけ使う
+     =====================================================================*/
+
+
 .layout-3col {
   --l3-topbar-h: 44px;
-  --l3-content-max: 960px;   /* 中央カラムの上限幅（左右とも開いているとき） */
-  --l3-side-w: 210px;        /* 左右カラムの幅 */
-  --l3-gap: 1rem;            /* 左右カラムと中央の間隔 */
+  --l3-content-max: 960px;
+  /* 中央カラムの上限幅（左右とも開いているとき） */
+  --l3-side-w: 210px;
+  /* 左右カラムの幅 */
+  --l3-gap: 1rem;
+  /* 左右カラムと中央の間隔 */
 
   /* 各カラムが取る幅。閉じると 0 になり、その分を中央が使う */
   --l3-left-w: calc(var(--l3-side-w) + var(--l3-gap));
@@ -553,21 +590,21 @@ td {
 @media (min-width: 1150px) {
 
   /* 閉じた側は幅を 0 にして、非表示にする（その分、中央が広がる） */
-  html.left-closed .layout-3col {
+  html.left-closed .layout-3col:where(:not(.l3-2col)) {
     --l3-left-w: 0px;
   }
 
-  html.right-closed .layout-3col {
+  html.right-closed .layout-3col:where(:not(.l3-2col)) {
     --l3-right-w: 0px;
   }
 
-  html.left-closed .layout-3col .side-left,
-  html.right-closed .layout-3col .side-right {
+  html.left-closed .layout-3col:where(:not(.l3-2col)) .side-left,
+  html.right-closed .layout-3col:where(:not(.l3-2col)) .side-right {
     display: none;
   }
 
-  .layout-3col .layout,
-  .layout-3col .topbar {
+  .layout-3col:where(:not(.l3-2col)) .layout,
+  .layout-3col:where(:not(.l3-2col)) .topbar {
     display: grid;
     grid-template-columns: var(--l3-left-w) minmax(0, 1fr) var(--l3-right-w);
     width: 100%;
@@ -577,62 +614,64 @@ td {
   }
 
   /* 上部バー: 全体幅のうち、中央カラムの範囲だけに背景と下線を引き、ボタンを左右端に置く */
-  .layout-3col .topbar {
+  .layout-3col:where(:not(.l3-2col)) .topbar {
     grid-template-rows: var(--l3-topbar-h);
     gap: 0;
     background: none;
     border-bottom: 0;
-    pointer-events: none;   /* 左右カラムの上はクリックを素通しさせる */
+    pointer-events: none;
+    /* 左右カラムの上はクリックを素通しさせる */
   }
 
-  .layout-3col .topbar::before {
+  .layout-3col:where(:not(.l3-2col)) .topbar::before {
     content: "";
     grid-column: 2;
     grid-row: 1;
-    align-self: stretch;   /* 基本形の align-items:center が効くと、線がバーの真ん中に来てしまう */
+    align-self: stretch;
+    /* 基本形の align-items:center が効くと、線がバーの真ん中に来てしまう */
     background: #fff;
     border-bottom: 1px solid #d0e7f5;
   }
 
-  .layout-3col .topbar > * {
+  .layout-3col:where(:not(.l3-2col)) .topbar>* {
     grid-column: 2;
     grid-row: 1;
     align-self: center;
     pointer-events: auto;
   }
 
-  .layout-3col #btn-left {
+  .layout-3col:where(:not(.l3-2col)) #btn-left {
     justify-self: start;
   }
 
-  .layout-3col #btn-right {
+  .layout-3col:where(:not(.l3-2col)) #btn-right {
     justify-self: end;
   }
 
-  .layout-3col .topbar-title {
+  .layout-3col:where(:not(.l3-2col)) .topbar-title {
     justify-self: center;
     max-width: calc(100% - 96px);
   }
 
   /* 本文 */
-  .layout-3col #content {
+  .layout-3col:where(:not(.l3-2col)) #content {
     grid-column: 2;
     min-width: 0;
   }
 
   /* 左カラムが開いているとき: 本文の左端に薄い線を引く（本文と同じ高さまで続く） */
-  html:not(.left-closed) .layout-3col #content {
+  html:not(.left-closed) .layout-3col:where(:not(.l3-2col)) #content {
     border-left: 1px solid #e2e8f0;
     padding-left: 1.25rem;
   }
 
   /* 左ボタンは本文の左端（文字の頭）にそろえる */
-  html:not(.left-closed) .layout-3col #btn-left {
+  html:not(.left-closed) .layout-3col:where(:not(.l3-2col)) #btn-left {
     margin-left: 1.25rem;
   }
 
   /* 左右カラム: スクロールに追随 */
-  .layout-3col .side {
+  .layout-3col:where(:not(.l3-2col)) .side {
     position: sticky;
     top: 1rem;
     align-self: start;
@@ -644,12 +683,12 @@ td {
     font-size: 0.9rem;
   }
 
-  .layout-3col .side-left {
+  .layout-3col:where(:not(.l3-2col)) .side-left {
     grid-column: 1;
     justify-self: start;
   }
 
-  .layout-3col .side-right {
+  .layout-3col:where(:not(.l3-2col)) .side-right {
     grid-column: 3;
     justify-self: end;
     border-left: 1px solid #e2e8f0;
@@ -678,7 +717,8 @@ td {
     z-index: 40;
     width: min(300px, 85vw);
     max-height: none;
-    align-self: stretch; /* 広い画面用の align-self:start が残ると、縦が中身の高さに縮んでしまう */
+    align-self: stretch;
+    /* 広い画面用の align-self:start が残ると、縦が中身の高さに縮んでしまう */
     margin: 0;
     padding: 1rem;
     font-size: 0.9rem;
@@ -724,8 +764,77 @@ td {
   }
 }
 
+/* ---------- 2カラム版（<body class="layout-3col l3-2col">） ----------
+   左: ページ一覧 / 中央: 本文。右カラム（目次）はなし。
+
+   ・左カラムは画面幅に関係なく、閉じた状態から、ボタンで本文に重ねて開く（オーバーレイ）。
+     上の「狭い画面: 左右はドロワー」と同じ見せ方を、広い画面でも使う。
+   ・本文の幅: 既定は --l3-content-max（960px）で中央寄せ。
+     画面幅いっぱいに使いたいページは <body style="--l3-content-max: none"> のように上書きする。
+   ・上の広い画面ブロックは :where(:not(.l3-2col)) で除外してある（詳細度は変わらないので、3カラム版のページには影響しない）。
+
+   ※ドロワーの記述は「狭い画面」ブロックと同じ内容。直すときは両方そろえること。
+   ===================================================================== */
+
+.layout-3col.l3-2col .layout {
+  display: block;
+  padding: 0 1rem;
+}
+
+.layout-3col.l3-2col #content {
+  max-width: var(--l3-content-max);
+  margin: 0 auto;
+}
+
+.layout-3col.l3-2col .side {
+  position: fixed;
+  top: var(--l3-topbar-h);
+  bottom: 0;
+  z-index: 40;
+  width: min(300px, 85vw);
+  max-height: none;
+  margin: 0;
+  padding: 1rem;
+  font-size: 0.9rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.18);
+  /* 閉じている間はフォーカスも受けないようにする */
+  visibility: hidden;
+  transition: transform 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.layout-3col.l3-2col .side-left {
+  left: 0;
+  transform: translateX(-102%);
+}
+
+html.left-open .layout-3col.l3-2col .side-left {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.2s ease, visibility 0s;
+}
+
+.layout-3col.l3-2col .side-backdrop {
+  position: fixed;
+  top: var(--l3-topbar-h);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 35;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+html.left-open .layout-3col.l3-2col .side-backdrop {
+  display: block;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .layout-3col .side {
+
+  .layout-3col .side,
+  .layout-3col.l3-2col .side,
+  html.left-open .layout-3col.l3-2col .side-left {
     transition: none;
   }
 }
@@ -740,7 +849,7 @@ td {
   color: #718096;
 }
 
-.layout-3col .site-nav-group + .site-nav-group {
+.layout-3col .site-nav-group+.site-nav-group {
   margin-top: 1.2rem;
 }
 
@@ -831,12 +940,13 @@ td {
 }
 
 /* 長いインラインコードが本文を突き抜けないように */
-.layout-3col #content :not(pre) > code {
+.layout-3col #content :not(pre)>code {
   overflow-wrap: anywhere;
 }
 
 
 @media print {
+
   .layout-3col .topbar,
   .layout-3col .side,
   .layout-3col .side-backdrop {

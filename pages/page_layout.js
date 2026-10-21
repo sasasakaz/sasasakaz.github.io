@@ -6,6 +6,11 @@
  *   2. <head> に <script src="page_layout.js" defer></script> を入れる
  *   3. 本文を <main id="content"> で囲み、左右に <nav id="site-nav"> / <nav id="page-toc"> を置く
  *
+ * 2カラム版（左: ページ一覧 / 中央: 本文。目次なし）にするページ
+ *   ・<body class="layout-3col l3-2col"> にする
+ *   ・<nav id="page-toc"> と右ボタン(#btn-right)は置かない
+ *   ・左カラムは画面幅に関係なく、閉じた状態から、ボタンで本文に重ねて開く（オーバーレイ）
+ *
  * ページを追加したとき: 下の SITE_NAV に1行足すだけでよい。
  */
 (function () {
@@ -58,6 +63,12 @@
   var root = document.documentElement;
   var mq = window.matchMedia(WIDE_QUERY);
   var state = loadState();
+
+  // 広い画面で左右を並べる動作(3カラム)かどうか。
+  // 2カラム版(body.l3-2col)は画面幅に関係なく、ドロワー(オーバーレイ)として動かす。
+  function isWide() {
+    return mq.matches && !document.body.classList.contains('l3-2col');
+  }
 
   function el(tag, attrs, text) {
     var e = document.createElement(tag);
@@ -166,7 +177,7 @@
 
     // 狭い画面では、目次をタップしたら閉じる
     list.addEventListener('click', function (e) {
-      if (e.target.closest('a') && !mq.matches) closeDrawers();
+      if (e.target.closest('a') && !isWide()) closeDrawers();
     });
     return items;
   }
@@ -227,7 +238,7 @@
 
   /* ===================== 左右の開閉 ===================== */
   // 広い画面: 閉じた状態を localStorage に保存（html に left-closed / right-closed）
-  // 狭い画面: ドロワーとして開く（html に left-open / right-open）。保存しない。
+  // 狭い画面（と2カラム版）: ドロワーとして開く（html に left-open / right-open）。保存しない。
 
   var buttons = {
     left: document.getElementById('btn-left'),
@@ -235,7 +246,7 @@
   };
 
   function isOpen(side) {
-    return mq.matches
+    return isWide()
       ? !root.classList.contains(side + '-closed')
       : root.classList.contains(side + '-open');
   }
@@ -272,7 +283,7 @@
   }
 
   function toggle(side) {
-    if (mq.matches) {
+    if (isWide()) {
       keepReadingPosition(function () {
         state[side] = root.classList.toggle(side + '-closed');
       });
@@ -315,7 +326,7 @@
     var backdrop = document.getElementById('side-backdrop');
     if (backdrop) backdrop.addEventListener('click', closeDrawers);
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && !mq.matches) closeDrawers();
+      if (e.key === 'Escape' && !isWide()) closeDrawers();
     });
     var onChange = function () { closeDrawers(); };
     if (mq.addEventListener) mq.addEventListener('change', onChange);

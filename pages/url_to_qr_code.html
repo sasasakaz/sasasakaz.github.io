@@ -3,6 +3,7 @@
 <!-- 
 URL to QR code
 Created: 2026-03-09
+Updated: 2026-10-18
 Description: URLをQRコードに変換するツールにゃん。
 Note: 
 -->
@@ -11,21 +12,26 @@ Note:
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>URL to QR code</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/url_to_qr_code.html">
+  <link rel="icon" href="https://sasasakaz.github.io/pages/sasasakaz.png">
+  <meta name="description" content="URLをQRコードに変換するツールにゃん。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="URL to QR code">
+  <meta property="og:description" content="URLをQRコードに変換するツールにゃん。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/url_to_qr_code.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-  <!-- Google Tag Manager -->
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-QRGD44CZBH');
-  </script><!-- End Google Tag Manager -->
-
-  <link rel="stylesheet" href="../common.css">
   <style>
-    body {
+    h1 {
+      /* margin-top: 0; */
+      margin-bottom: revert;
+      font-size: 1.5em;
+    }
+
+    #content {
       text-align: center;
     }
 
@@ -72,18 +78,49 @@ Note:
       background: #0056b3;
     }
   </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
 </head>
 
-<body>
+<body class="layout-3col l3-2col">
 
-  <div class="container">
-    <h2>QRコード作成にゃん</h2>
-    <input type="text" id="url-input" placeholder="URLを貼り付けてにゃん" oninput="generateQR()">
-    <p>スマホやカメラでURL共有しやすいにゃん</p>
+  <!-- 上部バー: 左ボタン（ページ一覧を開く） -->
+  <header class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+  </header>
+  <div id="side-backdrop" class="side-backdrop"></div>
 
-    <div id="qrcode"></div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
-    <a id="download-btn" class="btn" style="display: none;">PNG画像として保存する</a>
+    <main id="content">
+
+      <div class="container">
+        <h1>QRコード作成にゃん</h1>
+        <input type="text" id="url-input" placeholder="URLを貼り付けてにゃん" oninput="generateQR()">
+        <p>スマホやカメラでURL共有しやすいにゃん</p>
+
+        <div id="qrcode"></div>
+
+        <a id="download-btn" class="btn" style="display: none;">PNG画像として保存する</a>
+      </div>
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
   </div>
 
   <script>
