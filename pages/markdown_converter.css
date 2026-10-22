@@ -1,7 +1,8 @@
 /* markdown_converter.css
    markdown_converter.html 専用。page_common.css（2カラム版 <body class="layout-3col l3-2col">）の「後」に読み込むこと。
    ・上書きは page_common.css と同じ詳細度で書き、読み込み順で勝たせている。
-   ・旧 common.css から移した設定（body の背景・文字サイズ、a、button）もここにある。 */
+   ・旧 common.css から移した設定（body の背景・文字サイズ、a、button）もここにある。
+   ・色は page_common.css の :root にある変数（--c-*）を使う。色を変えたいときは :root 側を直す。 */
 
 /* ===== 旧 common.css から移した設定 ===== */
 
@@ -10,7 +11,7 @@
   --l3-content-max: none;
 
   /* 旧 body の設定のうち、余白・中央寄せ・幅以外（背景・文字サイズなど） */
-  background: #f6f8fa;
+  background: var(--c-bg-subtle);
   font-size: 0.9rem;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
@@ -66,9 +67,9 @@ textarea,
 .output {
   width: 100%;
   padding: 1rem;
-  border: 1px solid #ccc;
+  border: 1px solid var(--c-border);
   border-radius: 0.5rem;
-  background: white;
+  background: var(--c-bg);
   box-sizing: border-box;
   font-family: monospace;
   font-size: 0.9rem;
@@ -87,16 +88,6 @@ textarea,
 
 #html-output {
   white-space: pre-wrap;
-}
-
-/* 下部コントロール（ボタン類） */
-.bottom-controls {
-  margin-top: 0.5rem;
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
 }
 
 /* 左側の設定エリア */
@@ -118,19 +109,19 @@ textarea,
 .settings-area label {
   font-size: 0.9rem;
   font-weight: bold;
-  color: #666;
+  color: var(--c-text-sub);
 }
 
 .settings-area textarea {
   height: 80px;
-  background: #fafafa;
+  background: var(--c-bg-subtle);
 }
 
 /* 予備欄（迷ってるmdの避難用メモ） */
 .draft-label {
   font-size: 0.75rem;
   font-weight: bold;
-  color: #999;
+  color: var(--c-text-weak);
   margin: 0.6rem 0 0.25rem;
 }
 
@@ -147,22 +138,22 @@ textarea,
 }
 
 .css-preset-btn {
-  background: #fff;
-  border: 1px solid #ddd;
-  color: #666;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-sub);
   font-size: 0.75rem;
   padding: 0.3rem 0.6rem;
 }
 
 .css-preset-btn.active {
-  background: #0288d1;
-  border-color: #0288d1;
+  background: var(--c-brand-vivid);
+  border-color: var(--c-brand-vivid);
   color: white;
 }
 
 .css-mode-hint {
   font-size: 0.75rem;
-  color: #f57c00;
+  color: var(--c-accent);
   margin-bottom: 0.3rem;
 }
 
@@ -176,9 +167,9 @@ textarea,
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  background: #fff3e0;
-  border: 1px solid #ff9800;
-  color: #7a4a00;
+  background: var(--c-accent-light);
+  border: 1px solid var(--c-accent);
+  color: var(--c-accent-dark);
   border-radius: 0.5rem;
   padding: 0.6rem 1rem;
   margin-bottom: 0.75rem;
@@ -201,90 +192,17 @@ textarea,
 }
 
 .btn-sync-reload {
-  background: #ff9800;
+  background: var(--c-accent);
   color: white;
 }
 
 .btn-sync-dismiss {
-  background: #fff;
-  border: 1px solid #ccc;
-  color: #666;
-}
-
-/* 変換方向のスライドスイッチ */
-.mode-switch-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-left: auto;
-}
-
-.switch-label {
-  font-size: 0.75rem;
-  font-weight: bold;
-  color: #aaa;
-  transition: color 0.2s;
-  white-space: nowrap;
-}
-
-.switch-label.active {
-  color: #0288d1;
-}
-
-.mode-switch-track {
-  position: relative;
-  width: 48px;
-  height: 22px;
-  background: #cfd8dc;
-  border-radius: 11px;
-  cursor: grab;
-  user-select: none;
-  touch-action: none;
-  flex-shrink: 0;
-}
-
-.mode-switch-track.dragging {
-  cursor: grabbing;
-  background: #b0bec5;
-}
-
-.mode-switch-knob {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-  transition: left 0.2s ease;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-sub);
 }
 
 /* 共通ボタン・タグ */
-.controls {
-  margin-bottom: 0.5rem;
-  display: flex;
-  /* ボタン同士のすき間を少しキュッと詰める */
-  gap: 0.5rem;
-  /* 万が一画面からはみ出た時用の保険 */
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-.controls button {
-  width: 3.5rem;
-  /* 内側の余白をなくして絵文字を真ん中に */
-  padding: 0;
-  font-size: 1rem;
-}
-
-.copy-msg {
-  color: #4caf50;
-  font-weight: bold;
-  font-size: 0.9rem;
-  min-width: 120px;
-}
-
 button {
   padding: 0.5rem 1rem;
   border: none;
@@ -295,39 +213,75 @@ button {
 
 /* 共通のボタンスタイル */
 .btn-tag {
-  background: #fff;
-  border: 1px solid #ddd;
-  color: #555;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-sub);
   /* 左側に少し太めの線を入れて、色分けの目印にする */
   border-left-width: 0.25rem;
 }
 
 /* Markdown形式のボタン（控えめなグレー） */
 .btn-md {
-  border-left-color: #ccc;
+  border-left-color: var(--c-border);
 }
 
 /* HTML形式のボタン（鮮やかなブルー） */
 .btn-html {
-  border-left-color: #0288d1;
+  border-left-color: var(--c-brand-vivid);
 }
 
 .btn-tag:hover {
-  background: #f8f8f8;
+  background: var(--c-bg-subtle);
 }
 
 .btn-copy {
-  background: #f57c00;
+  background: var(--c-accent);
   color: white;
+  position: relative;
+}
+
+/* コピー完了のチェック表示。
+   ボタンの中で文字とチェックを同じ位置に重ねておき、押したときだけ入れ替える（ボタンの幅は変わらない） */
+.btn-done {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  visibility: hidden;
+}
+
+.btn-copy.copied .btn-label {
+  visibility: hidden;
+}
+
+.btn-copy.copied .btn-done {
+  visibility: visible;
 }
 
 .btn-preview {
-  background: #0288d1;
+  background: var(--c-brand-vivid);
   color: white;
 }
 
 button:hover {
   opacity: 0.8;
+}
+
+/* 目立つ操作ボタンは、opacity ではなく page_common.css の :root にある hover 用の色に変える
+   （色の濃さを変えたいときは :root の --c-*-hover だけ直す） */
+.btn-preview:hover,
+.css-preset-btn.active:hover {
+  background: var(--c-brand-vivid-hover);
+  border-color: var(--c-brand-vivid-hover);
+  opacity: 1;
+}
+
+.btn-copy:hover,
+.btn-sync-reload:hover {
+  background: var(--c-accent-hover);
+  opacity: 1;
 }
 
 /* ===== 上部バー（site の .topbar に、このツールの操作ボタンを同居させる） =====
@@ -372,8 +326,8 @@ button:hover {
 .mode-badge {
   font-size: 0.7rem;
   font-weight: bold;
-  color: #0288d1;
-  border: 1px solid #0288d1;
+  color: var(--c-brand-vivid);
+  border: 1px solid var(--c-brand-vivid);
   border-radius: 1rem;
   padding: 0.1rem 0.5rem;
   white-space: nowrap;
@@ -393,11 +347,17 @@ button:hover {
 }
 
 .icon-btn {
-  background: #fff;
-  border: 1px solid #ddd;
-  color: #555;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  color: var(--c-text-sub);
   padding: 0.4rem 0.6rem;
   font-size: 1rem;
+}
+
+/* 設定パネルが開いている間の設定ボタン（閉じる操作はこのボタンの再クリックだけなので、開閉の状態が分かるようにする） */
+.icon-btn[aria-expanded="true"] {
+  background: var(--c-brand2-2);
+  border-color: var(--c-brand-vivid);
 }
 
 .pin-btn {
@@ -421,8 +381,8 @@ button:hover {
   max-height: calc(100dvh - var(--l3-topbar-h, 3.5rem) - 1rem);
   /* version1 70vh */
   overflow-y: auto;
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
   border-radius: 0.5rem;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 0.3rem;
@@ -434,13 +394,13 @@ button:hover {
 
 .dd-title {
   font-size: 0.7rem;
-  color: #999;
+  color: var(--c-text-weak);
   font-weight: bold;
   padding: 0.4rem 0.5rem 0.1rem;
 }
 
 .dd-sep {
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--c-border);
   margin: 0.2rem 0;
 }
 
@@ -448,15 +408,15 @@ button:hover {
   display: block;
   width: 100%;
   text-align: left;
-  background: #fff;
-  color: #333;
+  background: var(--c-bg);
+  color: var(--c-text);
   font-weight: normal;
   padding: 0.4rem 0.5rem;
 }
 
 .dd-item:hover,
 .dd-item.current {
-  background: #e3f2fd;
+  background: var(--c-brand2-2);
   opacity: 1;
 }
 
@@ -472,8 +432,8 @@ button:hover {
   bottom: 0;
   width: min(440px, 92vw);
   z-index: 40;
-  background: #fff;
-  border-left: 1px solid #ccc;
+  background: var(--c-bg);
+  border-left: 1px solid var(--c-border);
   box-shadow: -4px 0 12px rgba(0, 0, 0, 0.12);
   padding: 0.75rem;
   overflow-y: auto;

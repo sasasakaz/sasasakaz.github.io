@@ -149,7 +149,7 @@ function resetView() {
   document.getElementById("running-message").hidden = true;
   document.getElementById("completion-message").hidden = true;
   document.getElementById("error-message").hidden = true;
-  document.getElementById("footer").hidden = true;
+  document.getElementById("footer").style.display = "none";
   document.getElementById("running-message-text").textContent = "";
   tabs.forEach((tab, index) => {
     const selected = index === 0;
@@ -183,7 +183,7 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
   completionMessage.hidden = true;
   errorMessage.hidden = true;
   runningMessage.hidden = true;
-  document.getElementById("footer").hidden = true;
+  document.getElementById("footer").style.display = "none";
 
   try {
     if (API_BASE_URL.includes("YOUR_CLOUD_RUN_SERVICE")) {
@@ -277,7 +277,7 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
     runningMessage.hidden = true;
     completionMessage.textContent = "推定完了！解説やPointを参考にしながら推定結果を読み解いてください。";
     completionMessage.hidden = false;
-    document.getElementById("footer").hidden = false;
+    document.getElementById("footer").style.display = "block";
   } catch (error) {
     if (error.name === "AbortError" || version !== requestVersion) return;
     runningMessage.hidden = true;

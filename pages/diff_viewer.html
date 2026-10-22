@@ -30,7 +30,7 @@ Note:
 
     <style>
         .layout-3col {
-            --l3-content-max: min(90%, 1400px);
+            --l3-content-max: min(96%, 2200px);
             /* 画面幅いっぱいに使う */
         }
 
@@ -53,6 +53,15 @@ Note:
             border: 1px solid #d0d7de;
             border-radius: 0.5rem;
             font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
             font-size: 0.9rem;
         }
 
@@ -141,18 +150,24 @@ Note:
             width: 100%;
         }
 
+        /* 内部HTMLの改行・インデントが pre-wrap で表示されないよう flex 化 */
         #output .d2h-code-side-line,
         #output .d2h-code-line {
-            display: block;
+            display: flex;
             box-sizing: border-box;
             width: 100%;
             padding: 0 0.5em 0 4.5em;
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
+        }
+
+        #output .d2h-code-line-prefix {
+            flex: none;
         }
 
         #output .d2h-code-line-ctn {
-            display: inline;
+            display: block;
+            flex: 1;
+            min-width: 0;
+            width: auto;
             white-space: pre-wrap;
             overflow-wrap: anywhere;
         }
@@ -197,6 +212,11 @@ Note:
                     <button type="button" class="clear-btn" data-target="new" hidden>Clear</button>
                 </div>
             </div>
+            <div class="options">
+                <label><input type="checkbox" id="opt-trim-start"> 行頭の空白を無視</label>
+                <label><input type="checkbox" id="opt-trim-end"> 行末の空白を無視</label>
+                <label><input type="checkbox" id="opt-eol" checked> 改行コードの違いを無視</label>
+            </div>
             <div class="btn-container">
                 <button onclick="compare()">比較実行にゃん！</button>
                 <button type="button" class="reset-btn" onclick="resetAll()">リセットにゃん</button>
@@ -204,12 +224,14 @@ Note:
 
             <div id="output"></div>
 
-            <footer id="footer">
-                <div class="footer-links">
-                    <a href="https://sasasakaz.github.io/">🏠 Home</a>
-                </div>
-                <p>Author: sasasakaz</p>
-            </footer>
+    <footer id="footer">
+        <div class="footer-links">
+            <a href="https://sasasakaz.github.io/">🏠 Home</a>
+            <span class="separator">|</span>
+            <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+    </footer>
         </main>
     </div>
 
@@ -243,8 +265,15 @@ Note:
         updateClearButtons();
 
         function compare() {
-            const oldVal = document.getElementById('old').value;
-            const newVal = document.getElementById('new').value;
+            const normalize = text => {
+                if (document.getElementById('opt-eol').checked) text = text.replace(/\r\n?/g, '\n');
+                const ts = document.getElementById('opt-trim-start').checked;
+                const te = document.getElementById('opt-trim-end').checked;
+                if (!ts && !te) return text;
+                return text.split('\n').map(l => ts && te ? l.trim() : ts ? l.trimStart() : l.trimEnd()).join('\n');
+            };
+            const oldVal = normalize(document.getElementById('old').value);
+            const newVal = normalize(document.getElementById('new').value);
             const out = document.getElementById('output');
 
             try {

@@ -65,10 +65,10 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       <span class="tools" id="pinned-btns"></span>
     </div>
     <div class="right-tools">
-      <span id="copy-message" class="copy-msg" style="display: none;">コピーしたにゃん！</span>
       <button type="button" class="btn-preview" id="preview-btn" onclick="openPreview()">Preview</button>
-      <button type="button" class="btn-copy" id="copy-btn" onclick="copyToClipboard()">Copy HTML</button>
-      <button type="button" class="icon-btn" id="settings-btn" title="Preview設定（CSS / HTML）"
+      <button type="button" class="btn-copy" id="copy-btn" onclick="copyToClipboard()"><span class="btn-label">Copy
+          HTML</span><span class="btn-done" aria-hidden="true">✓</span></button>
+      <button type="button" class="icon-btn" id="settings-btn" title="Preview設定（CSS / HTML）。もう一度押すと閉じる"
         aria-expanded="false">⚙</button>
     </div>
   </header>
@@ -103,13 +103,11 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
 
       <footer id="footer">
         <div class="footer-links">
-          <a href="https://sasasakaz.github.io/" target="_blank">🏠 View Other Tools</a>
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
           <span class="separator">|</span>
-          <a href="https://github.com/sasasakaz/sasasakaz.github.io/blob/main/pages/markdown_converter.html"
-            target="_blank">View source
-            on GitHub</a>
+          <a href="#header">Back to Top</a>
         </div>
-        <p>Coded by sasasakaz 2022-2026</p>
+        <p>Author: sasasakaz</p>
       </footer>
     </main>
   </div>
@@ -117,8 +115,7 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
   <aside class="settings-wrapper settings-panel" id="settings-wrapper" aria-label="Preview設定">
     <div class="panel-head">
       <strong>⚙ Preview設定</strong>
-      <span><button type="button" class="css-preset-btn" onclick="resetSettings()">初期値に戻す</button>
-        <button type="button" class="icon-btn" onclick="toggleSettings(false)" aria-label="閉じる">✕</button></span>
+      <button type="button" class="css-preset-btn" onclick="resetSettings()">初期値に戻す</button>
     </div>
     <div class="settings-area">
       <label>Preview画面に適用するCSS</label>
@@ -413,7 +410,7 @@ mark { background-color: #fff176; }
         : 'HTMLをMarkdownに変換するにゃん';
       document.getElementById('mode-badge').textContent = isMd2Html ? 'MD→HTML' : 'HTML→MD';
       input.placeholder = isMd2Html ? 'Input Markdown...' : 'Input HTML...';
-      document.getElementById('copy-btn').textContent = isMd2Html ? 'Copy HTML' : 'Copy Markdown';
+      document.querySelector('#copy-btn .btn-label').textContent = isMd2Html ? 'Copy HTML' : 'Copy Markdown';
       document.querySelectorAll('[data-mode]').forEach(b => b.classList.toggle('current', b.dataset.mode === mode));
     }
     function setMode(mode) {
@@ -504,13 +501,15 @@ mark { background-color: #fff176; }
       input.setSelectionRange(newCursorPos, newCursorPos);
     }
 
+    // コピー完了は、ボタン内の文字をチェック(✓)に一時的に入れ替えて知らせる
+    let copyDoneTimer;
     function copyToClipboard() {
-      const msgSpan = document.getElementById('copy-message');
+      const btn = document.getElementById('copy-btn');
       navigator.clipboard.writeText(output.textContent).then(() => {
-        // メッセージを表示
-        msgSpan.style.display = "inline-block";
-        // 2秒（2000ミリ秒）後にメッセージを消す
-        setTimeout(() => { msgSpan.style.display = "none"; }, 2000);
+        btn.classList.add('copied');
+        // 連続で押しても、最後に押してから1.5秒表示する
+        clearTimeout(copyDoneTimer);
+        copyDoneTimer = setTimeout(() => btn.classList.remove('copied'), 1500);
       });
     }
 
