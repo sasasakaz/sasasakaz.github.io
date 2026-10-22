@@ -588,7 +588,7 @@ td {
   visibility: visible;
 }
 
-/* いま読んでいる章の名前 */
+/* いま読んでいる章の名前（3カラム版）／ 本文の h1 が隠れたときのページ名（2カラム版。表示の切り替えは下の2カラム版ブロック） */
 .layout-3col .topbar-title {
   flex: 1;
   min-width: 0;
@@ -806,6 +806,22 @@ td {
   margin: 0 auto;
 }
 
+/* 上部バーのページ名（本文の h1 が上部バーの下に隠れたら、page_layout.js が .is-visible を付ける）。
+   ・普段は非表示。display ではなく opacity/visibility で切り替えるので、バーの高さは変わらない。
+   ・右ボタンがない分、文字が画面中央より右にずれる。左ボタン(36px)+gap(0.75rem)と同じ幅を右に空けて中央に揃える。
+   ・文字の大きさ・色・省略表示は、上の .layout-3col .topbar-title（3カラム版の章名と共通）を使う。 */
+.layout-3col.l3-2col .topbar-title {
+  margin-right: calc(36px + 0.75rem);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+}
+
+.layout-3col.l3-2col .topbar-title.is-visible {
+  opacity: 1;
+  visibility: visible;
+}
+
 .layout-3col.l3-2col .side {
   position: fixed;
   top: var(--l3-topbar-h);
@@ -854,7 +870,8 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
 
   .layout-3col .side,
   .layout-3col.l3-2col .side,
-  html.left-open .layout-3col.l3-2col .side-left {
+  html.left-open .layout-3col.l3-2col .side-left,
+  .layout-3col.l3-2col .topbar-title {
     transition: none;
   }
 }

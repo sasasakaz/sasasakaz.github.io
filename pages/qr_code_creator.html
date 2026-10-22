@@ -23,6 +23,10 @@ Description: 連絡先登録用・サイト表示用のQRコードを作成す�
   <script src="page_layout.js" defer></script>
   <script src="https://cdn.jsdelivr.net/gh/ushelp/EasyQRCodeJS@master/dist/easy.qrcode.min.js"></script>
   <style>
+    body {
+      background: #fff;
+    }
+
     .container {
       box-sizing: border-box;
       width: calc(100% - 2rem);
@@ -34,17 +38,21 @@ Description: 連絡先登録用・サイト表示用のQRコードを作成す�
       box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
     }
 
-    .header {
+    #header {
+      box-sizing: border-box;
+      width: calc(100% - 2rem);
+      max-width: 500px;
+      margin: 0 auto 1.5rem;
+      padding: 1.5rem 1.5rem 0;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-wrap: wrap;
       gap: 0.75rem;
-      margin-bottom: 1.5rem;
       text-align: center;
     }
 
-    .header h1 {
+    #header h1 {
       all: revert;
       margin: 0;
       color: #007aff;
@@ -184,6 +192,10 @@ Description: 連絡先登録用・サイト表示用のQRコードを作成す�
         padding: 1rem;
       }
 
+      #header {
+        padding: 1rem 1rem 0;
+      }
+
       .field-row {
         gap: 0.4rem;
       }
@@ -207,27 +219,26 @@ Description: 連絡先登録用・サイト表示用のQRコードを作成す�
 </head>
 
 <body class="layout-3col l3-2col">
-  <header class="topbar">
+  <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>
-  </header>
+  </div>
   <div id="side-backdrop" class="side-backdrop"></div>
-
   <div class="layout">
     <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
     <main id="content">
-      <div class="container">
-        <div class="header">
-          <h1>QRコード作成</h1>
-          <div class="mode-switch" role="group" aria-label="QRコードの用途">
-            <button type="button" class="mode-button" data-mode="contact" aria-controls="contact-panel"
-              aria-pressed="true">連絡先</button>
-            <button type="button" class="mode-button" data-mode="url" aria-controls="url-panel"
-              aria-pressed="false">サイト表示</button>
-          </div>
+      <header id="header">
+        <h1>QRコード作成</h1>
+        <div class="mode-switch" role="group" aria-label="QRコードの用途">
+          <button type="button" class="mode-button" data-mode="contact" aria-controls="contact-panel"
+            aria-pressed="true">連絡先</button>
+          <button type="button" class="mode-button" data-mode="url" aria-controls="url-panel"
+            aria-pressed="false">サイト表示</button>
         </div>
+      </header>
 
+      <div class="container">
         <section id="contact-panel" class="mode-panel" aria-label="連絡先登録用QRコード">
           <div class="field-row">
             <div class="field-group">

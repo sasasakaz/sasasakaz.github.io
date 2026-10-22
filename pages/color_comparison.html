@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -179,18 +180,21 @@
     gtag('config', 'G-QRGD44CZBH');
   </script>
 </head>
+
 <body class="layout-3col l3-2col">
-  <header class="topbar">
+  <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>
-  </header>
+  </div>
   <div id="side-backdrop" class="side-backdrop"></div>
-
   <div class="layout">
     <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
     <main id="content">
-      <h1>色比較にゃん</h1>
-      <p>#RGB または #RRGGBB 形式に対応してるにゃん（先頭の # は省略できるにゃん）。</p>
+      <header id="header">
+        <h1>色比較にゃん</h1>
+        <p>#RGB または #RRGGBB 形式に対応してるにゃん（先頭の # は省略できるにゃん）。</p>
+      </header>
 
       <div class="color-grid">
         <section class="color-card" data-color-card>
@@ -279,69 +283,77 @@
       <div class="palette" id="palette"></div>
 
       <section class="color-notes">
-      <h2>hex値と名前付き色について</h2>
-      
-
-      <h3>hex値の読み方</h3>
-      <p><code>#RRGGBB</code> は、赤（R）・緑（G）・青（B）の各成分の値を、2桁ずつ16進数で並べたものです。</p>
-      <ul>
-        <li>16進数の1桁は <code>0〜9</code> と <code>a〜f</code>（a=10 … f=15）で、大文字・小文字は区別されません。</li>
-        <li>2桁で <code>00〜ff</code>（10進数で 0〜255）を表します。左の桁が16の位、右の桁が1の位です。例: <code>c8</code> = 12×16 + 8 = 200。</li>
-        <li>先頭から2桁ずつ「赤・緑・青」です。例: <code>#ff8000</code> は 赤=255、緑=128、青=0 で、オレンジ色になります。</li>
-        <li>各成分の値が大きいほど、その成分の出力値が大きくなります。<code>#000000</code> は3成分すべてが最小の黒、<code>#ffffff</code> はすべてが最大の白です。</li>
-        <li>3色の組み合わせは 256×256×256 = 16,777,216 通りです。</li>
-        <li>赤・緑・青が同じ値なら灰色になります。例: <code>#808080</code>（gray）。</li>
-      </ul>
-      
-
-      <h3>3桁のhex値があるのはなぜ？</h3>
-      <p><code>#RGB</code> の3桁は、各桁を2回ずつ繰り返す短縮形です。<code>#f80</code> は <code>#ff8800</code> と同じ色になります。2桁が同じ数字の組（00, 11, 22 …
-        ff）だけで作れるため、使える色は 16×16×16 = 4,096 通りです。6桁表記より短く書けるため、CSSの色指定を簡潔に記述できます。このツールの入力欄も、3桁と6桁に対応しています。</p>
-      <p>名前付き色のうち、3桁で書けるのは次の色です。</p>
-      <ul>
-        <li>
-          <code>black</code>（#000）、<code>white</code>（#fff）、<code>red</code>（#f00）、<code>lime</code>（#0f0）、<code>blue</code>（#00f）
-        </li>
-        <li><code>yellow</code>（#ff0）、<code>aqua</code> / <code>cyan</code>（#0ff）、<code>fuchsia</code> /
-          <code>magenta</code>（#f0f）</li>
-        <li><code>rebeccapurple</code>（#639）、<code>lightslategray</code> / <code>lightslategrey</code>（#789）</li>
-      </ul>
-      <p>CSSでは、アルファ値（不透明度）を加えた4桁（<code>#RGBA</code>）と8桁（<code>#RRGGBBAA</code>）の表記も使えます。末尾のアルファ値は、<code>00</code>
-        が完全に透明、<code>ff</code> が完全に不透明を表します。</p>
-      
-
-      <h3>148色の由来</h3>
-      <ul>
-        <li>CSS Level 1では、基本となる16色（aqua, black, blue, fuchsia, gray, green, lime, maroon, navy, olive, purple, red, silver,
-          teal, white, yellow）が定義されました。CSS Level 2では <code>orange</code> が加わり、17色になりました。</li>
-        <li>その後、X11の色名（元はUNIX系システムで使われていた色名）を基にした多数の色名がSVG 1.0で採用され、CSS Color Module Level
-          3で標準化されました。これにより、<code>rebeccapurple</code> を除く147色が定義されました。</li>
-        <li>CSS Color Module Level 4では <code>rebeccapurple</code> が加わり、148色になりました。<code>transparent</code> と
-          <code>currentcolor</code> は別に定義されているキーワードなので、この148色には含まれません。</li>
-      </ul>
-      
-
-      <h3>似た名前があるのはなぜ？</h3>
-      <ul>
-        <li><b>gray と grey</b>: アメリカ英語の gray とイギリス英語の grey を、どちらも書けるようにしたものです。darkgray / darkslategray / dimgray / gray /
-          lightgray / lightslategray / slategray の7組は、それぞれ綴りが異なりますが、まったく同じ色です。</li>
-        <li><b>aqua と cyan</b>、<b>fuchsia と magenta</b>: aqua と fuchsia はHTML由来、cyan と magenta
-          はX11由来の名前で、それぞれ同じ色（#00ffff、#ff00ff）です。</li>
-        <li>この結果、148個の名前に対して、実際に異なるhex値は139種類です。gray / grey の7組と、aqua / cyan、fuchsia / magenta の2組を合わせた9組が重複しています。</li>
-      </ul>
-      
-
-      <h3>名前から想像と違う色</h3>
-      <ul>
-        <li><b>green は #008000</b> と暗めの緑で、明るい緑は <b>lime（#00ff00）</b> です。X11では <code>green</code> が <code>#00ff00</code>
-          でしたが、CSSの基本色では別の値が採用されました。X11由来の色名が追加された後も、この違いが残っています。</li>
-        <li><b>darkgray（#a9a9a9）は gray（#808080）より明るい</b>。名前の「dark」から想像する順序と逆になっています。これもX11由来の色名と、基本色の値の違いが残った例です。</li>
-        <li><code>rebeccapurple</code>（#663399）は、Web標準の発展に貢献したEric Meyer氏の娘Rebeccaさんを記念して、2014年にCSSの色名として追加されました。</li>
-      </ul>
+        <h2>hex値と名前付き色について</h2>
 
 
-      <h3>このパレットの並び</h3>
-        <p>有彩色は色相を30°ごとのグループに分け、グループ内を暗い色から明るい色の順に並べています（明るさはHSLのL値）。灰色・黒・白は最後にまとめています。同じ系統でも、鮮やかな色は L 値が中間になるため、見た目の明るさとは少し順序が前後します。</p>
+        <h3>hex値の読み方</h3>
+        <p><code>#RRGGBB</code> は、赤（R）・緑（G）・青（B）の各成分の値を、2桁ずつ16進数で並べたものです。</p>
+        <ul>
+          <li>16進数の1桁は <code>0〜9</code> と <code>a〜f</code>（a=10 … f=15）で、大文字・小文字は区別されません。</li>
+          <li>2桁で <code>00〜ff</code>（10進数で 0〜255）を表します。左の桁が16の位、右の桁が1の位です。例: <code>c8</code> = 12×16 + 8 = 200。</li>
+          <li>先頭から2桁ずつ「赤・緑・青」です。例: <code>#ff8000</code> は 赤=255、緑=128、青=0 で、オレンジ色になります。</li>
+          <li>各成分の値が大きいほど、その成分の出力値が大きくなります。<code>#000000</code> は3成分すべてが最小の黒、<code>#ffffff</code> はすべてが最大の白です。</li>
+          <li>3色の組み合わせは 256×256×256 = 16,777,216 通りです。</li>
+          <li>赤・緑・青が同じ値なら灰色になります。例: <code>#808080</code>（gray）。</li>
+        </ul>
+
+
+        <h3>3桁のhex値があるのはなぜ？</h3>
+        <p><code>#RGB</code> の3桁は、各桁を2回ずつ繰り返す短縮形です。<code>#f80</code> は <code>#ff8800</code> と同じ色になります。2桁が同じ数字の組（00, 11,
+          22 …
+          ff）だけで作れるため、使える色は 16×16×16 = 4,096 通りです。6桁表記より短く書けるため、CSSの色指定を簡潔に記述できます。このツールの入力欄も、3桁と6桁に対応しています。</p>
+        <p>名前付き色のうち、3桁で書けるのは次の色です。</p>
+        <ul>
+          <li>
+            <code>black</code>（#000）、<code>white</code>（#fff）、<code>red</code>（#f00）、<code>lime</code>（#0f0）、<code>blue</code>（#00f）
+          </li>
+          <li><code>yellow</code>（#ff0）、<code>aqua</code> / <code>cyan</code>（#0ff）、<code>fuchsia</code> /
+            <code>magenta</code>（#f0f）
+          </li>
+          <li><code>rebeccapurple</code>（#639）、<code>lightslategray</code> / <code>lightslategrey</code>（#789）</li>
+        </ul>
+        <p>CSSでは、アルファ値（不透明度）を加えた4桁（<code>#RGBA</code>）と8桁（<code>#RRGGBBAA</code>）の表記も使えます。末尾のアルファ値は、<code>00</code>
+          が完全に透明、<code>ff</code> が完全に不透明を表します。</p>
+
+
+        <h3>148色の由来</h3>
+        <ul>
+          <li>CSS Level 1では、基本となる16色（aqua, black, blue, fuchsia, gray, green, lime, maroon, navy, olive, purple, red,
+            silver,
+            teal, white, yellow）が定義されました。CSS Level 2では <code>orange</code> が加わり、17色になりました。</li>
+          <li>その後、X11の色名（元はUNIX系システムで使われていた色名）を基にした多数の色名がSVG 1.0で採用され、CSS Color Module Level
+            3で標準化されました。これにより、<code>rebeccapurple</code> を除く147色が定義されました。</li>
+          <li>CSS Color Module Level 4では <code>rebeccapurple</code> が加わり、148色になりました。<code>transparent</code> と
+            <code>currentcolor</code> は別に定義されているキーワードなので、この148色には含まれません。
+          </li>
+        </ul>
+
+
+        <h3>似た名前があるのはなぜ？</h3>
+        <ul>
+          <li><b>gray と grey</b>: アメリカ英語の gray とイギリス英語の grey を、どちらも書けるようにしたものです。darkgray / darkslategray / dimgray /
+            gray /
+            lightgray / lightslategray / slategray の7組は、それぞれ綴りが異なりますが、まったく同じ色です。</li>
+          <li><b>aqua と cyan</b>、<b>fuchsia と magenta</b>: aqua と fuchsia はHTML由来、cyan と magenta
+            はX11由来の名前で、それぞれ同じ色（#00ffff、#ff00ff）です。</li>
+          <li>この結果、148個の名前に対して、実際に異なるhex値は139種類です。gray / grey の7組と、aqua / cyan、fuchsia / magenta の2組を合わせた9組が重複しています。
+          </li>
+        </ul>
+
+
+        <h3>名前から想像と違う色</h3>
+        <ul>
+          <li><b>green は #008000</b> と暗めの緑で、明るい緑は <b>lime（#00ff00）</b> です。X11では <code>green</code> が
+            <code>#00ff00</code>
+            でしたが、CSSの基本色では別の値が採用されました。X11由来の色名が追加された後も、この違いが残っています。</li>
+          <li><b>darkgray（#a9a9a9）は gray（#808080）より明るい</b>。名前の「dark」から想像する順序と逆になっています。これもX11由来の色名と、基本色の値の違いが残った例です。</li>
+          <li><code>rebeccapurple</code>（#663399）は、Web標準の発展に貢献したEric Meyer氏の娘Rebeccaさんを記念して、2014年にCSSの色名として追加されました。</li>
+        </ul>
+
+
+        <h3>このパレットの並び</h3>
+        <p>有彩色は色相を30°ごとのグループに分け、グループ内を暗い色から明るい色の順に並べています（明るさはHSLのL値）。灰色・黒・白は最後にまとめています。同じ系統でも、鮮やかな色は L
+          値が中間になるため、見た目の明るさとは少し順序が前後します。</p>
       </section>
 
       <footer id="footer">
@@ -464,4 +476,5 @@
     });
   </script>
 </body>
+
 </html>

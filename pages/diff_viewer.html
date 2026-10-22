@@ -189,19 +189,18 @@ Note:
 </head>
 
 <body class="layout-3col l3-2col">
-
-    <header class="topbar">
+    <div class="topbar">
         <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
         <div id="topbar-title" class="topbar-title"></div>
-    </header>
+    </div>
     <div id="side-backdrop" class="side-backdrop"></div>
-
     <div class="layout">
         <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
         <main id="content">
-
-            <h1>左右比較ビューアにゃん</h1>
+            <header id="header">
+                <h1>左右比較ビューアにゃん</h1>
+            </header>
             <div class="input-area">
                 <div class="field">
                     <textarea id="old" placeholder="Before（older）"></textarea>
@@ -224,14 +223,14 @@ Note:
 
             <div id="output"></div>
 
-    <footer id="footer">
-        <div class="footer-links">
-            <a href="https://sasasakaz.github.io/">🏠 Home</a>
-            <span class="separator">|</span>
-            <a href="#header">Back to Top</a>
-        </div>
-        <p>Author: sasasakaz</p>
-    </footer>
+            <footer id="footer">
+                <div class="footer-links">
+                    <a href="https://sasasakaz.github.io/">🏠 Home</a>
+                    <span class="separator">|</span>
+                    <a href="#header">Back to Top</a>
+                </div>
+                <p>Author: sasasakaz</p>
+            </footer>
         </main>
     </div>
 

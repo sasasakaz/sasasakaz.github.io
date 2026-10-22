@@ -24,10 +24,20 @@ Note:
   <link rel="stylesheet" href="page_common.css">
   <script src="page_layout.js" defer></script>
   <style>
+    body {
+      background: #fff;
+    }
+
     h1 {
       /* margin-top: 0; */
       margin-bottom: revert;
       font-size: 1.75em;
+    }
+
+    #header {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 1rem;
     }
 
     .card {
@@ -70,7 +80,7 @@ Note:
       font-size: 0.9rem
     }
 
-    .out {
+    #cleanOut {
       background: #f6f8fa;
       padding: 0.5rem;
       border-radius: 0.5rem;
@@ -90,15 +100,8 @@ Note:
       background: #0069d9
     }
 
-    .small {
-      font-size: 0.9rem;
-      padding: 0.5rem
-    }
-
-    .actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem
+    #shorten {
+      margin-top: 0.5rem;
     }
 
     #copyMsg {
@@ -166,22 +169,22 @@ Note:
 </head>
 
 <body class="layout-3col l3-2col">
-
-  <header class="topbar">
+  <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>
-  </header>
+  </div>
   <div id="side-backdrop" class="side-backdrop"></div>
-
   <div class="layout">
     <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
     <main id="content">
-      <div class="card">
+      <header id="header">
         <h1>Amazon URL Shortener</h1>
         <p class="muted">Extracts the ASIN from Amazon's long URL and converts it into a simple product page URL.</p>
         <p class="muted">Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。</p>
+      </header>
 
+      <div class="card">
         <label for="url">Long URL</label>
         <div class="url-row">
           <input id="url" />
@@ -210,17 +213,13 @@ Note:
           </div>
         </div>
 
-        <div class="actions">
-          <button id="shorten" class="btn">Shorten</button>
-        </div>
+        <button id="shorten" class="btn">Shorten</button>
 
-        <div id="resultArea">
-          <label>Short URL</label>
-          <div id="cleanOut" class="out"> — </div>
-          <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-            <button id="copyClean" class="btn small">Copy</button>
-            <span id="copyMsg">Copied!</span>
-          </div>
+        <label>Short URL</label>
+        <div id="cleanOut"> — </div>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <button id="copyClean" class="btn">Copy</button>
+          <span id="copyMsg">Copied!</span>
         </div>
 
         <div id="history" class="muted">

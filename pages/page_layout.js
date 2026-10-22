@@ -10,6 +10,10 @@
  *   ・<body class="layout-3col l3-2col"> にする
  *   ・<nav id="page-toc"> と右ボタン(#btn-right)は置かない
  *   ・左カラムは画面幅に関係なく、閉じた状態から、ボタンで本文に重ねて開く（オーバーレイ）
+ *   ・上部バー中央(#topbar-title)に、本文の h1 が上部バーの下に隠れたときだけページ名を出す。
+ *     対象は「#topbar-title と #content #header h1 の両方があるページ」。どちらかがなければ何もしない
+ *     （markdown_converter は #topbar-title を置かないので対象外）。
+ *     バーに出す文字を変えたいときは <h1 data-topbar-title="短い名前"> にする（なければ h1 の文字を使う）。
  *
  * ページを追加したとき: 下の SITE_NAV に1行足すだけでよい。
  */
@@ -347,6 +351,34 @@
     });
   }
 
+  /* ===================== 2カラム版: 上部バーのページ名 ===================== */
+  // 本文の h1 が上部バーの下に隠れたら #topbar-title にページ名を出し、見えたら消す。
+  // 3カラム版（章名を #topbar-title に出す）とは干渉しないよう、2カラム版で目次がないページだけで動かす。
+
+  function setupPageTitle() {
+    if (!document.body.classList.contains('l3-2col')) return;
+    var box = document.getElementById('topbar-title');
+    var h1 = document.querySelector('#content #header h1');
+    var bar = document.querySelector('.topbar');
+    if (!box || !h1 || !bar || !('IntersectionObserver' in window)) return;
+    if (document.getElementById('page-toc')) return;   // 目次があるなら章名の更新と衝突するので何もしない
+
+    var text = (h1.getAttribute('data-topbar-title') || h1.textContent).replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    box.textContent = text;
+    box.setAttribute('aria-hidden', 'true');   // 本文に同じ h1 があるので、読み上げ対象にしない
+
+    // rootMargin には CSS 変数が使えないので、バーの実測値(px)で、バーの下端を監視の上端にする
+    var barH = Math.round(bar.getBoundingClientRect().height);
+    new IntersectionObserver(function (entries) {
+      var e = entries[entries.length - 1];
+      var r = e.boundingClientRect;
+      // 「バーの上に隠れた」ときだけ表示する（画面の下に外れたときや、高さ0のときは表示しない）
+      var gone = !e.isIntersecting && r.height > 0 && !!e.rootBounds && r.top < e.rootBounds.top;
+      box.classList.toggle('is-visible', gone);
+    }, { rootMargin: '-' + barH + 'px 0px 0px 0px', threshold: 0 }).observe(h1);
+  }
+
   /* ===================== 初期化 ===================== */
 
   function init() {
@@ -355,6 +387,7 @@
     wrapTables();
     setupToggles();
     setupScrollSpy(items);
+    setupPageTitle();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

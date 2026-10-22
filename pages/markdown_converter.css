@@ -311,8 +311,8 @@ button:hover {
   opacity: 1;
 }
 
-/* ページ名。page_common.css の h2 装飾（青い左線・背景・余白）を打ち消す */
-.layout-3col .topbar h2 {
+/* ページ名。page_common.css の h1 装飾（青い左線・背景・余白）を打ち消す */
+.layout-3col .topbar h1 {
   font-size: 1.2rem;
   margin: 0;
   padding: 0;

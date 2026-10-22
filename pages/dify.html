@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="page_common.css">
   <script src="page_layout.js" defer></script>
 
-<style>
-          .layout-3col {
-            --l3-content-max: min(75%, 960px);
-            /* 画面幅いっぱいに使う */
-        }
-</style>
+  <style>
+    .layout-3col {
+      --l3-content-max: min(75%, 960px);
+      /* 画面幅いっぱいに使う */
+    }
+  </style>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
@@ -36,14 +36,11 @@
 </head>
 
 <body class="layout-3col l3-2col">
-
-  <!-- ① 上部バー（新規追加） -->
-  <header class="topbar">
+  <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>
-  </header>
+  </div>
   <div id="side-backdrop" class="side-backdrop"></div>
-
   <div class="layout">
     <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
 
