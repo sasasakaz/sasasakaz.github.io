@@ -126,6 +126,37 @@ Note:
             border-radius: 0.5rem;
         }
 
+        /* 長い行を表示幅で折り返す */
+        #output .d2h-file-side-diff {
+            overflow-x: hidden;
+        }
+
+        #output .d2h-diff-table {
+            table-layout: auto;
+            width: 100%;
+        }
+
+        /* 行番号セルは absolute なので、コード側のセルが残り幅を全て使うようにする */
+        #output .d2h-diff-table td:not(.d2h-code-side-linenumber):not(.d2h-code-linenumber) {
+            width: 100%;
+        }
+
+        #output .d2h-code-side-line,
+        #output .d2h-code-line {
+            display: block;
+            box-sizing: border-box;
+            width: 100%;
+            padding: 0 0.5em 0 4.5em;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        #output .d2h-code-line-ctn {
+            display: inline;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
         #output:empty {
             display: none;
         }

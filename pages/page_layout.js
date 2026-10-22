@@ -46,9 +46,9 @@
         ['🦁 Easy Bayesian Estimation for Group Proportions', 'pages/beat_5g.html'],
         ['🐶 Markdown Converter', 'pages/markdown_converter.html'],
         ['🐯 Diff Viewer', 'pages/diff_viewer.html'],
-        ['🦄 Amazon URL Shortener', 'pages/amazon_url_shortener.html'],
-        ['🐹 QR Contact URL Generator', 'pages/qr_contact_url_generator.html'],
-        ['🐼 URL to QR', 'pages/url_to_qr_code.html']
+        ['🦄 Color Comparison', 'pages/color_comparison.html'],
+        ['🐹 Amazon URL Shortener', 'pages/amazon_url_shortener.html'],
+        ['🐼 QR Code Creator', 'pages/qr_code_creator.html']
       ]
     }
   ];

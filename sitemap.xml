@@ -53,15 +53,15 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://sasasakaz.github.io/pages/color_comparison.html</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://sasasakaz.github.io/pages/amazon_url_shortener.html</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://sasasakaz.github.io/pages/qr_contact_url_generator.html</loc>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://sasasakaz.github.io/pages/url_to_qr_code.html</loc>
+    <loc>https://sasasakaz.github.io/pages/qr_code_creator.html</loc>
     <priority>0.8</priority>
   </url>
   <url>

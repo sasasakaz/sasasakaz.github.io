@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<!--
+QR Code Creator
+Created: 2026-10-22
+Description: 連絡先登録用・サイト表示用のQRコードを作成するツール。
+-->
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR Code Creator</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/qr_code_creator.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="連絡先登録用・サイト表示用のQRコードを作成できます。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="QR Code Creator">
+  <meta property="og:description" content="連絡先登録用・サイト表示用のQRコードを作成できます。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/qr_code_creator.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page_common.css">
+  <script src="page_layout.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/ushelp/EasyQRCodeJS@master/dist/easy.qrcode.min.js"></script>
+  <style>
+    .container {
+      box-sizing: border-box;
+      width: calc(100% - 2rem);
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 1.25rem;
+      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .header h1 {
+      all: revert;
+      margin: 0;
+      color: #007aff;
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .mode-switch {
+      display: inline-flex;
+      padding: 0.2rem;
+      border: 1px solid #d9e4f2;
+      border-radius: 0.65rem;
+      background: #f4f7fb;
+    }
+
+    .mode-switch button {
+      padding: 0.55rem 0.75rem;
+      border: 0;
+      border-radius: 0.45rem;
+      background: transparent;
+      color: #445;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .mode-switch button[aria-pressed="true"] {
+      background: #007aff;
+      color: white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .mode-panel[hidden] {
+      display: none;
+    }
+
+    .field-group {
+      margin-bottom: 1rem;
+    }
+
+    .field-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .field-row .field-group {
+      flex: 1;
+      min-width: 0;
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.25rem;
+      color: #666;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    input {
+      box-sizing: border-box;
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      border: 0.2rem solid #eee;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #007aff;
+      background-color: #f9fcff;
+    }
+
+    .btn-create {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 1rem;
+      border: 0;
+      border-radius: 0.75rem;
+      background-color: #007aff;
+      color: white;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .btn-create:hover {
+      background-color: #0056b3;
+    }
+
+    .mode-description,
+    .privacy-note {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      background-color: #f8f9fa;
+      color: #555;
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+
+    .privacy-note {
+      border-left: 0.25rem solid #34c759;
+    }
+
+    #qrcode-area {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 2rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid #eee;
+    }
+
+    #qrcode img {
+      max-width: 100%;
+      border: 1px solid #eee;
+      padding: 0.25rem;
+    }
+
+    .btn-download {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      background-color: #5856d6;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    @media (max-width: 420px) {
+      .container {
+        padding: 1rem;
+      }
+
+      .field-row {
+        gap: 0.4rem;
+      }
+
+      .mode-switch button {
+        padding: 0.5rem;
+        font-size: 0.78rem;
+      }
+    }
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
+</head>
+
+<body class="layout-3col l3-2col">
+  <header class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+  </header>
+  <div id="side-backdrop" class="side-backdrop"></div>
+
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <div class="container">
+        <div class="header">
+          <h1>QRコード作成</h1>
+          <div class="mode-switch" role="group" aria-label="QRコードの用途">
+            <button type="button" class="mode-button" data-mode="contact" aria-controls="contact-panel"
+              aria-pressed="true">連絡先</button>
+            <button type="button" class="mode-button" data-mode="url" aria-controls="url-panel"
+              aria-pressed="false">サイト表示</button>
+          </div>
+        </div>
+
+        <section id="contact-panel" class="mode-panel" aria-label="連絡先登録用QRコード">
+          <div class="field-row">
+            <div class="field-group">
+              <label for="lastName">苗字 Last Name</label>
+              <input id="lastName" autocomplete="family-name" placeholder="田中">
+            </div>
+            <div class="field-group">
+              <label for="firstName">名前 First Name</label>
+              <input id="firstName" autocomplete="given-name" placeholder="太郎">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field-group">
+              <label for="lastNameKana">苗字（カナ）Last Kana</label>
+              <input id="lastNameKana" placeholder="タナカ">
+            </div>
+            <div class="field-group">
+              <label for="firstNameKana">名前（カナ）First Kana</label>
+              <input id="firstNameKana" placeholder="タロウ">
+            </div>
+          </div>
+
+          <div class="field-group">
+            <label for="email1">Email</label>
+            <input id="email1" type="email" autocomplete="email" placeholder="mail@example.com">
+          </div>
+          <div class="field-group">
+            <label for="tel">Phone Number</label>
+            <input id="tel" type="tel" autocomplete="tel" placeholder="09012345678">
+          </div>
+
+          <div class="field-row">
+            <div class="field-group" style="flex: 0.4;">
+              <label for="zip">郵便番号</label>
+              <input id="zip" autocomplete="postal-code" placeholder="123-4567">
+            </div>
+            <div class="field-group">
+              <label for="pref">都道府県</label>
+              <input id="pref" autocomplete="address-level1" placeholder="東京都">
+            </div>
+          </div>
+          <div class="field-group">
+            <label for="addr">住所（市区町村・番地）</label>
+            <input id="addr" autocomplete="street-address" placeholder="千代田区...">
+          </div>
+          <div class="field-group">
+            <label for="webUrl">Website / SNS（URL）</label>
+            <input id="webUrl" type="url" placeholder="https://example.com">
+          </div>
+          <p class="mode-description">連絡先のお知らせやアドレス登録に使えるQRコードを作成できます。</p>
+          <button type="button" id="create-contact" class="btn-create">連絡先のQRコードを作成</button>
+        </section>
+
+        <section id="url-panel" class="mode-panel" aria-label="サイト表示用QRコード" hidden>
+          <div class="field-group">
+            <label for="url-input">サイトのURL</label>
+            <input id="url-input" type="url" autocomplete="url" placeholder="https://example.com">
+          </div>
+          <p class="mode-description">スマホやカメラでURLを共有しやすくするQRコードを作成できます。</p>
+          <button type="button" id="create-url" class="btn-create">サイト表示用QRコードを作成</button>
+        </section>
+
+        <p class="privacy-note">🛡️ 入力内容はこのブラウザ内でQRコードに変換してるにゃん。サーバーには送信されないから安心にゃん。</p>
+
+        <div id="qrcode-area" aria-live="polite">
+          <div id="qrcode"></div>
+          <a id="downloadBtn" class="btn-download" download="qrcode.png">PNG画像を保存する</a>
+        </div>
+      </div>
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    const modeButtons = document.querySelectorAll(".mode-button");
+    const contactPanel = document.getElementById("contact-panel");
+    const urlPanel = document.getElementById("url-panel");
+    const qrArea = document.getElementById("qrcode-area");
+    const qrDiv = document.getElementById("qrcode");
+    const downloadBtn = document.getElementById("downloadBtn");
+    let generationId = 0;
+
+    function setMode(mode) {
+      const isContactMode = mode === "contact";
+      contactPanel.hidden = !isContactMode;
+      urlPanel.hidden = isContactMode;
+      modeButtons.forEach((button) => {
+        button.setAttribute("aria-pressed", String(button.dataset.mode === mode));
+      });
+      generationId += 1;
+      qrDiv.innerHTML = "";
+      qrArea.style.display = "none";
+    }
+
+    function getValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function escapeVCardText(value) {
+      return value
+        .replace(/\\/g, "\\\\")
+        .replace(/\r\n|\r|\n/g, "\\n")
+        .replace(/([,;])/g, "\\$1");
+    }
+
+    function createVCard() {
+      const lastName = getValue("lastName");
+      const firstName = getValue("firstName");
+      if (!lastName && !firstName) {
+        alert("連絡先登録用QRコードには、苗字か名前を入力してください。");
+        return null;
+      }
+
+      const lastNameKana = getValue("lastNameKana");
+      const firstNameKana = getValue("firstNameKana");
+      const email = getValue("email1");
+      const tel = getValue("tel");
+      const zip = getValue("zip");
+      const pref = getValue("pref");
+      const addr = getValue("addr");
+      const webUrl = getValue("webUrl");
+
+      let vcard = "BEGIN:VCARD\r\nVERSION:3.0\r\n";
+      vcard += "N;CHARSET=UTF-8:" + escapeVCardText(lastName) + ";" + escapeVCardText(firstName) + ";;;\r\n";
+      vcard += "FN;CHARSET=UTF-8:" + escapeVCardText([lastName, firstName].filter(Boolean).join(" ")) + "\r\n";
+      if (lastNameKana) vcard += "X-PHONETIC-LAST-NAME;CHARSET=UTF-8:" + escapeVCardText(lastNameKana) + "\r\n";
+      if (firstNameKana) vcard += "X-PHONETIC-FIRST-NAME;CHARSET=UTF-8:" + escapeVCardText(firstNameKana) + "\r\n";
+      if (email) vcard += "EMAIL;TYPE=INTERNET,HOME:" + escapeVCardText(email) + "\r\n";
+      if (tel) vcard += "TEL:" + escapeVCardText(tel) + "\r\n";
+      if (zip || pref || addr) {
+        vcard += "ADR;TYPE=HOME;CHARSET=UTF-8:;;" + escapeVCardText(addr) + ";;"
+          + escapeVCardText(pref) + ";" + escapeVCardText(zip) + ";Japan\r\n";
+      }
+      if (webUrl) vcard += "URL:" + escapeVCardText(webUrl) + "\r\n";
+      return vcard + "END:VCARD";
+    }
+
+    function createQR(qrText, fileName) {
+      generationId += 1;
+      const currentGeneration = generationId;
+      qrArea.style.display = "none";
+      qrDiv.innerHTML = "";
+      try {
+        new QRCode(qrDiv, {
+          text: qrText,
+          width: 250,
+          height: 250,
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (error) {
+        console.error("QRコードの作成に失敗しました。", error);
+        alert("入力内容が多すぎてQRコードを作成できませんでした。入力項目を減らしてお試しください。");
+        return;
+      }
+
+      setTimeout(() => {
+        if (currentGeneration !== generationId) return;
+
+        const canvas = qrDiv.querySelector("canvas");
+        const image = qrDiv.querySelector("img");
+        const imageUrl = canvas ? canvas.toDataURL("image/png") : image && image.src;
+        if (!imageUrl) {
+          alert("QRコード画像を作成できませんでした。もう一度お試しください。");
+          return;
+        }
+
+        qrDiv.innerHTML = "";
+        const qrImage = document.createElement("img");
+        qrImage.src = imageUrl;
+        qrImage.width = 250;
+        qrImage.height = 250;
+        qrImage.alt = "作成したQRコード";
+        qrDiv.appendChild(qrImage);
+        downloadBtn.href = imageUrl;
+        downloadBtn.download = fileName + ".png";
+        qrArea.style.display = "flex";
+      }, 100);
+    }
+
+    function sanitizeFileName(value) {
+      return value.replace(/[\\/:*?"<>|]/g, "_").replace(/^\.+|\.+$/g, "").trim() || "qrcode";
+    }
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => setMode(button.dataset.mode));
+    });
+
+    document.getElementById("create-contact").addEventListener("click", () => {
+      const vcard = createVCard();
+      if (vcard) {
+        const name = [getValue("lastName"), getValue("firstName")].filter(Boolean).join("_");
+        createQR(vcard, sanitizeFileName(name));
+      }
+    });
+
+    document.getElementById("create-url").addEventListener("click", () => {
+      const urlInput = document.getElementById("url-input");
+      if (!urlInput.value.trim()) {
+        alert("サイトのURLを入力してください。");
+        urlInput.focus();
+        return;
+      }
+      if (!urlInput.checkValidity()) {
+        urlInput.reportValidity();
+        return;
+      }
+      createQR(urlInput.value.trim(), "qrcode");
+    });
+  </script>
+</body>
+
+</html>
