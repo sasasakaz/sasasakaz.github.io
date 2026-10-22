@@ -1,5 +1,58 @@
 @charset "utf-8";
 
+/* =====================================================================
+   色の定義（色を変えたいときは、ここだけ直せば全ページに反映される）
+   ・用途を限定しない名前にしてある（使い道はコメントを参照）
+   ・ツール系ページの専用CSS（page_common.css の後に読み込むもの）からも使う
+   ===================================================================== */
+:root {
+  /* ブランド（primary青系） */
+  --c-brand-dark: #1a365d;
+  /* dark-navy, h2 color */
+  --c-brand: #2b5b84;
+  /* muted-dark-blue, h2 border-left */
+  --c-brand-light: #3182ce;
+  /* medium blue, h3 border-left */
+  --c-brand-vivid: #007aff;
+  /* vivid-blue, button */
+
+  /* ブランド（secondary薄青系。番号が大きいほど濃い） */
+  --c-brand2-1: #f0f4f8;
+  /* h2 bg 一番薄い */
+  --c-brand2-2: #e8f4fc;
+  /* th, site-nav-current */
+  --c-brand2-3: #d0e7f5;
+  /* table border */
+
+  /* アクセント */
+  --c-accent-dark: #7a4a00;
+  /* dark-brown */
+  --c-accent: #f57c00;
+  /* orange */
+  --c-accent-light: #fff3e0;
+  /* creamy-orange */
+
+  /* 文字（濃い→薄い順） */
+  --c-text: #333333;
+  /* main */
+  --c-text-sub: #666666;
+  /* medium-gray, blockquote */
+  --c-text-weak: #999999;
+  /* medium-light-gray */
+
+  /* 面・線（薄い→濃い順） */
+  --c-bg: #ffffff;
+  /* white */
+  --c-bg-subtle: #f5f5f5;
+  /* mdc-note-box bg */
+  --c-border: #dddddd;
+  /* light-gray */
+
+  /* 派生色（hoverなど）。black を white にすると「少し明るく」に変わる */
+  --c-brand-vivid-hover: color-mix(in srgb, var(--c-brand-vivid) 85%, black);
+  --c-accent-hover: color-mix(in srgb, var(--c-accent) 85%, black);
+}
+
 /* すべての要素でサイズ計算を正確にする */
 * {
   box-sizing: border-box;
@@ -8,7 +61,7 @@
 body {
   font-family: "Open Sans", verdana, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol";
   /* 文字色：真っ黒より少しだけ優しい黒 */
-  color: #333;
+  color: var(--c-text);
   /* 行間を少し広くする */
   /* line-height: 1.25;  */
 
@@ -61,11 +114,11 @@ h1 {
 
 h2 {
   font-size: 1.75em;
-  color: #1a365d;
+  color: var(--c-brand-dark);
   /* 濃いネイビー */
-  border-left: 6px solid #2b5b84;
+  border-left: 6px solid var(--c-brand);
   /* 太い左線 */
-  background-color: #f0f4f8;
+  background-color: var(--c-brand2-1);
   /* うすい背景色 */
   padding: 0.4em 0.7em;
   border-radius: 0 4px 4px 0;
@@ -75,10 +128,10 @@ h2 {
 
 h3 {
   font-size: 1.5em;
-  color: #1a365d;
-  border-left: 4px solid #3182ce;
-  /* 中太左線、少し明るい青、背景なし */
-  background-color: #f0f4f8;
+  color: var(--c-brand-dark);
+  border-left: 4px solid var(--c-brand-light);
+  /* 中太左線、少し明るい青、うすい背景色つき */
+  background-color: var(--c-brand2-1);
   padding: 0.3em 0.6em;
   margin-top: 2.5em;
   margin-bottom: 0.4em;
@@ -86,8 +139,8 @@ h3 {
 
 h4 {
   font-size: 1.2em;
-  color: #1a365d;
-  border-left: 3px solid #3182ce;
+  color: var(--c-brand-dark);
+  border-left: 3px solid var(--c-brand-light);
   padding-left: 0.5em;
   margin-top: 2em;
   margin-bottom: 0em;
@@ -120,42 +173,9 @@ img {
   text-align: center;
   margin-top: 2rem;
   padding: 1rem 0;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--c-border);
   clear: both;
 }
-
-
-.toc {
-  border: 1px solid #d0e7f5;
-  border-radius: 0.5em;
-  padding: 1em 1.5em;
-  /* 枠線と中の余白 */
-  margin: 2em 0;
-  background-color: #f8fafc;
-  /* うっすら背景を入れるとカード感が出る */
-}
-
-/* 目次のタイトル */
-.toc h2 {
-  font-size: 1.05em;
-  font-weight: bold;
-  color: #1a365d;
-  margin-top: 0;
-  /* デフォルトの大きな余白を全部消す */
-  margin-bottom: 0.2em;
-  /* 下のリスト（ul）との間のスキマだけ少し開ける */
-
-  /* h2の装飾（左線や背景帯など）が引き継がれないようにクリア */
-  border: none;
-  background: none;
-  padding: 0;
-}
-
-.toc ul {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 
 
 .book-promo {
@@ -171,7 +191,7 @@ img {
 }
 
 .affiliate-notice {
-  color: #666666;
+  color: var(--c-text-sub);
   font-size: 0.9em;
 }
 
@@ -181,7 +201,7 @@ img {
   width: fit-content;
   margin: 1em auto 0;
   padding: 0.6em 1.2em;
-  background: #f57c00;
+  background: var(--c-accent);
   color: #fff;
   text-decoration: none;
   font-weight: bold;
@@ -189,21 +209,21 @@ img {
 }
 
 .btn-amzn:hover {
-  opacity: 0.85;
+  background: var(--c-accent-hover);
 }
 
 blockquote {
   margin: 1em 0;
   padding: 0.5em 1em;
   /* border-left: 0.25em solid #ccc; */
-  background-color: #f9f9f9;
-  color: #666;
+  background-color: var(--c-bg-subtle);
+  color: var(--c-text-sub);
 }
 
 
 /* インラインコード用 */
 .inline-code {
-  background-color: #f4f4f4;
+  background-color: var(--c-bg-subtle);
   /* ほんのりグレー */
   color: #9b2c2c;
   /* 赤系の色 */
@@ -249,7 +269,7 @@ blockquote {
 
 /* 注釈のインライン版やちょっとしたフレーズ用 */
 .inline-gray {
-  background-color: #eef2f6;
+  background-color: var(--c-brand2-1);
   /* ほんのり青みのあるうすいグレー */
   color: #374151;
   /* ダークグレー（黒すぎない上品な色） */
@@ -272,8 +292,8 @@ blockquote {
 }
 
 .mdc-warn-box {
-  background-color: #fff3e0;
-  border-left: 5px solid #ff9800;
+  background-color: var(--c-accent-light);
+  border-left: 5px solid var(--c-accent);
   /* margin: 1em 1.5em; */
   padding: 0.2em 0.8em;
   border-radius: 4px;
@@ -289,7 +309,7 @@ blockquote {
 
 /* 注釈のボックス版 */
 .mdc-note-box {
-  background-color: #f5f5f5;
+  background-color: var(--c-bg-subtle);
   /* border-left: 5px solid #f44336; */
   /* margin: 0em 0.5em; */
   padding: 0.2em 0.8em;
@@ -305,13 +325,13 @@ table {
   border-collapse: collapse;
   margin: 20px 0;
   line-height: 1.6;
-  border: 1px solid #d0e7f5;
+  border: 1px solid var(--c-brand2-3);
   /* 表の外枠 */
 }
 
 th,
 td {
-  border: 1px solid #d0e7f5;
+  border: 1px solid var(--c-brand2-3);
   /* 縦線と横線（すべて同じ薄い水色） */
 }
 
@@ -319,9 +339,9 @@ th {
   padding: 12px 8px;
   font-weight: bold;
   text-align: left;
-  background-color: #e8f4fc;
+  background-color: var(--c-brand2-2);
   /* ヘッダーの薄い水色 */
-  color: #2b5b84;
+  color: var(--c-brand);
   /* ヘッダーの文字色（少し濃いめの紺色にして読みやすく） */
   /* white-space: nowrap; */
   /* 見出しの文字が途中で折り返されなくなる */
@@ -340,7 +360,7 @@ td {
 .term {
   /* font-weight: bold; */
   font-size: 1.1em;
-  color: #2b5b84;
+  color: var(--c-brand);
   margin: 1.2em 0 .2em;
 
   /* 左線の装飾 */
@@ -375,7 +395,7 @@ td {
   gap: 8px;
   font-size: 0.875rem;
   /* 約14px（少し小さめ） */
-  color: #666666;
+  color: var(--c-text-sub);
   /* 主張しすぎないグレー */
   margin-bottom: 24px;
   /* 本文との間の余白 */
@@ -395,7 +415,7 @@ td {
 
 /* 区切り線のスラッシュ */
 .meta-divider {
-  color: #ccc;
+  color: var(--c-border);
   margin: 0 2px;
 }
 
@@ -440,11 +460,11 @@ td {
 以降記述の並び順
 
 場所（目安）	内容	対象
-約406〜436行	変数の定義と、bodyの打ち消し	3カラム版・2カラム版の両方（.layout-3col）
-約438〜549行	上部バー、開閉ボタン、ツールチップ、章名	両方
-約551〜660行	広い画面（1150px以上）で左右を並べる3カラム	3カラム版だけ（:where(:not(.l3-2col)) で2カラム版を除外）
-約662〜727行	狭い画面（1150px未満）の左右ドロワー	3カラム版の狭い画面
-約729〜800行	2カラム版のドロワー	2カラム版だけ（.layout-3col.l3-2col）
+約456〜476行	変数の定義と、bodyの打ち消し	3カラム版・2カラム版の両方（.layout-3col）
+約479〜585行	上部バー、開閉ボタン、ツールチップ、章名	両方
+約592〜701行	広い画面（1150px以上）で左右を並べる3カラム	3カラム版だけ（:where(:not(.l3-2col)) で2カラム版を除外）
+約704〜769行	狭い画面（1150px未満）の左右ドロワー	3カラム版の狭い画面
+約771〜844行	2カラム版のドロワー	2カラム版だけ（.layout-3col.l3-2col）
 その先	ページ一覧、目次、本文まわり、印刷	ページ一覧と本文まわりは両方、目次は3カラム版だけ使う
      =====================================================================*/
 
@@ -483,8 +503,8 @@ td {
   align-items: center;
   gap: 0.75rem;
   padding: 0 0.8rem;
-  background: #fff;
-  border-bottom: 1px solid #d0e7f5;
+  background: var(--c-bg);
+  border-bottom: 1px solid var(--c-brand2-3);
 }
 
 /* 開閉ボタン（中身のSVGアイコンは page_layout.js が入れる） */
@@ -498,7 +518,7 @@ td {
   height: 32px;
   padding: 0;
   font: inherit;
-  color: #2b5b84;
+  color: var(--c-brand);
   background: transparent;
   border: 1px solid transparent;
   border-radius: 0.4em;
@@ -513,20 +533,20 @@ td {
 
 /* 2. ホバー: ほんのり背景を出して、押せると分かるようにする */
 .layout-3col .topbar-btn:hover {
-  background: #f0f4f8;
-  color: #2b5b84;
+  background: var(--c-brand2-1);
+  color: var(--c-brand);
 }
 
 /* 3. 開いているとき: 背景と青い枠はやめて、アイコンの色だけ濃くする */
 .layout-3col .topbar-btn[aria-expanded="true"] {
   background: transparent;
   border-color: transparent;
-  color: #2b5b84;
+  color: var(--c-brand);
 }
 
 .layout-3col .topbar-btn:focus-visible,
 .layout-3col .side a:focus-visible {
-  outline: 2px solid #3182ce;
+  outline: 2px solid var(--c-brand-light);
   outline-offset: 2px;
 }
 
@@ -542,7 +562,7 @@ td {
   line-height: 1.4;
   white-space: nowrap;
   color: #fff;
-  background: #2d3748;
+  background: var(--c-text);
   border-radius: 0.3em;
   opacity: 0;
   visibility: hidden;
@@ -574,7 +594,7 @@ td {
   min-width: 0;
   text-align: center;
   font-size: 0.85rem;
-  color: #718096;
+  color: var(--c-text-sub);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -629,8 +649,8 @@ td {
     grid-row: 1;
     align-self: stretch;
     /* 基本形の align-items:center が効くと、線がバーの真ん中に来てしまう */
-    background: #fff;
-    border-bottom: 1px solid #d0e7f5;
+    background: var(--c-bg);
+    border-bottom: 1px solid var(--c-brand2-3);
   }
 
   .layout-3col:where(:not(.l3-2col)) .topbar>* {
@@ -661,7 +681,7 @@ td {
 
   /* 左カラムが開いているとき: 本文の左端に薄い線を引く（本文と同じ高さまで続く） */
   html:not(.left-closed) .layout-3col:where(:not(.l3-2col)) #content {
-    border-left: 1px solid #e2e8f0;
+    border-left: 1px solid var(--c-border);
     padding-left: 1.25rem;
   }
 
@@ -691,7 +711,7 @@ td {
   .layout-3col:where(:not(.l3-2col)) .side-right {
     grid-column: 3;
     justify-self: end;
-    border-left: 1px solid #e2e8f0;
+    border-left: 1px solid var(--c-border);
     padding-left: 0.4rem;
   }
 }
@@ -724,7 +744,7 @@ td {
     font-size: 0.9rem;
     overflow-y: auto;
     overscroll-behavior: contain;
-    background: #fff;
+    background: var(--c-bg);
     box-shadow: 0 0 24px rgba(0, 0, 0, 0.18);
     /* 閉じている間はフォーカスも受けないようにする */
     visibility: hidden;
@@ -798,7 +818,7 @@ td {
   font-size: 0.9rem;
   overflow-y: auto;
   overscroll-behavior: contain;
-  background: #fff;
+  background: var(--c-bg);
   box-shadow: 0 0 24px rgba(0, 0, 0, 0.18);
   /* 閉じている間はフォーカスも受けないようにする */
   visibility: hidden;
@@ -846,7 +866,7 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
   margin: 0 0 0.4rem 0.6rem;
   font-size: 0.8rem;
   font-weight: bold;
-  color: #718096;
+  color: var(--c-text-sub);
 }
 
 .layout-3col .site-nav-group+.site-nav-group {
@@ -863,17 +883,17 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
   border-radius: 0.3em;
   font-size: 0.85rem;
   line-height: 1.4;
-  color: #2d3748;
+  color: var(--c-text);
   text-decoration: none;
 }
 
 .layout-3col .site-nav-group a:hover {
-  background: #f0f4f8;
+  background: var(--c-brand2-1);
 }
 
 .layout-3col .site-nav-group a.current {
-  background: #e8f4fc;
-  color: #1a365d;
+  background: var(--c-brand2-2);
+  color: var(--c-brand-dark);
   font-weight: bold;
 }
 
@@ -881,7 +901,7 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
 .layout-3col .site-nav-group a.external::after {
   content: " ↗";
   font-size: 0.8em;
-  color: #a0aec0;
+  color: var(--c-text-weak);
 }
 
 
@@ -899,7 +919,7 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
   border-left: 3px solid transparent;
   font-size: 0.85rem;
   line-height: 1.4;
-  color: #4a5568;
+  color: var(--c-text-sub);
   text-decoration: none;
 }
 
@@ -909,13 +929,13 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
 }
 
 .layout-3col .page-toc-list a:hover {
-  background: #f0f4f8;
+  background: var(--c-brand2-1);
 }
 
 .layout-3col .page-toc-list a.active {
-  border-left-color: #3182ce;
-  background: #f0f4f8;
-  color: #1a365d;
+  border-left-color: var(--c-brand-light);
+  background: var(--c-brand2-1);
+  color: var(--c-brand-dark);
   font-weight: bold;
 }
 
