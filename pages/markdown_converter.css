@@ -6,19 +6,20 @@
 /* ===== 旧 common.css から移した設定 ===== */
 
 .layout-3col {
-  /* 本文の最大幅。min(95%, 1400px) = 上限1400px。端まで使うなら none */
-  /* --l3-content-max: min(95%, 1400px); */
+  /* 本文の最大幅。none = 画面幅いっぱい（上限を付けるなら min(95%, 1400px) など） */
   --l3-content-max: none;
+
   /* 旧 body の設定のうち、余白・中央寄せ・幅以外（背景・文字サイズなど） */
-  background: #f4f4f4;
+  background: #f6f8fa;
   font-size: 0.9rem;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
-/* 旧 body の余白・下マージン。横の余白は .layout の padding(1rem) が担当 */
+/* 旧 body の余白・下マージン。横の余白は .layout の padding(1rem) が担当。
+   上の 0.75rem が「バーと入出力欄の間隔」。入出力欄の高さ計算（- 0.75rem）と必ず揃えること */
 .layout-3col.l3-2col #content {
-  padding: 1rem 0;
+  padding: 0.75rem 0 1rem;
   margin-bottom: 2rem;
 }
 
@@ -79,8 +80,8 @@ textarea,
 /* 入力と出力の高さを固定 */
 #markdown-input,
 #html-output {
-  height: calc(100vh - var(--l3-topbar-h, 3.5rem) - 1.5rem);
-  height: calc(100dvh - var(--l3-topbar-h, 3.5rem) - 1.5rem);
+  height: calc(100vh - var(--l3-topbar-h, 3.5rem) - 0.75rem);
+  height: calc(100dvh - var(--l3-topbar-h, 3.5rem) - 0.75rem);
   min-height: 18rem;
 }
 
@@ -330,8 +331,8 @@ button:hover {
 }
 
 /* ===== 上部バー（site の .topbar に、このツールの操作ボタンを同居させる） =====
-   page_common.css の .layout-3col .topbar（高さ44px固定・白背景）を、折り返せる高さと
-   旧デザイン（#f4f4f4）に上書きする。詳細度を同じ(0,2,0)にして、後から読み込む本ファイルで勝たせる。 */
+   背景（白）と下線は site 既定のまま。page_common.css の .layout-3col .topbar（高さ44px固定）を、
+   「44px以上・折り返し可」に上書きする。詳細度を同じ(0,2,0)にして、後から読み込む本ファイルで勝たせる。 */
 .layout-3col .topbar {
   /* 設定パネル(40)・ドロワー(40)より上。バー内のドロップダウンが隠れないように */
   z-index: 50;
@@ -340,10 +341,15 @@ button:hover {
   min-height: 44px;
   flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0.4rem 1rem;
-  margin-bottom: 0.5rem;
-  background: #f4f4f4;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 0.3rem 1rem;
+}
+
+/* バー内のボタンを 32px に揃えて、バーを44pxに収める（左の開閉ボタンも32px）。
+   旧 common.css 由来の min-height:3rem はここだけ小さくする。
+   ドロップダウン内の項目(.dd-item)と設定パネル内のボタンは従来どおり 3rem のまま */
+.layout-3col .topbar button:not(.topbar-btn):not(.dd-item) {
+  min-height: 2rem;
+  padding-block: 0.25rem;
 }
 
 /* 共通の button:hover { opacity: .8 } が、サイドバー開閉ボタンとツールチップまで薄くしないように */
@@ -353,7 +359,7 @@ button:hover {
 
 /* ページ名。page_common.css の h2 装飾（青い左線・背景・余白）を打ち消す */
 .layout-3col .topbar h2 {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   margin: 0;
   padding: 0;
   color: inherit;

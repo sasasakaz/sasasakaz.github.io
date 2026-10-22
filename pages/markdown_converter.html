@@ -3,7 +3,7 @@
 <!-- 
 MarkdownをHTMLに変換するツール
 Created: 2026-04-25
-Updated: 2026-10-21
+Updated: 2026-10-22
 Description: MarkdownをHTMLに変換する。逆も可能。
 Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に編集可能。hilight.js利用時はペースト先のHTMLにhighlight.jsとCSSの追加が必要。
 -->
@@ -45,6 +45,7 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
        #topbar-title は置かない（ページ名は下の h2。目次がないので章名の更新も不要） -->
   <header class="topbar" id="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <h2 id="page-title">MarkdownをHTMLに変換するにゃん</h2>
     <div class="dd">
       <button type="button" class="icon-btn" title="変換方向" aria-label="変換方向">⇄</button>
       <div class="dd-panel">
@@ -55,7 +56,6 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
           MD</button>
       </div>
     </div>
-    <h2 id="page-title">MarkdownをHTMLに変換するにゃん</h2>
     <span class="mode-badge" id="mode-badge">MD→HTML</span>
     <div class="tools" id="tag-controls">
       <div class="dd">
@@ -103,7 +103,11 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
 
       <footer id="footer">
         <div class="footer-links">
-          <a href="https://sasasakaz.github.io/" target="_blank">🏠 Home</a>
+          <a href="https://sasasakaz.github.io/" target="_blank">🏠 View Other Tools</a>
+          <span class="separator">|</span>
+          <a href="https://github.com/sasasakaz/sasasakaz.github.io/blob/main/pages/markdown_converter.html"
+            target="_blank">View source
+            on GitHub</a>
         </div>
         <p>Coded by sasasakaz 2022-2026</p>
       </footer>
