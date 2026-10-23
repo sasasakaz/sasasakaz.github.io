@@ -76,6 +76,13 @@
       font-weight: 700;
     }
 
+    /* 白抜きにしない塗りつぶし（薄い色での見え方確認用） */
+    .fill-sample-plain {
+      margin-top: 0.4rem;
+      color: inherit;
+      font-weight: normal;
+    }
+
     .border-sample {
       display: grid;
       min-height: 3.5rem;
@@ -203,6 +210,7 @@
           <p class="color-status" aria-live="polite"></p>
           <div class="sample-group">
             <div class="fill-sample">塗りつぶし</div>
+            <div class="fill-sample fill-sample-plain">塗りつぶし2</div>
           </div>
           <div class="sample-group">
             <div class="border-sample">枠線</div>
@@ -223,6 +231,7 @@
           <p class="color-status" aria-live="polite"></p>
           <div class="sample-group">
             <div class="fill-sample">塗りつぶし</div>
+            <div class="fill-sample fill-sample-plain">塗りつぶし2</div>
           </div>
           <div class="sample-group">
             <div class="border-sample">枠線</div>
@@ -243,6 +252,7 @@
           <p class="color-status" aria-live="polite"></p>
           <div class="sample-group">
             <div class="fill-sample">塗りつぶし</div>
+            <div class="fill-sample fill-sample-plain">塗りつぶし2</div>
           </div>
           <div class="sample-group">
             <div class="border-sample">枠線</div>
@@ -263,6 +273,7 @@
           <p class="color-status" aria-live="polite"></p>
           <div class="sample-group">
             <div class="fill-sample">塗りつぶし</div>
+            <div class="fill-sample fill-sample-plain">塗りつぶし2</div>
           </div>
           <div class="sample-group">
             <div class="border-sample">枠線</div>
@@ -444,7 +455,7 @@
     document.querySelectorAll('[data-color-card]').forEach(function (card) {
       var input = card.querySelector('.color-input');
       var status = card.querySelector('.color-status');
-      var fill = card.querySelector('.fill-sample');
+      var fills = card.querySelectorAll('.fill-sample');
       var border = card.querySelector('.border-sample');
       var textSamples = card.querySelector('.text-samples');
 
@@ -455,7 +466,7 @@
 
         if (!isHex) {
           status.textContent = value ? 'カラーコードは #RGB または #RRGGBB で入力してください。' : 'カラーコードを入力してください。';
-          fill.hidden = true;
+          fills.forEach(function (fill) { fill.hidden = true; });
           border.hidden = true;
           textSamples.hidden = true;
           return;
@@ -463,12 +474,15 @@
 
         var color = value.charAt(0) === '#' ? value : '#' + value;
         status.textContent = '';
-        fill.hidden = false;
         border.hidden = false;
         textSamples.hidden = false;
-        fill.style.backgroundColor = color;
+        fills.forEach(function (fill) {
+          fill.hidden = false;
+          fill.style.backgroundColor = color;
+        });
         border.style.borderColor = color;
         textSamples.style.color = color;
+        textSamples.style.borderColor = color;
       }
 
       input.addEventListener('input', updateColor);
