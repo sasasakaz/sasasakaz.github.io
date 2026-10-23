@@ -3,7 +3,7 @@
 <!-- 
 Amazon URL Shortener
 Created: 2025-10-05
-Updated: 2026-10-18
+Updated: 2026-10-23
 Description: Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。
 Note: 
 -->
@@ -24,13 +24,8 @@ Note:
   <link rel="stylesheet" href="page_common.css">
   <script src="page_layout.js" defer></script>
   <style>
-    body {
-      background: #fff;
-    }
-
     h1 {
-      /* margin-top: 0; */
-      margin-bottom: revert;
+      margin-top: 0em;
       font-size: 1.75em;
     }
 
@@ -40,10 +35,10 @@ Note:
       padding: 1rem;
     }
 
-    .card {
-      background: #fff;
+    .container {
+      background: var(--c-bg);
       border-radius: 0.5rem;
-      padding: 1rem;
+      padding: 1.5rem;
       box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.06);
       max-width: 640px;
       margin: 0 auto
@@ -55,15 +50,24 @@ Note:
       font-size: 0.9rem;
       padding: 0.5rem;
       border-radius: 0.5rem;
-      border: 1px solid #ddd;
-      width: 100%;
-      box-sizing: border-box
+      border: 1px solid var(--c-border);
+      width: 100%
     }
 
-    label {
-      font-weight: 600;
-      margin-top: 0.5rem;
-      display: block
+    input,
+    select,
+    .btn,
+    .clear-btn {
+      min-height: 3rem;
+    }
+
+    /* 項目名（p + strong）。入力欄との間は狭く、前の項目との間は広く */
+    .container p {
+      margin: 0.9rem 0 0.5rem;
+    }
+
+    .container>p:first-child {
+      margin-top: 0;
     }
 
     .row {
@@ -76,71 +80,112 @@ Note:
     }
 
     .muted {
-      color: #666;
+      color: var(--c-text-sub);
       font-size: 0.9rem
     }
 
     #cleanOut {
-      background: #f6f8fa;
-      padding: 0.5rem;
+      background: var(--c-brand2-1);
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      min-height: 3rem;
+      padding: 0.75rem;
       border-radius: 0.5rem;
-      margin-top: 0.5rem;
       word-break: break-all
     }
 
     .btn {
-      background: #007bff;
+      display: block;
+      margin-top: 0.75rem;
+      background: var(--c-brand-vivid);
       color: #fff;
       border: none;
-      transition: background 0.2s;
-      width: 100%
+      cursor: pointer;
+      transition: background 0.2s
     }
 
     .btn:hover {
-      background: #0069d9
+      background: var(--c-brand-vivid-hover)
     }
 
-    #shorten {
-      margin-top: 0.5rem;
-    }
-
-    #copyMsg {
-      margin-top: 0.5rem;
-      color: green;
-      font-size: 0.9rem;
-      display: none
-    }
-
-    .url-row {
+    .url-row,
+    .result-row {
       display: flex;
+      align-items: stretch;
       gap: 0.5rem;
-      align-items: center;
-      width: 100%
     }
 
     .url-row input {
       flex: 1;
-      min-width: 0
+      min-width: 0;
+    }
+
+    .url-row .clear-btn {
+      flex: 0 0 3rem;
+    }
+
+    .url-row .shorten-btn {
+      flex: 0 0 auto;
+      width: auto;
+      min-width: 7rem;
+      margin-top: 0;
+    }
+
+    .result-section {
+      margin-top: 2rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--c-border);
+    }
+
+    .result-row #cleanOut {
+      flex: 1;
+    }
+
+    .result-row #copyClean {
+      flex: 0 0 auto;
+      width: auto;
+      min-width: 5.5rem;
+      margin-top: 0;
+    }
+
+    #copyClean {
+      background: var(--c-accent);
+    }
+
+    #copyClean:hover {
+      background: var(--c-accent-hover);
     }
 
     .clear-btn {
-      flex: 0 0 2rem;
-      height: 2rem;
       padding: 0;
       border-radius: 0.5rem;
-      background: #eee;
-      color: #555;
-      border: 1px solid #ddd;
+      background: var(--c-bg-subtle);
+      color: var(--c-text-sub);
+      border: 1px solid var(--c-border);
       font-size: 1rem;
       line-height: 1;
+      cursor: pointer;
     }
 
     .clear-btn:hover {
-      background: #ddd
+      background: var(--c-border)
+    }
+
+    @media (max-width: 480px) {
+      .url-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 3rem;
+      }
+
+      .url-row .shorten-btn {
+        grid-column: 1 / -1;
+        width: 100%;
+      }
     }
 
     #history {
-      margin-top: 1rem;
+      margin-top: 1.25rem;
       font-size: 0.9rem
     }
 
@@ -152,7 +197,7 @@ Note:
 
     #history li {
       padding: 0.25rem 0;
-      border-bottom: 1px solid #eee;
+      border-bottom: 1px solid var(--c-border);
       word-break: break-all
     }
   </style>
@@ -180,21 +225,21 @@ Note:
     <main id="content">
       <header id="header">
         <h1>Amazon URL Shortener</h1>
-        <p class="muted">Extracts the ASIN from Amazon's long URL and converts it into a simple product page URL.</p>
         <p class="muted">Amazonの長いURLからASINを抽出してシンプルな商品ページURLに変換するにゃん。</p>
       </header>
 
-      <div class="card">
-        <label for="url">Long URL</label>
+      <div class="container">
+        <p><strong>Long URL</strong></p>
         <div class="url-row">
-          <input id="url" />
-          <button class="clear-btn" id="clearUrl" title="clear">✕</button>
+          <input id="url" aria-label="Long URL" />
+          <button class="clear-btn" id="clearUrl" title="clear" aria-label="Clear URL">✕</button>
+          <button id="shorten" class="btn shorten-btn">Shorten</button>
         </div>
 
-        <div class="row" style="margin-top:8px">
+        <div class="row">
           <div>
-            <label for="domain">domain</label>
-            <select id="domain">
+            <p>domain</p>
+            <select id="domain" aria-label="domain">
               <option value="co.jp">amazon.co.jp</option>
               <option value="com">amazon.com</option>
               <option value="co.uk">amazon.co.uk</option>
@@ -205,22 +250,21 @@ Note:
             </select>
           </div>
           <div>
-            <label for="style">URL style</label>
-            <select id="style">
+            <p>URL style</p>
+            <select id="style" aria-label="URL style">
               <option value="dp">/dp/ASIN</option>
               <option value="gp">/gp/product/ASIN</option>
             </select>
           </div>
         </div>
 
-        <button id="shorten" class="btn">Shorten</button>
-
-        <label>Short URL</label>
-        <div id="cleanOut"> — </div>
-        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
-          <button id="copyClean" class="btn">Copy</button>
-          <span id="copyMsg">Copied!</span>
-        </div>
+        <section class="result-section" aria-labelledby="shortUrlLabel">
+          <p id="shortUrlLabel"><strong>Short URL</strong></p>
+          <div class="result-row">
+            <div id="cleanOut" aria-live="polite"> — </div>
+            <button id="copyClean" class="btn">Copy</button>
+          </div>
+        </section>
 
         <div id="history" class="muted">
           <strong>History</strong>
@@ -231,6 +275,8 @@ Note:
       <footer id="footer">
         <div class="footer-links">
           <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
         </div>
         <p>Author: sasasakaz</p>
       </footer>
@@ -251,7 +297,7 @@ Note:
     const domainEl = document.getElementById('domain');
     const styleEl = document.getElementById('style');
     const cleanOut = document.getElementById('cleanOut');
-    const copyMsg = document.getElementById('copyMsg');
+    const copyBtn = document.getElementById('copyClean');
     const historyList = document.getElementById('historyList');
 
     document.getElementById('clearUrl').addEventListener('click', () => {
@@ -294,12 +340,15 @@ Note:
       addHistory(url);
     });
 
-    document.getElementById('copyClean').addEventListener('click', async () => {
-      const txt = cleanOut.textContent;
+    let copyTimer;
+    copyBtn.addEventListener('click', async () => {
+      const txt = cleanOut.textContent.trim();
       if (!txt || txt === '—') return;
       await navigator.clipboard.writeText(txt);
-      copyMsg.style.display = 'inline';
-      setTimeout(() => { copyMsg.style.display = 'none'; }, 2000);
+      // ボタンの大きさは変えず、ラベルだけ一定時間 Copied! にする
+      copyBtn.textContent = 'Copied!';
+      clearTimeout(copyTimer);
+      copyTimer = setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
     });
   </script>
 </body>

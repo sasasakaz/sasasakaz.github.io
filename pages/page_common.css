@@ -24,13 +24,21 @@
   --c-brand2-3: #d0e7f5;
   /* table border */
 
-  /* アクセント */
+  /* アクセント（オレンジ系） */
   --c-accent-dark: #7a4a00;
   /* dark-brown */
   --c-accent: #f57c00;
   /* orange */
   --c-accent-light: #fff3e0;
   /* creamy-orange */
+
+  /* アクセント2（グリーン系） */
+  --c-accent2-dark: #155724;
+  /* dark-green */
+  --c-accent2: #34c759;
+  /* fresh-green */
+  --c-accent2-light: #e8f5e9;
+  /* honeydew, mdc-info-box bg */
 
   /* 文字（濃い→薄い順） */
   --c-text: #333333;
@@ -283,9 +291,8 @@ blockquote {
 
 /* 装飾ボックス */
 .mdc-info-box {
-  background-color: #e8f5e9;
-  /* border-left: 5px solid #4caf50; */
-  /* border: 1px solid #4caf50; */
+  background-color: var(--c-accent2-light);
+  /* border-left: 5px solid var(--c-accent2); */
   /* margin: 0.5em 1em; */
   padding: 0.2em 0.8em;
   border-radius: 4px;
