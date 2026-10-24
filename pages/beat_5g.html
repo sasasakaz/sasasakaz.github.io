@@ -20,8 +20,7 @@
   <link rel="stylesheet" href="beat_5g.css">
 
   <script src="page_layout.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js" defer></script>
-  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js" defer></script>
+  <script src="beat_5g_py.js" defer></script>
   <script src="beat_5g.js" defer></script>
 
 
@@ -125,7 +124,7 @@
                 <li>各群の比率がとりそうな値の範囲を表します。</li>
               </ul>
               <div id='summary-chart'></div>
-              <div id='all-groups-hdi-container'></div>
+              <div id='summary-hdi'></div>
 
               <div>
                 <ul>
@@ -168,8 +167,8 @@
                   <li>diff A - B: A群の比率からB群の比率を差し引いた値（以降同様です）</li>
                 </ul>
               </div>
-              <div id="all-diffs-summary-container"></div>
-              <div id="diff-charts-container"></div>
+              <div id="diff-hdi"></div>
+              <div id="diff-chart"></div>
               <div class="mdc-warn-box">
                 <p>✅ Point:</p>
                 <ul>

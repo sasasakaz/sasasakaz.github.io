@@ -1,7 +1,7 @@
 /* markdown_converter.css
    markdown_converter.html 専用。page_common.css（2カラム版 <body class="layout-3col l3-2col">）の「後」に読み込むこと。
    ・上書きは page_common.css と同じ詳細度で書き、読み込み順で勝たせている。
-   ・旧 common.css から移した設定（body の背景・文字サイズ、a、button）もここにある。
+   ・旧 common.css から移した設定（body の文字サイズ、a、button）もここにある。
    ・色は page_common.css の :root にある変数（--c-*）を使う。色を変えたいときは :root 側を直す。 */
 
 /* ===== 旧 common.css から移した設定 ===== */
@@ -10,8 +10,7 @@
   /* 本文の最大幅。none = 画面幅いっぱい（上限を付けるなら min(95%, 1400px) など） */
   --l3-content-max: none;
 
-  /* 旧 body の設定のうち、余白・中央寄せ・幅以外（背景・文字サイズなど） */
-  background: var(--c-bg-subtle);
+  /* 旧 body の設定のうち、余白・中央寄せ・幅以外（文字サイズなど） */
   font-size: 0.9rem;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;

@@ -368,7 +368,6 @@ summary {
 /* 全群の事後分布 */
 #summary-chart {
   width: 640px;
-  height: 320px;
   max-width: 100%;
   margin-bottom: 1.25rem;
   padding: 0.5rem;
@@ -377,17 +376,35 @@ summary {
 }
 
 
-#all-groups-hdi-container {
+#summary-hdi {
   width: 720px;
   max-width: 100%;
   padding: 0.5rem;
   margin-bottom: 0.5rem;
 }
 
-.hdi-individual-plot {
-  width: 640px;
-  max-width: 100%;
-  height: 40px;
+/* matplotlibが出力するSVGは親の幅に合わせて拡縮する */
+#summary-chart svg,
+#summary-hdi svg,
+#diff-hdi svg,
+.diff-plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.plot-tooltip {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  padding: 4px 8px;
+  border-radius: 3px;
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0.9;
 }
 
 
@@ -470,7 +487,7 @@ summary {
 
 
 
-#all-diffs-summary-container {
+#diff-hdi {
   width: 640px;
   max-width: 100%;
   padding: 0.5rem;
@@ -479,23 +496,17 @@ summary {
 
 
 /* 2群間比較の「親コンテナ」（ガワだけ） */
-#diff-charts-container {
-  /* ここで「横に並べるぞ」と宣言 */
-  display: flex;
-  /* 入りきらない分は折り返す */
-  flex-wrap: wrap;
-  /* グラフ同士の隙間 */
+#diff-chart {
+  /* 列幅を固定し、最下段の個数が少なくても各グラフの幅をそろえる */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 300px));
+  justify-content: start;
   gap: 1rem;
   width: 100%;
 }
 
 /* 2群間比較の「個別のグラフ」（JSで生成される要素につける） */
 .diff-plot {
-  /* 200pxを基準に伸び縮み */
-  flex: 1 1 200px;
-  min-width: 200px;
-  max-width: 300px;
-  height: 200px;
   padding: 0.5rem;
   background: #fff;
   box-sizing: border-box;
