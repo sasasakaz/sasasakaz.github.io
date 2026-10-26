@@ -154,6 +154,26 @@ input:focus {
   font-weight: normal;
 }
 
+/* 色は best_5g の確認表（.summary-table）と同じ灰色系にそろえる */
+#confirmation-table {
+  background-color: #fff;
+  border: 1px solid var(--c-border);
+}
+
+#confirmation-table th,
+#confirmation-table td {
+  border: 1px solid var(--c-border);
+}
+
+#confirmation-table th {
+  background-color: #f8f9fa;
+  color: var(--c-text);
+}
+
+#confirmation-table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
 #confirmation-table td {
   text-align: right;
 }

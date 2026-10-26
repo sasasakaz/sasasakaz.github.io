@@ -1,13 +1,5 @@
 @charset "utf-8";
 
-/* page_common.css 併用のための調整（beat_5g.css と同じ3カラムレイアウト） */
-
-.layout-3col {
-  --l3-content-max: min(95%, 1400px);
-}
-
-
-
 :where(#content) button {
   cursor: pointer;
   transition: all 0.2s ease;
@@ -74,7 +66,7 @@ body {
   gap: 0.75rem;
 }
 
-@container (max-width: 42rem) {
+@container (max-width: 36rem) {
   .input-fields {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-areas:
@@ -132,11 +124,6 @@ input:focus {
   height: 4.75rem;
   width: 100%;
   flex: none;
-}
-
-details {
-  margin-top: 2rem;
-  cursor: pointer;
 }
 
 summary {
@@ -254,8 +241,18 @@ summary {
 /* メッセージ類 */
 .mdc-info-box,
 .mdc-warn-box,
-.mdc-alert-box {
+.mdc-alert-box,
+.mdc-info2-box {
   margin: 1.25rem 0;
+}
+
+/* 青いボックス（beat_5g.css と同じ定義。page_common.css に無いのでここに置く） */
+.mdc-info2-box {
+  background-color: var(--c-brand2-2);
+  border-left: 5px solid var(--c-brand-light);
+  padding: 0.2em 0.8em;
+  border-radius: 4px;
+  color: var(--c-brand-dark);
 }
 
 #header .mdc-note-box {
@@ -263,7 +260,7 @@ summary {
   line-height: 1.4;
 }
 
-#header .mdc-note-box > p {
+#header .mdc-note-box>p {
   margin-block: 0.8em;
 }
 
@@ -302,12 +299,6 @@ summary {
   .spinner {
     animation-duration: 2s;
   }
-}
-
-.result-section + .result-section {
-  margin-top: 2.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #ddd;
 }
 
 /* 画像・表 */
@@ -363,16 +354,17 @@ summary {
   background-color: #f1f1f1;
 }
 
-#observations {
+#confirmation-table {
   margin: 0;
   font-size: 0.85rem;
 }
 
-#observations th,
-#observations td {
+#confirmation-table th,
+#confirmation-table td {
   padding: 0.4rem 0.5rem;
 }
 
-#footer {
-  display: none;
+#confirmation-table th {
+  text-align: center;
+  font-weight: normal;
 }

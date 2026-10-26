@@ -9,7 +9,7 @@
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="5群までの平均値の差を簡単にベイズ推定できます。">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="平均の差のベイズ推定">
+  <meta property="og:title" content="平均の差のベイズ推定 | BEST">
   <meta property="og:description" content="5群までの平均値の差を簡単にベイズ推定できます。">
   <meta property="og:url" content="https://sasasakaz.github.io/pages/best_5g.html">
   <meta property="og:site_name" content="sasasakaz">
@@ -53,7 +53,7 @@
     <main id="content">
       <header id="header">
         <h1>Bayesian Comparison of Means</h1>
-        <p>A/Bテスト結果を入力して、クリックボタンを押してください。平均の差のベイズ推定ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差のベイズ推定ができます。</p>
         <div class="mdc-note-box">
           <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
           <p>各群のデータを数値で入力してください。カンマ、スペース、改行で区切って入力できます。</p>
@@ -71,7 +71,7 @@
 
       <div class="confirm-run">
         <div class="confirm-table-wrap">
-          <table id="observations" class="summary-table">
+          <table id="confirmation-table" class="summary-table">
             <thead>
               <tr>
                 <th>Group</th>
@@ -83,27 +83,62 @@
               </tr>
             </thead>
             <tbody>
-              <tr data-group="A"><th scope="row">Group A</th><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr data-group="B"><th scope="row">Group B</th><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr data-group="C"><th scope="row">Group C</th><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr data-group="D"><th scope="row">Group D</th><td></td><td></td><td></td><td></td><td></td></tr>
-              <tr data-group="E"><th scope="row">Group E</th><td></td><td></td><td></td><td></td><td></td></tr>
+              <tr data-group="A">
+                <th scope="row">Group A</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="B">
+                <th scope="row">Group B</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="C">
+                <th scope="row">Group C</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="D">
+                <th scope="row">Group D</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="E">
+                <th scope="row">Group E</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
             </tbody>
           </table>
         </div>
         <div class="run-box">
-          <button id="estimate-button" class="btn-primary" type="button" disabled>🚀 Estimate</button>
+          <button id="run-button" class="btn-primary" type="button" title="ベイズ推定実行" disabled>🚀 Estimate</button>
           <details>
             <summary>推定がうまくいかないとき用</summary>
             <p>TuneやDrawsを増やすと改善する場合がありますが、推定時間も長くなります。</p>
             <div class="parameter-select">
               <span id="tune-label">Tune</span>
               <div class="stepper">
-                <button id="tune-decrement" class="btn-secondary stepper-button" type="button"
-                  aria-label="Tuneを1000減らす" aria-describedby="tune-label">−</button>
+                <button id="tune-decrement" class="btn-secondary stepper-button" type="button" aria-label="Tuneを1000減らす"
+                  aria-describedby="tune-label">−</button>
                 <output id="tune-value" class="stepper-value" for="tune-decrement tune-increment">1000</output>
-                <button id="tune-increment" class="btn-secondary stepper-button" type="button"
-                  aria-label="Tuneを1000増やす" aria-describedby="tune-label">+</button>
+                <button id="tune-increment" class="btn-secondary stepper-button" type="button" aria-label="Tuneを1000増やす"
+                  aria-describedby="tune-label">+</button>
               </div>
             </div>
             <div class="parameter-select">
@@ -137,74 +172,83 @@
         ⚠️ 入力値に大きな数字が含まれています。推定がうまくいかない場合は、データを一律で桁下げすることを推奨します。
       </p>
 
-      <div id="results">
-        <section id="panel-overview" class="result-section">
-          <h2>📈 全体俯瞰：平均値の事後分布</h2>
-          <p>各群の平均値がとりそうな値の範囲を表します（meanもmuも平均のことです）。</p>
-          <img id="means-plot" class="plot" alt="平均値の事後分布">
-          <div class="table-wrap">
-            <table id="means-summary" class="summary-table"></table>
-          </div>
-          <div>
-            <h3>解説</h3>
-            <p>表のmean列は、各群の平均値がとりそうな値を点で推定した結果です。hdi_3%列とhdi_97%列は、事後分布の中で密度が高い94%の範囲（Highest Density Interval）です。</p>
-            <div class="mdc-warn-box">
-              <p><strong>✅ Point</strong></p>
-              <p>観測データ件数が十分に多い、あるいはばらつきが小さい場合は、mean列の値と入力データの平均値はほぼ一致します。分布は尖った形になりやすく、推定結果の確からしさを表します。</p>
-              <p>観測データ件数が少ない、あるいはばらつきが大きい場合は違いが生じることがあります。分布は裾が広くなりやすく、推定結果の不確かさを表します。</p>
-            </div>
-            <p><strong>推定結果の不確かさが大きいとき：</strong></p>
-            <ol>
-              <li>入力データが正しく読み取られているか、集計値を確認する</li>
-              <li>観測データ件数を増やす</li>
-              <li>推定方法を調整して再度実行する</li>
-            </ol>
-          </div>
-        </section>
-
-        <section id="panel-differences" class="result-section">
-          <h2>🔍 全組み合わせ比較：2群間の平均値の差分</h2>
-          <p>2群間の平均値の差がとりそうな値の範囲を表します。横棒がオレンジ線をまたいでいない（94% HDIが0を含まない）場合は、2群間の平均値に十分な差があると解釈しやすいです。</p>
-          <p><code>diff_A_B</code>はA群の平均値からB群の平均値を差し引いた値です（以降同様です）。</p>
-          <img id="forest-plot" class="plot" alt="2群間の平均値差のフォレストプロット">
-          <img id="differences-plot" class="plot" alt="群間差の事後分布">
-          <h3>解説</h3>
-          <div class="mdc-warn-box">
-            <p><strong>✅ Point</strong></p>
-            <p>下段グラフのオレンジ色の数値は、片方の群の平均値がもう片方を上回る（下回る）確率を表します。差が0を上回る（下回る）確率を示せることは、ベイズ推定の利点の一つです。</p>
-            <p>
-              この値が50%に近い場合は差の方向が不確かで、100%（0%）に近い場合は方向の確からしさが高まります。p値のような決まった判断基準はありません。推定結果だけに固執せず、関連する周辺情報も考慮してください。
-            </p>
-          </div>
-        </section>
-
-        <section id="panel-diagnostics" class="result-section">
-          <h2>🛠️ 診断：収束診断</h2>
-          <div class="mdc-warn-box">
-            <p><strong>✅ Point</strong></p>
-            <p>サンプリングが正常にできているかを確認します。診断項目に問題がなさそうであれば、適切な推定結果と解釈しやすいです。</p>
-          </div>
-          <div>
-            <h3>Summary</h3>
-            <p>
-              目安として、r_hatが1.05以下（理想は1.00）、mcse_meanが0.01以下（パラメータの変動範囲が0〜1の場合）またはパラメータのsdの5%以下（できれば2%以下）、ess_bulkとess_tailが400以上（できれば数千）あれば概ね問題ないと考えてください。
-            </p>
-            <h3>基本パラメータの要約統計量</h3>
-            <div class="table-wrap">
-              <table id="diagnostics" class="summary-table"></table>
-            </div>
-            <h3>MCSE(mean) / SD 比率チェック</h3>
-            <p><code>mcse_mean / sd (%)</code> が5%以下（できれば2%以下）という基準値に収まっているか確認してください。</p>
-            <div class="table-wrap">
-              <table id="mcse-ratios" class="summary-table"></table>
-            </div>
-            <h3>Trace Plot</h3>
-            <p>各グラフには4本の線が表示されます。左側のグラフでは4本の線がだいたい同じ形に、右側のグラフでは値が一定範囲を何度も行き来し、変動幅がだいたい同じくらいになっていれば概ね問題ないと考えてください。</p>
-            <p>グラフ下部に縦のバーが表示される場合は注意が必要です。推定方法を調整しても改善しない場合は、作成者に相談してください。</p>
-            <img id="trace-plot" class="plot" alt="Trace plot">
-          </div>
-        </section>
+      <h2 id="result-summary">📈 全体俯瞰：平均値の事後分布</h2>
+      <ul>
+        <li>各群の平均値がとりそうな値の範囲を表します（meanもmuも平均のことです）。</li>
+      </ul>
+      <img id="means-plot" class="plot" alt="平均値の事後分布">
+      <div class="table-wrap">
+        <table id="means-summary" class="summary-table"></table>
       </div>
+      <ul>
+        <li>表のmean列は、各群の平均値がとりそうな値を点で推定した結果です。</li>
+        <li>hdi_3%列とhdi_97%列は、事後分布の中で密度が高い94%の範囲（Highest Density Interval）です。</li>
+      </ul>
+
+      <div class="mdc-warn-box">
+        <p>✅ Point:</p>
+        <ul>
+          <li>観測データ件数が十分に多い、あるいはばらつきが小さい場合は、mean列の値と入力データの平均値はほぼ一致します。分布は尖った形になりやすく、推定結果の確からしさを表します。</li>
+          <li>観測データ件数が少ない、あるいはばらつきが大きい場合は違いが生じることがあります。分布は裾が広くなりやすく、推定結果の不確かさを表します。</li>
+        </ul>
+      </div>
+
+      <div class="mdc-info2-box">
+        <p>🏷️ 推定結果の不確かさが大きいときの対応策:</p>
+        <ol>
+          <li>入力データが正しく読み取られているか、集計値を確認する</li>
+          <li>観測データ件数を増やす</li>
+          <li>推定方法を調整して再度実行する</li>
+        </ol>
+      </div>
+
+      <h2 id="result-diff">🔍 全組み合わせ比較：各群間の平均値の差分</h2>
+      <ul>
+        <li>各群間の平均値の差がとりそうな値の範囲を表します。</li>
+        <li>横棒がオレンジ線をまたいでいない（94% HDIが0を含まない）場合は、各群間の平均値に十分な差があると解釈しやすいです。</li>
+        <li><code>diff_A_B</code>はA群の平均値からB群の平均値を差し引いた値です（以降同様です）。</li>
+      </ul>
+      <img id="forest-plot" class="plot" alt="2群間の平均値差のフォレストプロット">
+      <img id="differences-plot" class="plot" alt="群間差の事後分布">
+
+      <div class="mdc-warn-box">
+        <p>✅ Point:</p>
+        <ul>
+          <li>下段グラフのオレンジ色の数値は、片方の群の平均値がもう片方を上回る（下回る）確率を表します。</li>
+          <li>差が0を上回る（下回る）確率を示せることは、ベイズ推定の利点の一つです。</li>
+          <li>この値が50%に近い場合は差の方向が不確かで、100%（0%）に近い場合は方向の確からしさが高まります。</li>
+          <li>p値のような決まった判断基準はありません。推定結果だけに固執せず、関連する周辺情報も考慮してください。</li>
+        </ul>
+      </div>
+
+      <h2 id="result-diagnostics">🛠️ 診断：収束診断</h2>
+      <div class="mdc-warn-box">
+        <p>✅ Point:</p>
+        <ul>
+          <li>サンプリングが正常にできているかを確認します。診断項目に問題がなさそうであれば、適切な推定結果と解釈しやすいです。</li>
+        </ul>
+      </div>
+
+      <h3>Summary</h3>
+      <p>
+        目安として、r_hatが1.05以下（理想は1.00）、mcse_meanが0.01以下（パラメータの変動範囲が0〜1の場合）またはパラメータのsdの5%以下（できれば2%以下）、ess_bulkとess_tailが400以上（できれば数千）あれば概ね問題ないと考えてください。
+      </p>
+
+      <h3>基本パラメータの要約統計量</h3>
+      <div class="table-wrap">
+        <table id="diagnostics" class="summary-table"></table>
+      </div>
+
+      <h3>MCSE(mean) / SD 比率チェック</h3>
+      <p><code>mcse_mean / sd (%)</code> が5%以下（できれば2%以下）という基準値に収まっているか確認してください。</p>
+      <div class="table-wrap">
+        <table id="mcse-ratios" class="summary-table"></table>
+      </div>
+
+      <h3>Trace Plot</h3>
+      <p>各グラフには4本の線が表示されます。左側のグラフでは4本の線がだいたい同じ形に、右側のグラフでは値が一定範囲を何度も行き来し、変動幅がだいたい同じくらいになっていれば概ね問題ないと考えてください。</p>
+      <p>グラフ下部に縦のバーが表示される場合は注意が必要です。推定方法を調整しても改善しない場合は、管理者に相談してください。</p>
+      <img id="trace-plot" class="plot" alt="Trace plot">
 
       <footer id="footer">
         <div class="footer-links">

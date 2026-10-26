@@ -17,7 +17,7 @@ let activeRequestController = null;
 let requestVersion = 0;
 let isEstimating = false;
 
-class EstimateInputError extends Error {}
+class EstimateInputError extends Error { }
 
 function setupParameterStepper(name) {
   const valueElement = document.getElementById(`${name}-value`);
@@ -60,7 +60,7 @@ GROUPS.forEach(name => {
   textarea.name = `group-${name}`;
   textarea.placeholder = PLACEHOLDER_DATA[GROUPS.indexOf(name)] ?? "";
   textarea.setAttribute("aria-label", `Group ${name} のデータ`);
-  textarea.addEventListener("input", updateObservationTable);
+  textarea.addEventListener("input", updateConfirmationTable);
   group.append(label, textarea);
   groupInputs.appendChild(group);
 });
@@ -70,7 +70,7 @@ document.getElementById("sample-button").addEventListener("click", () => {
   GROUPS.forEach((name, index) => {
     document.getElementById(`group-${name}`).value = SAMPLE_DATA[index];
   });
-  updateObservationTable();
+  updateConfirmationTable();
 });
 
 document.getElementById("clear-button").addEventListener("click", () => {
@@ -91,8 +91,7 @@ document.getElementById("clear-button").addEventListener("click", () => {
   document.getElementById("error-message-text").textContent = "";
   delete document.getElementById("error-message").dataset.inputError;
   document.getElementById("initial-message").hidden = false;
-  document.getElementById("footer").style.display = "none";
-  updateObservationTable();
+  updateConfirmationTable();
 });
 
 function renderTable(tableId, rows, columns, digits = 2) {
@@ -140,7 +139,7 @@ function getParsedGroups() {
   }).filter(([, values]) => values.length > 0);
 }
 
-function getObservationRows(parsedGroups) {
+function getConfirmationRows(parsedGroups) {
   return parsedGroups.map(([name, values]) => {
     const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
     const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
@@ -155,14 +154,14 @@ function getObservationRows(parsedGroups) {
   });
 }
 
-function updateObservationTable() {
+function updateConfirmationTable() {
   const errorMessage = document.getElementById("error-message");
   const errorMessageText = document.getElementById("error-message-text");
   try {
     const parsedGroups = getParsedGroups();
-    const rows = getObservationRows(parsedGroups);
+    const rows = getConfirmationRows(parsedGroups);
     const rowsByGroup = new Map(rows.map(row => [row.Group, row]));
-    document.querySelectorAll("#observations tbody tr").forEach(tableRow => {
+    document.querySelectorAll("#confirmation-table tbody tr").forEach(tableRow => {
       const row = rowsByGroup.get(tableRow.dataset.group);
       const cells = tableRow.querySelectorAll("td");
       cells[0].textContent = row?.N ?? "";
@@ -171,17 +170,17 @@ function updateObservationTable() {
       cells[3].textContent = row?.Min ?? "";
       cells[4].textContent = row?.Max ?? "";
     });
-    document.getElementById("estimate-button").disabled = isEstimating || parsedGroups.length === 0;
+    document.getElementById("run-button").disabled = isEstimating || parsedGroups.length === 0;
     if (errorMessage.dataset.inputError) {
       errorMessage.hidden = true;
       errorMessageText.textContent = "";
       delete errorMessage.dataset.inputError;
     }
   } catch (error) {
-    document.querySelectorAll("#observations tbody td").forEach(cell => {
+    document.querySelectorAll("#confirmation-table tbody td").forEach(cell => {
       cell.textContent = "";
     });
-    document.getElementById("estimate-button").disabled = true;
+    document.getElementById("run-button").disabled = true;
     errorMessageText.textContent = error.message;
     errorMessage.dataset.inputError = "true";
     errorMessage.hidden = false;
@@ -207,11 +206,11 @@ function clearResults() {
   document.querySelectorAll(".plot").forEach(plot => plot.removeAttribute("src"));
 }
 
-document.getElementById("estimate-button").addEventListener("click", async () => {
+document.getElementById("run-button").addEventListener("click", async () => {
   const version = ++requestVersion;
   const controller = new AbortController();
   activeRequestController = controller;
-  const button = document.getElementById("estimate-button");
+  const button = document.getElementById("run-button");
   const largeValues = document.getElementById("large-values");
   const runningMessage = document.getElementById("running-message");
   const runningMessageText = document.getElementById("running-message-text");
@@ -228,7 +227,6 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
   errorMessage.hidden = true;
   delete errorMessage.dataset.inputError;
   runningMessage.hidden = true;
-  document.getElementById("footer").style.display = "none";
 
   try {
     if (API_BASE_URL.includes("YOUR_CLOUD_RUN_SERVICE")) {
@@ -244,7 +242,7 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
     if (parsedGroups.length < 2) {
       throw new EstimateInputError("推定には少なくとも2つの群にデータ入力が必要です。");
     }
-    updateObservationTable();
+    updateConfirmationTable();
     runningMessageText.textContent = `${parsedGroups.length}群でベイズ推定の実行中... MCMCサンプリングが終わるまで待ってにゃん`;
     runningMessage.hidden = false;
 
@@ -292,7 +290,6 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
     largeValues.hidden = !data.large_values;
     runningMessage.hidden = true;
     completionMessage.hidden = false;
-    document.getElementById("footer").style.display = "block";
   } catch (error) {
     if (error.name === "AbortError" || version !== requestVersion) return;
     runningMessage.hidden = true;
@@ -303,10 +300,10 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
   } finally {
     if (version === requestVersion) {
       isEstimating = false;
-      updateObservationTable();
+      updateConfirmationTable();
       activeRequestController = null;
     }
   }
 });
 
-updateObservationTable();
+updateConfirmationTable();
