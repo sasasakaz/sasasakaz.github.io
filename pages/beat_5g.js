@@ -9,11 +9,11 @@
 //    id を変える時は html / css / このファイルを同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
 //    ここでは各セルの文字だけを更新する（行数が変わらないので、下のパーツがずれない）。
-//  - 状態メッセージ: 推定中は #running-message、推定完了は #completion-message を hidden で切り替える。
+//  - 状態メッセージ: 初期は #initial-message、推定中は #running-message、推定完了は #completion-message、
+//    失敗は #error-message を hidden で切り替える。
 //  - 事後分布のホバー表示は、Pythonが返す hover データ（軸位置・ビン・密度）を使い、
 //    SVG上に .plot-tooltip(css) を重ねて出している。図の余白を変えるとズレるので注意。
 //  - Pyodideはページ表示時に裏で読み込み開始（初回のみ数秒〜）。
-//  - plotly / jStat は使用しない。
 // =====================================================================
 
 // --- [1] 設定・定数（ファイルの一番上にまとめる） ---
@@ -225,13 +225,18 @@ function attachPosteriorHover(container, hover) {
 async function runBayesianEstimation() {
   const { denoms, numers, groupCount } = getInputData();
   if (groupCount < 2) {
-    return alert("推定には少なくとも2群のデータが必要にゃん。手元にデータがなければ「サンプルデータ」ボタンで試してにゃん");
+    return alert("推定には少なくとも2群のデータが必要にゃん。手元にデータがなければ「Sample Data」ボタンで試してにゃん");
   }
 
   const running = document.getElementById('running-message');
   const completion = document.getElementById('completion-message');
 
+  const initial = document.getElementById('initial-message');
+  const errorBox = document.getElementById('error-message');
+
   setRunButtonBusy(true);
+  initial.hidden = true;
+  errorBox.hidden = true;
   completion.hidden = true;
   document.getElementById('running-message-text').textContent =
     `${groupCount}群でベイズ推定の実行中... 終わるまで待ってにゃん`;
@@ -259,8 +264,7 @@ async function runBayesianEstimation() {
     completion.hidden = false;
   } catch (e) {
     console.error(e);
-    running.hidden = true;
-    alert('計算に失敗しました: ' + e.message);
+    errorBox.hidden = false;
   } finally {
     running.hidden = true;
     setRunButtonBusy(false);

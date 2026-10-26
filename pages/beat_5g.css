@@ -247,8 +247,14 @@ summary {
 
 .mdc-info-box,
 .mdc-warn-box,
+.mdc-alert-box,
 .mdc-info2-box {
   margin: 1.25rem 0;
+}
+
+/* 初期案内は背景なし */
+.initial-message {
+  background: none;
 }
 
 /* 青いボックス（page_common.css に無いので、warn-box と同じ作りでここに置く） */

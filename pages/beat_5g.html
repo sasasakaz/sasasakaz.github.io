@@ -149,8 +149,12 @@
         <p>推定完了！ 解説やPointを参考にしながら推定結果を読み解いてください</p>
       </div>
 
-      <!-- <h2 id="results">推定結果</h2> -->
-      <!-- <p>「🚀 Estimate」を押すと、以下に結果が表示されます。</p> -->
+      <div id="initial-message" class="mdc-info-box initial-message" role="status">
+        <p>推定を実行すると、以下に結果が表示されます</p>
+      </div>
+      <div id="error-message" class="mdc-alert-box" role="alert" hidden>
+        <p>推定失敗: ネットワーク環境などを確認してもう一度試してみてにゃん</p>
+      </div>
 
       <h2 id="result-summary">全体結果（比率の事後分布）</h2>
       <ul>

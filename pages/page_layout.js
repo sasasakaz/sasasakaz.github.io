@@ -60,7 +60,7 @@
         ['🐶 Markdown Converter', 'pages/markdown_converter.html'],
         ['🐯 Diff Viewer', 'pages/diff_viewer.html'],
         ['🦄 Color Comparison', 'pages/color_comparison.html'],
-        ['🐹 Amazon URL Shortener', 'pages/amazon_url_shortener.html'],
+        ['🐹 Amazon Shortener', 'pages/amazon_shortener.html'],
         ['🐼 QR Code Creator', 'pages/qr_code_creator.html']
       ]
     }
