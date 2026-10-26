@@ -23,6 +23,10 @@
   <script src="beat_5g_py.js" defer></script>
   <script src="beat_5g.js" defer></script>
 
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
@@ -35,10 +39,11 @@
   <!-- End Google tag (gtag.js) -->
 </head>
 
-<body class="layout-3col l3-2col">
+<body class="layout-3col">
   <div class="topbar">
-    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true"></button>
     <div id="topbar-title" class="topbar-title"></div>
+    <button type="button" id="btn-right" class="topbar-btn" aria-controls="page-toc" aria-expanded="true"></button>
   </div>
   <div id="side-backdrop" class="side-backdrop"></div>
   <div class="layout">
@@ -46,148 +51,166 @@
 
     <main id="content">
       <header id="header">
-        <h1>Bayesian Estimation for the Difference of Proportions</h1>
+        <h1>Bayesian Comparison of Proportions</h1>
+        <p>A/Bテスト結果を入力してClickボタンを押してください。比率の差のベイズ推定ができます。</p>
+        <ul>
+          <li>比率（クリック率や購入率のような%指標）の元となるデータを入力してください。</li>
+          <li>入力データはどこにも送信されません。ブラウザのみで動作します。</li>
+        </ul>
       </header>
 
-      <div class="main-container">
-        <aside class="sidebar">
+      <!-- 入力エリア: 広いときは [分母][分子] の右にボタンを縦に2つ、狭いときは入力欄の下にボタンを横に並べる -->
+      <div class="input-area">
+        <div class="input-fields">
+          <div class="input-group">
+            <label for="denoms">Sample Size</label>
+            <textarea id="denoms" rows="5" autocomplete="off" placeholder="分母：試行回数や総ユーザー数など（例: 配布数、PV）"></textarea>
+          </div>
+          <div class="input-group">
+            <label for="numers">Events</label>
+            <textarea id="numers" rows="5" autocomplete="off" placeholder="分子：成功数や達成数など（例: 購入者数、クリック数）"></textarea>
+          </div>
+        </div>
 
-          <section id="data-entry">
-            <div class="input-container">
-              <p><strong>⚡️データ入力</strong></p>
-              <form id="input-form">
-                <div class="input-fields">
-                  <div class="input-group">
-                    <label for="denoms">分母（Users, 配布者数など）</label>
-                    <textarea id="denoms" rows="5" cols="33" autocomplete="off">1000 2000 1500 1200 1600</textarea>
-                  </div>
-
-                  <div class="input-group">
-                    <label for="numers">分子（Actions, 購入者数など）</label>
-                    <textarea id="numers" rows="5" cols="33" autocomplete="off">70 120 95 110 150</textarea>
-                  </div>
-                </div>
-              </form>
-            </div>
-
-            <div>
-              <div class="table-container">
-                <table id="confirmation-table">
-                </table>
-              </div>
-
-              <details>
-                <summary>推定がうまくいかないとき用</summary>
-                <div class="setting-group">
-                  <p>
-                    <label for="sample-count">Number of sampling times</label>
-                    <input type="Number" id="sample-count" form="input-form" autocomplete="off" value="10000"
-                      step="5000" min="10000" max="50000" style="text-align: right;">
-                  </p>
-                  <p>増やしてみるとうまくいく場合もあります（スマホでは処理が重いため増やさない方がいいです）</p>
-                </div>
-              </details>
-            </div>
-          </section>
-
-        </aside>
-
-        <div class="result-area">
-          <section>
-            <div>
-              <p><strong>A/Bテスト結果を入力して、クリックボタンを押してください。比率の差のベイズ推定ができます。</strong></p>
-              <ul>
-                <li>比率（クリック率や購入率のような%指標）の元となるデータをエクセルからコピペ入力などしてください。</li>
-                <li>入力データはどこにも送信されません。ブラウザのみで動作します。</li>
-              </ul>
-            </div>
-            <div class="action-buttons">
-              <button type="button" onclick="runBayesianEstimation();" class="btn-primary" id="run-button"
-                title="ベイズ推定実行">🚀 Click to Estimate</button>
-              <button type="reset" form="input-form" class="btn-secondary" title="初期画面に戻す">🗑️ Clear All</button>
-            </div>
-          </section>
-
-          <section id="result-container">
-            <div class="mdc-info-box">
-              <p>推定完了！ 解説やPointを参考にしながら推定結果を読み解いてください</p>
-            </div>
-
-            <div class="tabs">
-              <button type="button" class="tab-btn active" onclick="switchTab('summary')">📈 全体結果</button>
-              <button type="button" class="tab-btn" onclick="switchTab('diff')">🔍 2群間の比較</button>
-            </div>
-
-            <div id="summary-content" class="tab-panel">
-              <h2>比率の事後分布</h2>
-              <ul>
-                <li>各群の比率がとりそうな値の範囲を表します。</li>
-              </ul>
-              <div id='summary-chart'></div>
-              <div id='summary-hdi'></div>
-
-              <div>
-                <ul>
-                  <li>Mean（平均）は、各群の比率がとりそうな値を<strong>点</strong>で推定した結果です。</li>
-                  <li>94%HDIは、各群の比率がとりそうな値を<strong>区間</strong>で推定した結果です。上図各群の分布においてデータ全体100%から中央の94%を取ってきた両端の値です（Highest
-                    Density Interval 事後分布の中で最も密度が高い範囲）。</li>
-                </ul>
-              </div>
-
-              <div class="mdc-warn-box">
-                <p>✅ Point:</p>
-                <ul>
-                  <li>入力された観測データ件数（分母）が十分に多い場合は、Meanと入力データの比率はほぼ一致します。グラフは尖った形になりやすく、推定結果の確からしさを表します。</li>
-                  <li>入力された観測データ件数（分母）が少ない場合はやや違いが生じるときもあります。グラフは裾が広い形になりやすく、推定結果の不確かさを表します。</li>
-                </ul>
-              </div>
-
-              <div class="mdc-info2-box">
-                <p>🏷️ 推定結果の不確かさが大きいときの対応策:</p>
-                <ol>
-                  <li>入力データが変な値で読み取られていないか集計値を確認する</li>
-                  <li>A/Bテスト実施中であればテスト期間を延長するなどして観測データ件数を増やす</li>
-                  <li>左下カラムで推定方法を調整して再度実行してみる</li>
-                </ol>
-              </div>
-
-              <details class="summary-table-details">
-                <summary>データテーブル</summary>
-                <div id="summary-table-container"></div>
-              </details>
-
-            </div>
-
-            <div id="diff-content" class="tab-panel">
-              <h2>2群間の比率の差分</h2>
-              <div>
-                <ul>
-                  <li>2群間の比率の差がとりそうな値の範囲を表します。</li>
-                  <li>横棒がオレンジ線をまたいでいない（94%HDIが0を含まない）場合は、2群間の比率に十分な差があると解釈しやすいです。</li>
-                  <li>diff A - B: A群の比率からB群の比率を差し引いた値（以降同様です）</li>
-                </ul>
-              </div>
-              <div id="diff-hdi"></div>
-              <div id="diff-chart"></div>
-              <div class="mdc-warn-box">
-                <p>✅ Point:</p>
-                <ul>
-                  <li>下段グラフのオレンジ色の数値は、片方の群の比率がもう片方の群の比率を上回っている（下回っている）確率を表します。</li>
-                  <li>2群間の比率の差が0を上回る（下回る）確率が示唆される、これがベイズ推定の利点の一つです（94%HDIに0が含まれていてもこの値で2群間の比率の差を判断しやすいです）。</li>
-                  <li>もしもこの値が50%に近い場合は、比率に差があるかは不確かです。100%（0%）に近い場合は、比率の差の確からしさが高まります。</li>
-                  <li>この値の判断基準にはp値のような決まりはありません。<ul>
-                      <li>例えばこの値が80%以上のとき（20%未満のとき）、80%を確からしいとみなして比率に差があると判断してもよいです。</li>
-                      <li>80%は不確かとみなして比率に差はないと判断してもよいです。</li>
-                      <li>ここでの推定結果に固執せず、関連する周辺情報も考慮しつつ総合的観点から判断することを強く推奨します。</li>
-                    </ul>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
+        <div class="sample-buttons">
+          <button type="button" id="sample-button" class="btn-secondary">⚡️ Sample Data</button>
+          <button type="button" id="clear-button" class="btn-secondary">🗑️ Clear</button>
         </div>
       </div>
+
+      <div class="confirm-run">
+        <div class="confirm-table-wrap">
+          <table id="confirmation-table">
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Sample Size</th>
+                <th>Events</th>
+                <th>%</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Group A</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group B</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group C</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group D</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group E</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="run-box">
+          <button type="button" onclick="runBayesianEstimation();" class="btn-primary" id="run-button" title="ベイズ推定実行"
+            disabled>🚀 Estimate</button>
+          <details>
+            <summary>推定がうまくいかないとき用</summary>
+            <div class="setting-group">
+              <p>
+                <label for="sample-count">Number of sampling times</label>
+                <input type="number" id="sample-count" autocomplete="off" value="10000" step="5000" min="10000"
+                  max="50000" style="text-align: right;">
+              </p>
+              <p>増やしてみるとうまくいく場合もあります（スマホでは処理が重いため増やさない方がいいです）</p>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <div id="running-message" class="mdc-warn-box running-message" role="status" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <p id="running-message-text"></p>
+      </div>
+      <div id="completion-message" class="mdc-info-box" role="status" aria-live="polite" hidden>
+        <p>推定完了！ 解説やPointを参考にしながら推定結果を読み解いてください</p>
+      </div>
+
+      <!-- <h2 id="results">推定結果</h2> -->
+      <!-- <p>「🚀 Estimate」を押すと、以下に結果が表示されます。</p> -->
+
+      <h2 id="result-summary">全体結果（比率の事後分布）</h2>
+      <ul>
+        <li>各群の比率がとりそうな値の範囲を表します。</li>
+      </ul>
+      <div id="summary-chart"></div>
+      <div id="summary-hdi"></div>
+
+      <ul>
+        <li>Mean（平均）は、各群の比率がとりそうな値を<strong>点</strong>で推定した結果です。</li>
+        <li>94%HDIは、各群の比率がとりそうな値を<strong>区間</strong>で推定した結果です。上図各群の分布においてデータ全体100%から中央の94%を取ってきた両端の値です（Highest
+          Density Interval 事後分布の中で最も密度が高い範囲）。</li>
+      </ul>
+
+      <div class="mdc-warn-box">
+        <p>✅ Point:</p>
+        <ul>
+          <li>入力された観測データ件数（分母）が十分に多い場合は、Meanと入力データの比率はほぼ一致します。グラフは尖った形になりやすく、推定結果の確からしさを表します。</li>
+          <li>入力された観測データ件数（分母）が少ない場合はやや違いが生じるときもあります。グラフは裾が広い形になりやすく、推定結果の不確かさを表します。</li>
+        </ul>
+      </div>
+
+      <div class="mdc-info2-box">
+        <p>🏷️ 推定結果の不確かさが大きいときの対応策:</p>
+        <ol>
+          <li>入力データが変な値で読み取られていないか集計値を確認する</li>
+          <li>A/Bテスト実施中であればテスト期間を延長するなどして観測データ件数を増やす</li>
+          <li>実行ボタンの下の「推定がうまくいかないとき用」で推定方法を調整して再度実行してみる</li>
+        </ol>
+      </div>
+
+      <details class="summary-table-details">
+        <summary>データテーブル</summary>
+        <div id="summary-table-container"></div>
+      </details>
+
+      <h2 id="result-diff">各群間の比較（比率の差分）</h2>
+      <ul>
+        <li>各群間の比率の差がとりそうな値の範囲を表します。</li>
+        <li>横棒がオレンジ線をまたいでいない（94%HDIが0を含まない）場合は、各群間の比率に十分な差があると解釈しやすいです。</li>
+        <li>diff A - B: A群の比率からB群の比率を差し引いた値（以降同様です）</li>
+      </ul>
+      <div id="diff-hdi"></div>
+      <div id="diff-chart"></div>
+
+      <div class="mdc-warn-box">
+        <p>✅ Point:</p>
+        <ul>
+          <li>下段グラフのオレンジ色の数値は、片方の群の比率がもう片方の群の比率を上回っている（下回っている）確率を表します。</li>
+          <li>各群間の比率の差が0を上回る（下回る）確率が示唆される、これがベイズ推定の利点の一つです（94%HDIに0が含まれていてもこの値で各群間の比率の差を判断しやすいです）。</li>
+          <li>もしもこの値が50%に近い場合は、比率に差があるかは不確かです。100%（0%）に近い場合は、比率の差の確からしさが高まります。</li>
+          <li>この値の判断基準にはp値のような決まりはありません。<ul>
+              <li>例えばこの値が80%以上のとき（20%未満のとき）、80%を確からしいとみなして比率に差があると判断してもよいです。</li>
+              <li>80%は不確かとみなして比率に差はないと判断してもよいです。</li>
+              <li>ここでの推定結果に固執せず、関連する周辺情報も考慮しつつ総合的観点から判断することを強く推奨します。</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
       <footer id="footer">
         <div class="footer-links">
           <a href="https://sasasakaz.github.io/">🏠 Home</a>
@@ -197,6 +220,8 @@
         <p>Author: sasasakaz</p>
       </footer>
     </main>
+
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 </body>
 

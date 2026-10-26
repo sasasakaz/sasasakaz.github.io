@@ -1,20 +1,22 @@
 @charset "utf-8";
 
 /* =====================================================================
-   page_common.css 併用のための調整
-   （2カラム版: <body class="layout-3col l3-2col">）
+   beat_5g.css — beat_5g.html 専用の追加CSS（page_common.css の後に読み込む）
+   3カラム版（<body class="layout-3col">）の縦並びレイアウト。
 
-   page_common.css の本文用スタイル（見出し・余白・表など）を、このページでは使わない。
+   見出し・表・ボックス類（.mdc-*-box）の見た目は page_common.css をそのまま使う。
+   ここには、page_common.css に無い部品（ボタン・入力欄・確認表・スピナー）と、
+   グラフ出力まわり（下半分。従来どおり）だけを書く。
+   色は page_common.css の変数（--c-*）を使う。
    ===================================================================== */
 
-/* 本文カラムの上限幅（2カラム版）。広げたい・狭めたいときはここを変える */
-.layout-3col {
-  --l3-content-max: min(95%, 1400px);
+/* 旧 common.css から引き継ぎ（スマホで横に揺れない／文字サイズの自動調整をオフ） */
+body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
 }
 
-/* 旧 common.css の button / a の設定（page_common.css には無い）。
-   :where() で詳細度を 0 にして、旧 common.css と同じ強さのまま、本文内(#content)だけに限定する。
-   （上部バーのボタンなど、本文の外には影響しない） */
+/* 旧 common.css の button の設定。:where() で詳細度を 0 にして、本文内(#content)だけに限定する */
 :where(#content) button {
   cursor: pointer;
   transition: all 0.2s ease;
@@ -25,345 +27,283 @@
   font-family: inherit;
 }
 
-:where(#content) a {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: inherit;
-  text-decoration: none;
-}
 
-/* page_common.css の見出し・余白の設定を打ち消して、ブラウザ標準の見た目に戻す。
-   site共通の見た目にそろえたくなったら、この3ブロックを消す */
-#header h1 {
-  margin-bottom: revert;
-}
+/* ---------- 入力欄 ---------- */
 
-#content h2 {
-  all: revert;
-}
-
-#content :is(p, ul, ol) {
-  margin-block: revert;
-}
-
-/* page_common.css の表の設定のうち、このページの表にだけ残る分を打ち消す（個別の設定は下の各表の記述） */
-
-/* 基本は縦並び（スマホ用） */
-.main-container {
+/* 入力エリア全体（[分母][分子] の入力欄 + ボタン2つ）。
+   ・広いとき: 入力欄の右にボタンを縦に2つ並べる（ボタンの下端は入力欄の下端にそろえる）
+   ・狭いとき: 入力欄を横いっぱいにして、ボタンはその下に横並び
+   どちらになるかは、このエリア自身の幅で決まる（container query。画面幅やカラムの開閉に左右されない） */
+.input-area {
   display: flex;
-  flex-direction: column;
-  /* 縦に積むにゃん */
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  container-type: inline-size;
 }
 
-.sidebar {
-  flex: 0 0 auto;
-  /* 幅固定を解除して、画面いっぱいに広げる */
-  width: 100%;
-}
-
-/* 画面幅が 768px（タブレット・PC）以上の時だけ横並びにする */
-@media (min-width: 768px) {
-  .main-container {
-    flex-direction: row;
-    /* 横並びにする */
-    gap: 2.5rem;
-  }
-
-  .sidebar {
-    flex: 0 0 320px;
-    /* PCでは 320px で固定！ */
-  }
-}
-
-
-
-
-body {
-  background: #fff;
-  /* 旧 common.css から引き継ぎ（スマホで横に揺れない／文字サイズの自動調整をオフ） */
-  overflow-x: hidden;
-  -webkit-text-size-adjust: 100%;
-}
-
-/* 旧: body の font-size。上部バーやページ一覧には効かないよう、本文(#content)だけに付ける */
-#content {
-  font-size: 0.9rem;
-}
-
-/* 左右に分ける親要素 */
-.main-container {
-  /* 横並びにするための宣言 */
-  display: flex;
-  /* 左右の隙間 */
-  gap: 2.5rem;
-  /* 中身が短くても（子要素の高さが違っても）上に詰める */
-  align-items: flex-start;
-}
-
-/* 左カラムの幅を固定 */
-.sidebar {
-  /* 320pxから動かないように固定 */
-  flex: 0 0 320px;
-  top: 1rem;
-}
-
-/* 右カラムは残りの幅を全部使う */
-.result-area {
-  max-width: 100%;
-  flex: 1;
-}
-
-
-/* 入力エリアのレイアウト */
-/* 横並びに */
+/* 分母・分子のテキストエリアを横並びに。
+   max-width が入力欄の最大幅（1つあたり 16rem = 256px まで）。縮めたいときはここを直す */
 .input-fields {
   display: flex;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  flex: 1 1 22rem;
+  min-width: 0;
+  max-width: calc(2 * 16rem + 1rem);
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
 }
 
+.sample-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+/* 狭いとき（折り返してボタンが入力欄の下に来る幅）は、ボタンを横に並べる */
+@container (max-width: 34rem) {
+  .sample-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
 
 .input-group label {
-  /* 320pxから動かないように固定 */
+  font-size: 0.85rem;
+  /* font-weight: bold; */
   min-height: 1.5rem;
-  /* 上下に隙間を作って、中身が増えたら勝手に伸びるようにする */
   padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 2行になった時の行間を整える */
   line-height: 1.2;
-  /* ラベルと入力欄をくっつけたいなら0、少し空けたいなら 0.25rem とか */
-  gap: 0;
   text-align: center;
-  color: #0d90f3;
-  background-color: #d0ebfd;
-  border: 1px solid #a5d1f1;
+  /* 項目名が2行に折り返しても、分母・分子の入力欄の上端と下端がそろうよう、短い方の項目名を縦に伸ばす */
+  flex: 1 0 auto;
+  color: var(--c-brand);
+  background-color: var(--c-brand2-2);
+  border: 1px solid var(--c-brand2-3);
   border-bottom: none;
 }
-
-
 
 textarea,
 input {
   font-size: 0.85rem;
   padding: 0.75rem;
-  border: 1px solid #a5d1f1;
+  border: 1px solid var(--c-brand2-3);
   box-sizing: border-box;
 }
 
+textarea:focus,
+input:focus {
+  outline: none;
+  border-color: var(--c-brand-vivid);
+  background-color: var(--c-brand2-1);
+}
 
-/* テキストエリアを縦長にする */
 .input-group textarea {
-  height: 120px;
+  /* 最大5群ぶん（5行）が見える高さ */
+  /* height: 6.75rem; */
+  height: 4.75rem;
   width: 100%;
+  flex: none;
 }
 
 
-/* テーブルを包むコンテナに高さを設定 */
-/* テーブル行数が少なくてもdetailsは上に詰めたくないため */
-.table-container {
-  /* ここで高さを確保 */
-  min-height: 14rem;
+/* ---------- 確認表と実行ボタン（広いときは横並び、狭いときは折り返して縦並び） ---------- */
+
+.confirm-run {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
 }
 
+.confirm-table-wrap {
+  flex: 2 1 22rem;
+  min-width: 0;
+}
+
+.run-box {
+  flex: 1 1 14rem;
+  max-width: 22rem;
+}
+
+/* 確認表: 5行固定。page_common.css の表より詰める */
 #confirmation-table {
-  background-color: #f2f2f2;
-  border-collapse: collapse;
-  border: 0;
-  width: 100%;
-  margin: 1rem 0 0;
+  margin: 0;
   font-size: 0.85rem;
   line-height: normal;
 }
 
 #confirmation-table th,
 #confirmation-table td {
-  padding: 0.5rem 0.25rem;
-  border: 0;
-  border-bottom: 1px solid #ddd;
+  padding: 0.4rem 0.5rem;
   vertical-align: middle;
 }
 
 #confirmation-table th {
-  color: #555;
   text-align: center;
-  background: none;
+  font-weight: normal;
 }
 
-/* JS が align="right" で出力する右揃えを、page_common.css の td{text-align:left} に負けないようにする */
 #confirmation-table td {
   text-align: right;
 }
 
+/* 空欄の行も同じ高さになるよう、空のセルに見えない文字を入れる */
+#confirmation-table td:empty::before {
+  content: "\00a0";
+}
+
 /* 異常値のテキスト用クラス */
 .invalid-value {
-  /* 警告っぽい赤 */
   color: #d9534f;
   font-weight: bold;
 }
 
-/* 異常値のセルの背景を薄く赤くする */
-.invalid-cell {
-  background-color: #f2dede !important;
+/* 異常値の行（セル）の背景を薄く赤くする */
+#confirmation-table tr.invalid-cell td {
+  background-color: #ffebee;
+}
+
+/* ボタン */
+.btn-primary,
+.btn-secondary {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid var(--c-brand);
+  border-radius: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: #fff;
+  font-weight: bold;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--c-accent) 85%, white);
+  border-color: color-mix(in srgb, var(--c-accent) 85%, white);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: var(--c-bg);
+  color: var(--c-brand-dark);
+}
+
+.btn-secondary:hover {
+  background: var(--c-brand2-1);
+}
+
+/* サンプルデータ: 青の塗りボタン（clear all は .btn-secondary のまま） */
+#sample-button {
+  background: var(--c-brand-light);
+  border-color: var(--c-brand-light);
+  color: #fff;
+}
+
+#sample-button:hover {
+  background: color-mix(in srgb, var(--c-brand-light) 85%, white);
+  border-color: color-mix(in srgb, var(--c-brand-light) 85%, white);
 }
 
 
-/* details要素（左カラム）の上の余白を作る */
-details {
-  /* ここでテーブルとの間隔をしっかり空ける */
-  margin-top: 2rem;
-  /* 折りたたみ部分にマウスを乗せると指マークになるように */
-  cursor: pointer;
+
+.run-box .btn-primary {
+  width: 100%;
 }
 
-/* summary（detailsの見出し部分）の調整 */
+/* 推定がうまくいかないとき用（実行ボタンの下） */
+.run-box details {
+  margin-top: 1rem;
+}
+
 summary {
+  cursor: pointer;
   font-size: 0.85rem;
-  color: #666;
-  outline: none;
+  color: var(--c-text-sub);
 }
 
-/* サンプリング回数の入力欄があるブロックの余白をリセット */
 .setting-group {
   margin-top: 0.5rem;
 }
 
 
-/* ボタン関係 */
-.action-buttons {
-  margin-top: 1rem;
-  /* 横並びにする */
-  display: flex;
-  /* 高い方のボタンに高さを合わせる */
-  align-items: stretch;
-  /* ボタン同士の隙間を指一本分あける */
-  gap: 0.75rem;
-  /* スマホで横幅が足りない時は自動で折り返す */
-  flex-wrap: wrap;
-}
+/* ---------- 状態メッセージ（推定中 / 推定完了）と装飾ボックス ---------- */
 
-.btn-primary,
-.btn-secondary {
-  padding: 0.5rem 1rem;
-  font-size: 1rem;
-  border: 1px solid #68779a;
-  border-radius: 0.5rem;
-  /* 幅を均等にする */
-  flex: 1;
-  /* 広がりすぎ防止 */
-  max-width: 200px;
-}
-
-@media (max-width: 480px) {
-  .action-buttons {
-    flex-direction: column;
-    /* 縦並びにする */
-  }
-
-  .btn-primary,
-  .btn-secondary {
-    /* 画面幅いっぱいの大きなボタンにする */
-    width: 100%;
-    max-width: none;
-    /* スマホではより押しやすく少し高くする */
-    min-height: 3.5rem;
-  }
-}
-
-.btn-primary {
-  background: #cbe8fa;
-}
-
-.btn-secondary {
-  background: #fff;
-}
-
-.btn-primary:hover {
-  background-color: #E6A1C0;
-}
-
-.btn-secondary:hover {
-  background-color: #FFFF00;
-}
-
-
-
-/* 推定完了の装飾 */
-.mdc-info-box {
-  background-color: #e8f5e9;
-  padding: 0.25rem 1rem;
+.mdc-info-box,
+.mdc-warn-box,
+.mdc-info2-box {
   margin: 1.25rem 0;
-  border-radius: 0.5rem;
-  color: #155724;
 }
 
-
-
-#result-container {
-  display: none;
+/* 青いボックス（page_common.css に無いので、warn-box と同じ作りでここに置く） */
+.mdc-info2-box {
+  background-color: var(--c-brand2-2);
+  border-left: 5px solid var(--c-brand-light);
+  padding: 0.2em 0.8em;
+  border-radius: 4px;
+  color: var(--c-brand-dark);
 }
 
-/* 基本は全部隠す。初期状態もこれでOK */
-.tab-panel {
-  display: none;
-}
-
-/* activeクラスがついているパネルだけ出す */
-.tab-panel.active {
-  display: block;
-}
-
-/* タブ全体のコンテナ */
-.tabs {
+.running-message {
   display: flex;
-  border-bottom: 2px solid #ddd;
-  /* 下に線を引く */
-  gap: 4px;
-  margin-bottom: 1.5rem;
+  align-items: center;
+  gap: 0.625rem;
 }
 
-/* タブボタン単品 */
-.tab-btn {
-  /* 通常時は背景なし */
-  background: none;
-  border: none;
-  /* 上だけ角丸にする */
-  border-radius: 8px 8px 0 0;
-  padding: 0.75rem 1.25rem;
-  color: #666;
-  position: relative;
-  /* 下線に重ねる */
-  bottom: -2px;
-  font-size: 1rem;
+/* display:flex が hidden 属性より強いので、hidden のときは自分で消す */
+.running-message[hidden] {
+  display: none;
 }
 
-/* ホバー（マウスを乗せたとき） */
-.tab-btn:hover {
-  background-color: skyblue;
+/* スピナー（best_5g.css と同じ） */
+.spinner {
+  flex: 0 0 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  border: 0.1875rem solid #eadcae;
+  border-top-color: #9a7200;
+  border-radius: 50%;
+  animation: spinner-rotation 0.8s linear infinite;
+  display: inline-block;
 }
 
-/* 選択されているタブ（JSでactiveクラスがつく） */
-.tab-btn.active {
-  /* 背景を白にして浮き立たせる */
-  background: #fff;
-  color: #000000;
-  font-weight: bold;
-  /* 枠線をつける */
-  border: 2px solid #ddd;
-  /* 下の線だけ消して一体化させる！ */
-  border-bottom-color: #fff;
+@keyframes spinner-rotation {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
+
+
+/* ---------- データテーブル（details）の上の余白 ---------- */
+
+.summary-table-details {
+  margin-top: 2rem;
+}
+
+
+/* ---------- 以下、グラフの出力まわり（従来どおり） ---------- */
 
 /* 全群の事後分布 */
 #summary-chart {
@@ -406,28 +346,6 @@ summary {
   pointer-events: none;
   opacity: 0.9;
 }
-
-
-.mdc-warn-box {
-  background-color: #FFF3CD;
-  border-color: #FFEEBA;
-  border-left: none;
-  /* page_common.css の .mdc-warn-box の左線（橙）を使わない */
-  padding: 0.25rem 1rem;
-  margin: 1.25rem 0;
-  border-radius: 0.5rem;
-  color: #856404;
-}
-
-.mdc-info2-box {
-  background-color: #e0f0ff;
-  border-color: #b8daff;
-  padding: 0.25rem 1rem;
-  margin: 1.25rem 0;
-  border-radius: 0.5rem;
-  color: #004085;
-}
-
 
 
 /* 推定結果テーブルのスタイル */
@@ -510,8 +428,4 @@ summary {
   padding: 0.5rem;
   background: #fff;
   box-sizing: border-box;
-}
-
-#footer {
-  display: none;
 }

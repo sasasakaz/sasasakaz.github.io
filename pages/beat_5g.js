@@ -1,12 +1,15 @@
 // =====================================================================
-// beat_5g.html 用のJS。入力パース・確認テーブル・タブ切替・Pyodide呼び出しを担当。
+// beat_5g.html 用のJS。入力パース・確認テーブル・状態メッセージ・Pyodide呼び出しを担当。
 //
 // 【仕組み】
 //  - 計算とグラフ描画は beat_5g_py.js 内のPythonコード（BEAT_5G_PY）がPyodide上で行う。
 //    Pythonの run() は各グラフのSVG文字列をJSONで返し、ここで下記idのdivに挿入する。
 //      #summary-chart / #summary-hdi / #diff-hdi / #diff-chart / #summary-table-container
-//  - これらのid・タブ名（summary, diff）は beat_5g.html と beat_5g.css に対応する。
+//  - これらのidは beat_5g.html と beat_5g.css に対応する。
 //    id を変える時は html / css / このファイルを同時に直すこと。
+//  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
+//    ここでは各セルの文字だけを更新する（行数が変わらないので、下のパーツがずれない）。
+//  - 状態メッセージ: 推定中は #running-message、推定完了は #completion-message を hidden で切り替える。
 //  - 事後分布のホバー表示は、Pythonが返す hover データ（軸位置・ビン・密度）を使い、
 //    SVG上に .plot-tooltip(css) を重ねて出している。図の余白を変えるとズレるので注意。
 //  - Pyodideはページ表示時に裏で読み込み開始（初回のみ数秒〜）。
@@ -16,11 +19,17 @@
 // --- [1] 設定・定数（ファイルの一番上にまとめる） ---
 const MAX_GROUPS = 5;
 // 数字(0, 1, 2...)をアルファベット(A, B, C...)に変換して配列を作る
-// String.fromCharCode(65) が "A" なのを利用するっす
 const GROUP_IDS = Array.from({ length: MAX_GROUPS }, (_, i) => String.fromCharCode(65 + i));
 const PERCENTAGE_FACTOR = 100;
 const DEFAULT_HDI = 0.94;
 const DEFAULT_HDI_50 = 0.5;
+
+// 「サンプルデータ」ボタンで入るデータ
+const SAMPLE_DENOMS = "1000 2000 1500 1200 1600";
+const SAMPLE_NUMERS = "70 120 95 110 150";
+
+// 推定中は true（実行ボタンを無効にしておくための印）
+let isRunning = false;
 
 /**
  * データの取得と整形
@@ -48,119 +57,64 @@ function getInputData() {
       .split(/\s+/)             // 改行・タブ・スペースで分割
       .filter(v => v !== "")    // 空っぽを除外
       .map(Number)              // 数値に変換
-      .filter(v => !isNaN(v))   // 数字じゃない（NaN）ものを念のため弾く
-      .slice(0, MAX_GROUPS);             // 最初のMAX_GROUPSだけ取る
+      .filter(v => !isNaN(v));  // 数字じゃない（NaN）ものを念のため弾く
   };
 
-  const denoms = parseInput('denoms');
-  const numers = parseInput('numers');
+  const rawDenoms = parseInput('denoms');
+  const rawNumers = parseInput('numers');
+
+  // MAX_GROUPS を超えて入力されたか（超えた分は無視する。確認表の注記を赤くするために使う）
+  const overflow = Math.max(rawDenoms.length, rawNumers.length) > MAX_GROUPS;
+  const denoms = rawDenoms.slice(0, MAX_GROUPS);
+  const numers = rawNumers.slice(0, MAX_GROUPS);
 
   const groupCount = Math.min(denoms.length, numers.length);
-  return { denoms, numers, groupCount };
+  return { denoms, numers, groupCount, overflow };
 }
 
 /**
- * 入力値のリアルタイムチェック（テーブルを動的に生成）
+ * 入力値のリアルタイムチェック（確認表の5行の文字を更新）
  */
 function updateConfirmationTable() {
-  const { denoms, numers, groupCount } = getInputData();
-  const table = document.getElementById('confirmation-table');
+  const { denoms, numers, overflow } = getInputData();
+  const rows = document.querySelectorAll('#confirmation-table tbody tr');
   const runButton = document.getElementById('run-button');
-  const groupIds = ['A', 'B', 'C', 'D', 'E'];
 
-
-  if (!table) return;
-
-  // テーブルの枠組みを作成
-  let html = `<table class="confirmation-table">
-                <thead>
-                    <tr>
-                        <th>Group</th>
-                        <th>分母</th>
-                        <th>分子</th>
-                        <th>比率 (%)</th>
-                    </tr>
-                </thead>
-                <tbody>`;
+  // 分母・分子のどちらかでも入力のある行までを「入力あり」とする
+  const rowCount = Math.max(denoms.length, numers.length);
 
   // エラーがあるかどうかを記録するフラグ
   let hasError = false;
 
-  for (let i = 0; i < groupCount; i++) {
+  rows.forEach((tr, i) => {
+    const cells = tr.querySelectorAll('td');   // 分母, 分子, 比率
     const d = denoms[i];
     const n = numers[i];
+    const filled = i < rowCount;
 
-    // 異常値の判定（数字じゃない、分子>分母、マイナス、分母0）
-    const isInvalid = isNaN(n) || isNaN(d) || (n > d) || (n < 0) || (d <= 0);
+    // 異常値の判定（片方しか入力がない、分子>分母、マイナス、分母0）
+    const isInvalid = filled && (d === undefined || n === undefined || n > d || n < 0 || d <= 0);
+    if (isInvalid) hasError = true;
 
-    // 一つでも異常があればエラーフラグを立てる
-    if (isInvalid) {
-      hasError = true;
-    }
+    // 入力がない行は空欄、片方だけ入力がない場合は「—」
+    const blank = filled ? '—' : '';
+    cells[0].textContent = d === undefined ? blank : Math.round(d).toLocaleString();
+    cells[1].textContent = n === undefined ? blank : Math.round(n).toLocaleString();
 
-    const rateRaw = (d > 0) ? (PERCENTAGE_FACTOR * n / d) : 0;
-    const rateDisplay = rateRaw.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
+    const canCalc = d !== undefined && n !== undefined && d > 0;
+    cells[2].textContent = canCalc
+      ? (PERCENTAGE_FACTOR * n / d).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%'
+      : blank;
 
     // 異常ならCSSクラスを付与
-    const rowStyle = isInvalid ? 'class="invalid-cell"' : '';
-    const textStyle = isInvalid ? 'class="invalid-value"' : '';
+    tr.classList.toggle('invalid-cell', isInvalid);
+    cells[2].classList.toggle('invalid-value', isInvalid);
+  });
 
-    html += `<tr ${rowStyle}>
-                    <th style="text-align: center;">Group ${groupIds[i]}</th>
-                    <td align="right">${Math.round(d).toLocaleString()}</td>
-                    <td align="right">${Math.round(n).toLocaleString()}</td>
-                    <td align="right" ${textStyle}>${rateDisplay}%</td>
-                 </tr>`;
-  }
-
-  html += `</tbody></table>`;
-  table.innerHTML = html;
-
-  // ★バリデーション結果をボタンに反映
+  // ★バリデーション結果をボタンに反映（見た目は CSS の :disabled で変わる）
+  // 推定中・エラーがある・データが1件もない場合はボタンを押せなくする
   if (runButton) {
-    // エラーがある、またはデータが1件もない場合はボタンを押せなくする
-    runButton.disabled = hasError || groupCount === 0;
-
-    // 見た目も変える
-    if (runButton.disabled) {
-      runButton.style.opacity = "0.5";
-      runButton.style.cursor = "not-allowed";
-    } else {
-      runButton.style.opacity = "1.0";
-      runButton.style.cursor = "pointer";
-    }
-  }
-
-}
-
-/**
- * タブを切り替える関数
- */
-function switchTab(tabName) {
-  // 1. 全てのパネルから active クラスを外す
-  document.querySelectorAll('.tab-panel').forEach(panel => {
-    panel.classList.remove('active');
-  });
-
-  // 2. 選択されたパネルだけに active クラスをつける（CSSの.active { display: block; } が効く）
-  const targetPanel = document.getElementById(`${tabName}-content`);
-  if (targetPanel) {
-    targetPanel.classList.add('active');
-  }
-
-  // 3. ボタンの active クラス付け替え
-  const tabButtons = document.querySelectorAll('.tab-btn');
-  tabButtons.forEach(button => {
-    button.classList.remove('active');
-  });
-
-  // クリックされたボタンを特定して active にする
-  const clickedButton = document.querySelector(`.tab-btn[onclick*="${tabName}"]`);
-  if (clickedButton) {
-    clickedButton.classList.add('active');
+    runButton.disabled = isRunning || hasError || rowCount === 0;
   }
 }
 
@@ -190,18 +144,16 @@ function loadPyodideRuntime() {
   return pyodidePromise;
 }
 
+/**
+ * 推定中はボタンを無効にする（ラベルは変えない。推定中の表示は #running-message が担当）
+ */
 function setRunButtonBusy(busy) {
-  const btn = document.getElementById('run-button');
-  if (!btn) return;
-  if (busy) {
-    btn.dataset.label = btn.dataset.label || btn.textContent;
-    btn.textContent = '計算中...';
-    btn.disabled = true;
-  } else {
-    btn.textContent = btn.dataset.label || btn.textContent;
-    updateConfirmationTable();
-  }
+  isRunning = busy;
+  updateConfirmationTable();
 }
+
+// 次の描画が終わるまで待つ（Pythonの計算は画面を固めるので、その前に状態メッセージを描画させる）
+const nextPaint = () => new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
 
 /**
  * 推定結果のサマリーテーブル
@@ -273,12 +225,21 @@ function attachPosteriorHover(container, hover) {
 async function runBayesianEstimation() {
   const { denoms, numers, groupCount } = getInputData();
   if (groupCount < 2) {
-    return alert("推定には少なくとも2群のデータが必要にゃん。手元にデータがなければClear Allボタン押してサンプルデータで試してにゃん");
+    return alert("推定には少なくとも2群のデータが必要にゃん。手元にデータがなければ「サンプルデータ」ボタンで試してにゃん");
   }
 
+  const running = document.getElementById('running-message');
+  const completion = document.getElementById('completion-message');
+
   setRunButtonBusy(true);
+  completion.hidden = true;
+  document.getElementById('running-message-text').textContent =
+    `${groupCount}群でベイズ推定の実行中... 終わるまで待ってにゃん`;
+  running.hidden = false;
+
   try {
     const pyodide = await loadPyodideRuntime();
+    await nextPaint();   // ここで状態メッセージを描画させてから、計算に入る
     const numSamples = parseInt(document.getElementById('sample-count').value);
     const runFn = pyodide.globals.get('run');
     const result = JSON.parse(runFn(
@@ -295,12 +256,13 @@ async function runBayesianEstimation() {
       result.diffs.map(svg => `<div class="diff-plot">${svg}</div>`).join('');
     renderSummaryTable(result.table);
 
-    switchTab('summary');
-    ['result-container', 'footer'].forEach(id => document.getElementById(id).style.display = 'block');
+    completion.hidden = false;
   } catch (e) {
     console.error(e);
+    running.hidden = true;
     alert('計算に失敗しました: ' + e.message);
   } finally {
+    running.hidden = true;
     setRunButtonBusy(false);
   }
 }
@@ -309,7 +271,7 @@ async function runBayesianEstimation() {
  * 初期化処理
  */
 window.addEventListener('DOMContentLoaded', () => {
-  // 初期表示のテーブル生成
+  // 初期表示の確認表（入力は空欄なので、実行ボタンは無効のまま）
   updateConfirmationTable();
 
   // 初回ロードに時間がかかるため、先に裏で読み込んでおく
@@ -317,22 +279,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const dArea = document.getElementById('denoms');
   const nArea = document.getElementById('numers');
-  // リセット対象のformを取得
-  const inputForm = document.getElementById('input-form');
 
   // テキストエリア（リアルタイムバリデーション）の監視
-  if (dArea && nArea) {
-    dArea.addEventListener('input', updateConfirmationTable);
-    nArea.addEventListener('input', updateConfirmationTable);
-  }
+  dArea.addEventListener('input', updateConfirmationTable);
+  nArea.addEventListener('input', updateConfirmationTable);
 
-  // リセットボタンの監視
-  if (inputForm) {
-    inputForm.addEventListener('reset', () => {
-      // リセット直後に再計算と表示リセット
-      setTimeout(updateConfirmationTable, 0);
-      document.getElementById("result-container").style.display = "none";
-      document.getElementById("footer").style.display = "none";
-    });
-  }
+  // サンプルデータ：値を入れても input イベントは出ないので、確認表は自分で更新する
+  document.getElementById('sample-button').addEventListener('click', () => {
+    dArea.value = SAMPLE_DENOMS;
+    nArea.value = SAMPLE_NUMERS;
+    updateConfirmationTable();
+  });
+
+  // clear all：入力データだけを消す（表示中の推定結果は、再実行するまで残る）
+  document.getElementById('clear-button').addEventListener('click', () => {
+    dArea.value = '';
+    nArea.value = '';
+    updateConfirmationTable();
+  });
 });

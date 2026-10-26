@@ -17,6 +17,9 @@
 
   <link rel="stylesheet" href="page_common.css">
   <script src="page_layout.js" defer></script>
+  <script>
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
   <style>
   </style>
@@ -32,7 +35,7 @@
   <!-- End Google tag (gtag.js) -->
 </head>
 
-<body class="layout-3col l3-2col">
+<body class="layout-3col">
   <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>

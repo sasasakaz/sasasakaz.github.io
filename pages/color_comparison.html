@@ -188,10 +188,11 @@
   </script>
 </head>
 
-<body class="layout-3col l3-2col">
+<body class="layout-3col l3-drawer">
   <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>
+    <button type="button" id="btn-right" class="topbar-btn" aria-controls="page-toc" aria-expanded="false"></button>
   </div>
   <div id="side-backdrop" class="side-backdrop"></div>
   <div class="layout">
@@ -356,7 +357,8 @@
         <ul>
           <li><b>green は #008000</b> と暗めの緑で、明るい緑は <b>lime（#00ff00）</b> です。X11では <code>green</code> が
             <code>#00ff00</code>
-            でしたが、CSSの基本色では別の値が採用されました。X11由来の色名が追加された後も、この違いが残っています。</li>
+            でしたが、CSSの基本色では別の値が採用されました。X11由来の色名が追加された後も、この違いが残っています。
+          </li>
           <li><b>darkgray（#a9a9a9）は gray（#808080）より明るい</b>。名前の「dark」から想像する順序と逆になっています。これもX11由来の色名と、基本色の値の違いが残った例です。</li>
           <li><code>rebeccapurple</code>（#663399）は、Web標準の発展に貢献したEric Meyer氏の娘Rebeccaさんを記念して、2014年にCSSの色名として追加されました。</li>
         </ul>
@@ -376,6 +378,8 @@
         <p>Author: sasasakaz</p>
       </footer>
     </main>
+
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 
   <script>

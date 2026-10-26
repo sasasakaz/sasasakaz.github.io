@@ -1,5 +1,5 @@
 /* markdown_converter.css
-   markdown_converter.html 専用。page_common.css（2カラム版 <body class="layout-3col l3-2col">）の「後」に読み込むこと。
+   markdown_converter.html 専用。page_common.css（ドロワー型 <body class="layout-3col l3-drawer">）の「後」に読み込むこと。
    ・上書きは page_common.css と同じ詳細度で書き、読み込み順で勝たせている。
    ・旧 common.css から移した設定（body の文字サイズ、a、button）もここにある。
    ・色は page_common.css の :root にある変数（--c-*）を使う。色を変えたいときは :root 側を直す。 */
@@ -18,7 +18,7 @@
 
 /* 旧 body の余白・下マージン。横の余白は .layout の padding(1rem) が担当。
    上の 0.75rem が「バーと入出力欄の間隔」。入出力欄の高さ計算（- 0.75rem）と必ず揃えること */
-.layout-3col.l3-2col #content {
+.layout-3col.l3-drawer #content {
   padding: 0.75rem 0 1rem;
   margin-bottom: 2rem;
 }

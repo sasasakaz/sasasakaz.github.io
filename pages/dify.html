@@ -5,7 +5,7 @@
   <meta charset='utf-8'>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dify</title>
-  <link rel="canonical" href="https://sasasakaz.github.io/pages/diff_viewer.html">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/dify.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="Difyで作成したチャットツールです。">
   <meta property="og:type" content="website">
@@ -16,13 +16,9 @@
   <meta property="og:locale" content="ja_JP">
   <link rel="stylesheet" href="page_common.css">
   <script src="page_layout.js" defer></script>
-
-  <style>
-    .layout-3col {
-      --l3-content-max: min(75%, 960px);
-      /* 画面幅いっぱいに使う */
-    }
-  </style>
+  <script>
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
@@ -35,7 +31,7 @@
   <!-- End Google tag (gtag.js) -->
 </head>
 
-<body class="layout-3col l3-2col">
+<body class="layout-3col">
   <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>

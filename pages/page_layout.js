@@ -5,12 +5,21 @@
  *   1. <body class="layout-3col"> にする
  *   2. <head> に <script src="page_layout.js" defer></script> を入れる
  *   3. 本文を <main id="content"> で囲み、左右に <nav id="site-nav"> / <nav id="page-toc"> を置く
+ *   4. 標準（下の A/B）のページは、左右の開閉状態を復元する短い <script> を <head> に入れる
+ *      （ちらつき防止。ml_for_structured_data.html の <head> のものと同じ。ドロワー型には不要）
  *
- * 2カラム版（左: ページ一覧 / 中央: 本文。目次なし）にするページ
- *   ・<body class="layout-3col l3-2col"> にする
- *   ・<nav id="page-toc"> と右ボタン(#btn-right)は置かない
- *   ・左カラムは画面幅に関係なく、閉じた状態から、ボタンで本文に重ねて開く（オーバーレイ）
- *   ・上部バー中央(#topbar-title)に、本文の h1 が上部バーの下に隠れたときだけページ名を出す。
+ * 4つの型（詳しくは page_common.css 冒頭）
+ *                 目次あり                  目次なし
+ *   標準          A: layout-3col            B: layout-3col（#page-toc と #btn-right を置かない）
+ *   ドロワー型    C: layout-3col l3-drawer  D: layout-3col l3-drawer（#page-toc と #btn-right を置かない）
+ *
+ *   ・標準: 広い画面では左右を常設し、閉じても本文の幅と位置は変わらない。狭い画面ではドロワー。
+ *   ・ドロワー型: 画面幅に関係なく、左右カラムは閉じた状態から、ボタンで本文に重ねて開く（オーバーレイ）。
+ *   ・l3-2col は l3-drawer の旧名（移行用の別名）。
+ *
+ * 上部バー中央(#topbar-title)の表示
+ *   ・目次あり(A/C): いま読んでいる章の名前を出す。
+ *   ・目次なし(B/D): 本文の h1 が上部バーの下に隠れたときだけ、ページ名を出す。
  *     対象は「#topbar-title と #content #header h1 の両方があるページ」。どちらかがなければ何もしない
  *     （markdown_converter は #topbar-title を置かないので対象外）。
  *     バーに出す文字を変えたいときは <h1 data-topbar-title="短い名前"> にする（なければ h1 の文字を使う）。
@@ -46,8 +55,8 @@
       group: 'Tools',
       items: [
         ['💬 Dify', 'pages/dify.html'],
-        ['🦊 Easy Bayesian Estimation for Group Means', 'pages/best_5g.html'],
-        ['🦁 Easy Bayesian Estimation for Group Proportions', 'pages/beat_5g.html'],
+        ['🦊 Bayesian Comparison of Means', 'pages/best_5g.html'],
+        ['🦁 Bayesian Comparison of Proportions', 'pages/beat_5g.html'],
         ['🐶 Markdown Converter', 'pages/markdown_converter.html'],
         ['🐯 Diff Viewer', 'pages/diff_viewer.html'],
         ['🦄 Color Comparison', 'pages/color_comparison.html'],
@@ -68,10 +77,15 @@
   var mq = window.matchMedia(WIDE_QUERY);
   var state = loadState();
 
-  // 広い画面で左右を並べる動作(3カラム)かどうか。
-  // 2カラム版(body.l3-2col)は画面幅に関係なく、ドロワー(オーバーレイ)として動かす。
+  // ドロワー型(body.l3-drawer。旧名 l3-2col)かどうか。画面幅に関係なく、ドロワー(オーバーレイ)として動かす。
+  function isDrawerType() {
+    var c = document.body.classList;
+    return c.contains('l3-drawer') || c.contains('l3-2col');
+  }
+
+  // 広い画面で左右を並べる（常設する）動作かどうか。標準(A/B)の広い画面だけ true。
   function isWide() {
-    return mq.matches && !document.body.classList.contains('l3-2col');
+    return mq.matches && !isDrawerType();
   }
 
   function el(tag, attrs, text) {
@@ -351,12 +365,12 @@
     });
   }
 
-  /* ===================== 2カラム版: 上部バーのページ名 ===================== */
+  /* ===================== 目次なしページ: 上部バーのページ名 ===================== */
   // 本文の h1 が上部バーの下に隠れたら #topbar-title にページ名を出し、見えたら消す。
-  // 3カラム版（章名を #topbar-title に出す）とは干渉しないよう、2カラム版で目次がないページだけで動かす。
+  // 目次があるページ（章名を #topbar-title に出す）とは干渉しないよう、目次がないページ(B/D)だけで動かす。
+  // 表示・非表示の切り替えは page_common.css（:has(#page-toc) で判定）。
 
   function setupPageTitle() {
-    if (!document.body.classList.contains('l3-2col')) return;
     var box = document.getElementById('topbar-title');
     var h1 = document.querySelector('#content #header h1');
     var bar = document.querySelector('.topbar');

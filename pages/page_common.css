@@ -70,8 +70,8 @@ body {
   font-family: "Open Sans", verdana, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol";
   /* 文字色：真っ黒より少しだけ優しい黒 */
   color: var(--c-text);
-  /* 行間を少し広くする */
-  /* line-height: 1.25;  */
+  /* 行間（日本語の長文を読みやすくする）。表・見出し・コードなど、別の値が合うものは個別に指定する */
+  line-height: 1.8;
 
   max-width: 900px;
   margin: 0 auto;
@@ -114,6 +114,14 @@ li>ol {
 }
 
 
+
+/* 見出しは折り返したときに間延びしないよう、本文より詰める */
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.4;
+}
 
 h1 {
   /* margin-top: 0; */
@@ -449,53 +457,69 @@ td {
 
 
 /* =====================================================================
-   3カラムレイアウト（<body class="layout-3col"> のページだけに適用）
+   レイアウト（<body class="layout-3col"> のページだけに適用）
    左: ページ一覧 / 中央: 本文 / 右: 目次（追随）
 
-   ・1150px以上: 3カラム。左右カラムの幅・端の余白は固定で、中央だけが伸び縮みする。
-     左右どちらかを閉じると、その分を中央が使う。開閉ボタンは中央カラム上部の左端・右端。
-   ・1150px未満: 左右は閉じた状態から、ボタンで本文に重ねて開く（ドロワー）
+   ■ 4つの型（body のクラスと、右カラムの有無の組み合わせで決まる）
+       ┌──────────────┬───────────────────────────┬───────────────────────────┐
+       │              │ 目次あり                  │ 目次なし                  │
+       ├──────────────┼───────────────────────────┼───────────────────────────┤
+       │ 標準         │ A: layout-3col            │ B: layout-3col            │
+       │ （左右常設） │   #page-toc と #btn-right │   #page-toc と #btn-right │
+       │              │   を置く                  │   を置かない              │
+       ├──────────────┼───────────────────────────┼───────────────────────────┤
+       │ ドロワー型   │ C: layout-3col l3-drawer  │ D: layout-3col l3-drawer  │
+       │ （左右は     │   #page-toc と #btn-right │   #page-toc と #btn-right │
+       │  重ねて開く）│   を置く                  │   を置かない              │
+       └──────────────┴───────────────────────────┴───────────────────────────┘
+     ・「目次あり/なし」はクラスではなく、HTML に #page-toc があるかどうかで決まる（CSS は :has() で判定）。
+     ・標準（A/B）: 1150px以上で左右を常設。左右を閉じても本文の幅と位置は変わらない（閉じた側は空白）。
+       B は右カラムが空白のまま残るので、本文は画面の中央に来る。
+     ・ドロワー型（C/D）: 画面幅に関係なく、左右は閉じた状態から、ボタンで本文に重ねて開く。
+       メイン幅が足りない／画面幅いっぱい使いたいページ向け。本文の上限は既定 960px。
+       変えたいページは <style> で .layout-3col { --l3-content-max: ... } を上書きする。
+     ・1150px未満: 標準もドロワーとして動く。
+     ・l3-2col は l3-drawer の旧名（移行用の別名）。全ページを置き換えたら、このファイルとJSの l3-2col を消してよい。
 
-   ・2カラム版（左=ページ一覧のみ、オーバーレイ）は、下の「2カラム版」ブロックを参照。
-     <body class="layout-3col l3-2col"> にする。
+   ■ 本文の幅（標準）
+     ・--l3-content-max … 中央カラムの外枠（左線・左右の余白を含む）の上限
+     ・--l3-content-pad … 中央カラムの左右の余白（画面幅に応じて 1.25rem〜2.5rem）
+     ・文字の幅 ＝ --l3-content-max − --l3-content-pad × 2 − 1px（左線）
+       → 既定は 780px − 40px × 2 − 1px ≒ 700px（16px で約43字）
 
    ※ブレークポイント(1150px)は page_layout.js の WIDE_QUERY と揃えること。
-     目安 = 中央の最低幅(640) + (側幅 + 余白)×2 + 端の余白(2rem) + スクロールバー(約17) + 余裕
+     目安 = 中央の最低幅 + (側幅 + 余白)×2 + 端の余白(2rem) + スクロールバー(約17) + 余裕
    ===================================================================== */
-
-/* =====================================================================
-以降記述の並び順
-
-場所（目安）	内容	対象
-約456〜476行	変数の定義と、bodyの打ち消し	3カラム版・2カラム版の両方（.layout-3col）
-約479〜585行	上部バー、開閉ボタン、ツールチップ、章名	両方
-約592〜701行	広い画面（1150px以上）で左右を並べる3カラム	3カラム版だけ（:where(:not(.l3-2col)) で2カラム版を除外）
-約704〜769行	狭い画面（1150px未満）の左右ドロワー	3カラム版の狭い画面
-約771〜844行	2カラム版のドロワー	2カラム版だけ（.layout-3col.l3-2col）
-その先	ページ一覧、目次、本文まわり、印刷	ページ一覧と本文まわりは両方、目次は3カラム版だけ使う
-     =====================================================================*/
-
 
 .layout-3col {
   --l3-topbar-h: 44px;
-  --l3-content-max: 960px;
-  /* 中央カラムの上限幅（左右とも開いているとき） */
+  --l3-content-max: 780px;
+  /* 中央カラムの外枠の上限幅 */
+  --l3-content-pad: clamp(1.25rem, 3vw, 2.5rem);
+  /* 中央カラムの左右の余白 */
   --l3-side-w: 210px;
   /* 左右カラムの幅 */
   --l3-gap: 1rem;
   /* 左右カラムと中央の間隔 */
 
-  /* 各カラムが取る幅。閉じると 0 になり、その分を中央が使う */
+  /* 各カラムが取る幅。閉じても変えない（閉じた側は空白になり、本文は動かない） */
   --l3-left-w: calc(var(--l3-side-w) + var(--l3-gap));
   --l3-right-w: calc(var(--l3-side-w) + var(--l3-gap));
 
-  /* 全体の最大幅（開閉に関係なく一定。超えた分は両端の余白になる） */
+  /* 全体の最大幅（超えた分は両端の余白になる） */
   --l3-layout-max: calc(var(--l3-content-max) + 2 * (var(--l3-side-w) + var(--l3-gap)) + 2rem);
 
   /* 共通の body 設定（max-width 900px / 左右padding）を打ち消す */
   max-width: none;
   margin: 0;
   padding: 0;
+}
+
+/* ドロワー型の既定。:where() で詳細度を 0 にしてあるので、ページ側の <style> の
+   .layout-3col { --l3-content-max: ... } で上書きできる。 */
+.layout-3col:where(.l3-drawer, .l3-2col) {
+  --l3-content-max: 960px;
+  --l3-content-pad: 0px;
 }
 
 
@@ -595,7 +619,7 @@ td {
   visibility: visible;
 }
 
-/* いま読んでいる章の名前（3カラム版）／ 本文の h1 が隠れたときのページ名（2カラム版。表示の切り替えは下の2カラム版ブロック） */
+/* 上部バー中央の文字: 目次ありのページは「いま読んでいる章の名前」、目次なしのページは「ページ名」（表示の切り替えは下のブロック） */
 .layout-3col .topbar-title {
   flex: 1;
   min-width: 0;
@@ -607,235 +631,57 @@ td {
   white-space: nowrap;
 }
 
-.layout-3col .side-backdrop {
-  display: none;
-}
-
-
-/* ---------- 広い画面: 3カラム ---------- */
-
-@media (min-width: 1150px) {
-
-  /* 閉じた側は幅を 0 にして、非表示にする（その分、中央が広がる） */
-  html.left-closed .layout-3col:where(:not(.l3-2col)) {
-    --l3-left-w: 0px;
-  }
-
-  html.right-closed .layout-3col:where(:not(.l3-2col)) {
-    --l3-right-w: 0px;
-  }
-
-  html.left-closed .layout-3col:where(:not(.l3-2col)) .side-left,
-  html.right-closed .layout-3col:where(:not(.l3-2col)) .side-right {
-    display: none;
-  }
-
-  .layout-3col:where(:not(.l3-2col)) .layout,
-  .layout-3col:where(:not(.l3-2col)) .topbar {
-    display: grid;
-    grid-template-columns: var(--l3-left-w) minmax(0, 1fr) var(--l3-right-w);
-    width: 100%;
-    max-width: var(--l3-layout-max);
-    margin: 0 auto;
-    padding: 0 1rem;
-  }
-
-  /* 上部バー: 全体幅のうち、中央カラムの範囲だけに背景と下線を引き、ボタンを左右端に置く */
-  .layout-3col:where(:not(.l3-2col)) .topbar {
-    grid-template-rows: var(--l3-topbar-h);
-    gap: 0;
-    background: none;
-    border-bottom: 0;
-    pointer-events: none;
-    /* 左右カラムの上はクリックを素通しさせる */
-  }
-
-  .layout-3col:where(:not(.l3-2col)) .topbar::before {
-    content: "";
-    grid-column: 2;
-    grid-row: 1;
-    align-self: stretch;
-    /* 基本形の align-items:center が効くと、線がバーの真ん中に来てしまう */
-    background: var(--c-bg);
-    border-bottom: 1px solid var(--c-brand2-3);
-  }
-
-  .layout-3col:where(:not(.l3-2col)) .topbar>* {
-    grid-column: 2;
-    grid-row: 1;
-    align-self: center;
-    pointer-events: auto;
-  }
-
-  .layout-3col:where(:not(.l3-2col)) #btn-left {
-    justify-self: start;
-  }
-
-  .layout-3col:where(:not(.l3-2col)) #btn-right {
-    justify-self: end;
-  }
-
-  .layout-3col:where(:not(.l3-2col)) .topbar-title {
-    justify-self: center;
-    max-width: calc(100% - 96px);
-  }
-
-  /* 本文 */
-  .layout-3col:where(:not(.l3-2col)) #content {
-    grid-column: 2;
-    min-width: 0;
-  }
-
-  /* 左カラムが開いているとき: 本文の左端に薄い線を引く（本文と同じ高さまで続く） */
-  html:not(.left-closed) .layout-3col:where(:not(.l3-2col)) #content {
-    border-left: 1px solid var(--c-border);
-    padding-left: 1.25rem;
-  }
-
-  /* 左ボタンは本文の左端（文字の頭）にそろえる */
-  html:not(.left-closed) .layout-3col:where(:not(.l3-2col)) #btn-left {
-    margin-left: 1.25rem;
-  }
-
-  /* 左右カラム: スクロールに追随 */
-  .layout-3col:where(:not(.l3-2col)) .side {
-    position: sticky;
-    top: 1rem;
-    align-self: start;
-    width: var(--l3-side-w);
-    max-height: calc(100vh - 2rem);
-    margin-top: 1rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    font-size: 0.9rem;
-  }
-
-  .layout-3col:where(:not(.l3-2col)) .side-left {
-    grid-column: 1;
-    justify-self: start;
-  }
-
-  .layout-3col:where(:not(.l3-2col)) .side-right {
-    grid-column: 3;
-    justify-self: end;
-    border-left: 1px solid var(--c-border);
-    padding-left: 0.4rem;
-  }
-}
-
-
-/* ---------- 狭い画面: 左右はドロワー ---------- */
-
-@media (max-width: 1149.98px) {
-  .layout-3col .layout {
-    display: block;
-    padding: 0 1rem;
-  }
-
-  .layout-3col #content {
-    max-width: var(--l3-content-max);
-    margin: 0 auto;
-  }
-
-  .layout-3col .side {
-    position: fixed;
-    top: var(--l3-topbar-h);
-    bottom: 0;
-    z-index: 40;
-    width: min(300px, 85vw);
-    max-height: none;
-    align-self: stretch;
-    /* 広い画面用の align-self:start が残ると、縦が中身の高さに縮んでしまう */
-    margin: 0;
-    padding: 1rem;
-    font-size: 0.9rem;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    background: var(--c-bg);
-    box-shadow: 0 0 24px rgba(0, 0, 0, 0.18);
-    /* 閉じている間はフォーカスも受けないようにする */
-    visibility: hidden;
-    transition: transform 0.2s ease, visibility 0s linear 0.2s;
-  }
-
-  .layout-3col .side-left {
-    left: 0;
-    transform: translateX(-102%);
-  }
-
-  .layout-3col .side-right {
-    right: 0;
-    transform: translateX(102%);
-  }
-
-  html.left-open .layout-3col .side-left,
-  html.right-open .layout-3col .side-right {
-    transform: none;
-    visibility: visible;
-    transition: transform 0.2s ease, visibility 0s;
-  }
-
-  html.left-open .layout-3col .side-backdrop,
-  html.right-open .layout-3col .side-backdrop {
-    display: block;
-  }
-
-  .layout-3col .side-backdrop {
-    position: fixed;
-    top: var(--l3-topbar-h);
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 35;
-    background: rgba(0, 0, 0, 0.25);
-  }
-}
-
-/* ---------- 2カラム版（<body class="layout-3col l3-2col">） ----------
-   左: ページ一覧 / 中央: 本文。右カラム（目次）はなし。
-
-   ・左カラムは画面幅に関係なく、閉じた状態から、ボタンで本文に重ねて開く（オーバーレイ）。
-     上の「狭い画面: 左右はドロワー」と同じ見せ方を、広い画面でも使う。
-   ・本文の幅: 既定は --l3-content-max（960px）で中央寄せ。
-     画面幅いっぱいに使いたいページは <body style="--l3-content-max: none"> のように上書きする。
-   ・上の広い画面ブロックは :where(:not(.l3-2col)) で除外してある（詳細度は変わらないので、3カラム版のページには影響しない）。
-
-   ※ドロワーの記述は「狭い画面」ブロックと同じ内容。直すときは両方そろえること。
-   ===================================================================== */
-
-.layout-3col.l3-2col .layout {
-  display: block;
-  padding: 0 1rem;
-}
-
-.layout-3col.l3-2col #content {
-  max-width: var(--l3-content-max);
-  margin: 0 auto;
-}
-
-/* 上部バーのページ名（本文の h1 が上部バーの下に隠れたら、page_layout.js が .is-visible を付ける）。
-   ・普段は非表示。display ではなく opacity/visibility で切り替えるので、バーの高さは変わらない。
-   ・右ボタンがない分、文字が画面中央より右にずれる。左ボタン(36px)+gap(0.75rem)と同じ幅を右に空けて中央に揃える。
-   ・文字の大きさ・色・省略表示は、上の .layout-3col .topbar-title（3カラム版の章名と共通）を使う。 */
-.layout-3col.l3-2col .topbar-title {
-  margin-right: calc(36px + 0.75rem);
+/* 目次（#page-toc）がないページ: ページ名は、本文の h1 が上部バーの下に隠れたときだけ表示する（page_layout.js が .is-visible を付ける）。
+   ・display ではなく opacity/visibility で切り替えるので、バーの高さは変わらない。
+   ・目次があるページは、章名を常に表示する（切り替えなし）。 */
+.layout-3col:where(:not(:has(#page-toc))) .topbar-title {
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s, visibility 0.15s;
 }
 
-.layout-3col.l3-2col .topbar-title.is-visible {
+.layout-3col:where(:not(:has(#page-toc))) .topbar-title.is-visible {
   opacity: 1;
   visibility: visible;
 }
 
-.layout-3col.l3-2col .side {
+/* 右ボタンがないページ（flex の上部バー）: 左ボタン(36px)+gap(0.75rem)と同じ幅を右に空けて、文字を中央にそろえる。
+   広い画面の標準（grid）では、下の広い画面ブロックで 0 に戻す。 */
+.layout-3col:where(:not(:has(#btn-right))) .topbar-title {
+  margin-right: calc(36px + 0.75rem);
+}
+
+
+
+/* ---------- ドロワー（基本形） ----------
+   左右カラムは、閉じた状態から、ボタンで本文に重ねて開く。
+   ・1150px未満の全ページと、ドロワー型（C/D）の全画面幅で使う。
+   ・標準（A/B）の広い画面だけは、下の「広い画面」ブロックでこれを打ち消して常設にする。 */
+
+.layout-3col .layout {
+  display: block;
+  padding: 0 1rem;
+}
+
+.layout-3col #content {
+  max-width: var(--l3-content-max);
+  margin: 0 auto;
+}
+
+/* 標準の狭い画面: 左右の余白ぶんを引いて、広い画面と文字の幅をそろえる */
+.layout-3col:where(:not(.l3-drawer, .l3-2col)) #content {
+  max-width: calc(var(--l3-content-max) - 2 * var(--l3-content-pad));
+}
+
+.layout-3col .side {
   position: fixed;
   top: var(--l3-topbar-h);
   bottom: 0;
   z-index: 40;
   width: min(300px, 85vw);
   max-height: none;
+  align-self: stretch;
+  /* 広い画面用の align-self:start が残ると、縦が中身の高さに縮んでしまう */
   margin: 0;
   padding: 1rem;
   font-size: 0.9rem;
@@ -848,18 +694,25 @@ td {
   transition: transform 0.2s ease, visibility 0s linear 0.2s;
 }
 
-.layout-3col.l3-2col .side-left {
+.layout-3col .side-left {
   left: 0;
   transform: translateX(-102%);
 }
 
-html.left-open .layout-3col.l3-2col .side-left {
+.layout-3col .side-right {
+  right: 0;
+  transform: translateX(102%);
+}
+
+html.left-open .layout-3col .side-left,
+html.right-open .layout-3col .side-right {
   transform: none;
   visibility: visible;
   transition: transform 0.2s ease, visibility 0s;
 }
 
-.layout-3col.l3-2col .side-backdrop {
+.layout-3col .side-backdrop {
+  display: none;
   position: fixed;
   top: var(--l3-topbar-h);
   right: 0;
@@ -869,16 +722,131 @@ html.left-open .layout-3col.l3-2col .side-left {
   background: rgba(0, 0, 0, 0.25);
 }
 
-html.left-open .layout-3col.l3-2col .side-backdrop {
+html.left-open .layout-3col .side-backdrop,
+html.right-open .layout-3col .side-backdrop {
   display: block;
+}
+
+
+/* ---------- 広い画面（1150px以上）: 標準（A/B）は左右を並べる ---------- */
+
+@media (min-width: 1150px) {
+
+  /* 閉じた側は非表示にするだけで、列の幅は残す（本文の幅と位置が変わらないようにする） */
+  html.left-closed .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-left,
+  html.right-closed .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-right {
+    display: none;
+  }
+
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .layout,
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar {
+    display: grid;
+    grid-template-columns: var(--l3-left-w) minmax(0, 1fr) var(--l3-right-w);
+    width: 100%;
+    max-width: var(--l3-layout-max);
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  /* 上部バー: 全体幅のうち、中央カラムの範囲だけに背景と下線を引き、ボタンを左右端に置く */
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar {
+    grid-template-rows: var(--l3-topbar-h);
+    gap: 0;
+    background: none;
+    border-bottom: 0;
+    pointer-events: none;
+    /* 左右カラムの上はクリックを素通しさせる */
+  }
+
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar::before {
+    content: "";
+    grid-column: 2;
+    grid-row: 1;
+    align-self: stretch;
+    /* 基本形の align-items:center が効くと、線がバーの真ん中に来てしまう */
+    background: var(--c-bg);
+    border-bottom: 1px solid var(--c-brand2-3);
+  }
+
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar>* {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    pointer-events: auto;
+  }
+
+  /* ボタンは、本文の文字の端にアイコンの線をそろえる（ボタン内のアイコンの余白は左右 8px、左線は 1px） */
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) #btn-left {
+    justify-self: start;
+    margin-left: calc(var(--l3-content-pad) - 7px);
+  }
+
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) #btn-right {
+    justify-self: end;
+    margin-right: calc(var(--l3-content-pad) - 8px);
+  }
+
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar-title {
+    justify-self: center;
+    margin-right: 0;
+    /* grid では中央にそろうので、右ボタンがなくても補正しない */
+    max-width: calc(100% - 2 * (var(--l3-content-pad) + 40px));
+  }
+
+  /* 本文: 左右に余白を取る。左線は常に 1px 確保して、色だけ切り替える（開閉で幅がずれない） */
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) #content {
+    grid-column: 2;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+    padding-inline: var(--l3-content-pad);
+    border-left: 1px solid transparent;
+  }
+
+  /* 左カラムが開いているとき: 本文の左端に薄い線を引く（本文と同じ高さまで続く） */
+  html:not(.left-closed) .layout-3col:where(:not(.l3-drawer, .l3-2col)) #content {
+    border-left-color: var(--c-border);
+  }
+
+  /* 左右カラム: スクロールに追随（ドロワー基本形を打ち消す） */
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side {
+    position: sticky;
+    top: 1rem;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    z-index: auto;
+    align-self: start;
+    width: var(--l3-side-w);
+    max-height: calc(100vh - 2rem);
+    margin: 1rem 0 0;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    transform: none;
+    visibility: visible;
+    transition: none;
+  }
+
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-left {
+    grid-column: 1;
+    justify-self: start;
+  }
+
+  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-right {
+    grid-column: 3;
+    justify-self: end;
+    border-left: 1px solid var(--c-border);
+    padding-left: 0.4rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
 
   .layout-3col .side,
-  .layout-3col.l3-2col .side,
-  html.left-open .layout-3col.l3-2col .side-left,
-  .layout-3col.l3-2col .topbar-title {
+  html.left-open .layout-3col .side-left,
+  html.right-open .layout-3col .side-right,
+  .layout-3col .topbar-title {
     transition: none;
   }
 }
@@ -976,6 +944,7 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
 .layout-3col #content pre {
   max-width: 100%;
   overflow-x: auto;
+  line-height: 1.5;
 }
 
 .layout-3col .table-scroll {
@@ -1004,6 +973,6 @@ html.left-open .layout-3col.l3-2col .side-backdrop {
 
   .layout-3col #content {
     border-left: 0;
-    padding-left: 0;
+    padding-inline: 0;
   }
 }

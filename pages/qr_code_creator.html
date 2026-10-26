@@ -3,7 +3,7 @@
 <!--
 QR Code Creator
 Created: 2026-10-22
-Updated: 2026-10-23
+Updated: 2026-10-25
 Description: 連絡先登録用・サイト表示用のQRコードを作成するツール。
 -->
 
@@ -22,6 +22,9 @@ Description: 連絡先登録用・サイト表示用のQRコードを作成す�
   <meta property="og:locale" content="ja_JP">
   <link rel="stylesheet" href="page_common.css">
   <script src="page_layout.js" defer></script>
+  <script>
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
   <script src="https://cdn.jsdelivr.net/gh/ushelp/EasyQRCodeJS@master/dist/easy.qrcode.min.js"></script>
   <style>
     .container {
@@ -213,7 +216,7 @@ Description: 連絡先登録用・サイト表示用のQRコードを作成す�
   <!-- End Google tag (gtag.js) -->
 </head>
 
-<body class="layout-3col l3-2col">
+<body class="layout-3col">
   <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <div id="topbar-title" class="topbar-title"></div>
