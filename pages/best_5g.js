@@ -6,11 +6,16 @@ const SAMPLE_DATA = [
   "6.75, 17.33, 18.26, 20.43, 17.38, 17.34, 20.08, 16.26, 16.19, 18.88, 16.96, 20.56, 15.53, 16.75",
   "14.54, 15.4, 12.52, 18.74, 12.64, 16.48, 13.61, 16.12, 13.93, 17.89, 12.44, 12.51, 17.24, 14.29"
 ];
+const PLACEHOLDER_DATA = [
+  "14.63, 20.18, 19.85",
+  "14.34, 13.09, 14.62"
+];
 
 // TODO: Replace with the deployed Cloud Run service URL (without a trailing slash).
 const API_BASE_URL = "https://web-tools-app-697789875302.asia-northeast1.run.app";
 let activeRequestController = null;
 let requestVersion = 0;
+let isEstimating = false;
 
 class EstimateInputError extends Error {}
 
@@ -46,39 +51,48 @@ const getDraws = setupParameterStepper("draws");
 const groupInputs = document.getElementById("group-inputs");
 GROUPS.forEach(name => {
   const group = document.createElement("div");
-  group.className = "input-group";
+  group.className = `input-group group-${name.toLowerCase()}`;
   const label = document.createElement("label");
   label.htmlFor = `group-${name}`;
   label.textContent = `Group ${name}`;
   const textarea = document.createElement("textarea");
   textarea.id = `group-${name}`;
   textarea.name = `group-${name}`;
+  textarea.placeholder = PLACEHOLDER_DATA[GROUPS.indexOf(name)] ?? "";
   textarea.setAttribute("aria-label", `Group ${name} のデータ`);
+  textarea.addEventListener("input", updateObservationTable);
   group.append(label, textarea);
   groupInputs.appendChild(group);
 });
+groupInputs.appendChild(groupInputs.querySelector(".sample-buttons"));
 
 document.getElementById("sample-button").addEventListener("click", () => {
   GROUPS.forEach((name, index) => {
     document.getElementById(`group-${name}`).value = SAMPLE_DATA[index];
   });
+  updateObservationTable();
 });
 
 document.getElementById("clear-button").addEventListener("click", () => {
+  requestVersion += 1;
+  activeRequestController?.abort();
+  activeRequestController = null;
+  isEstimating = false;
+
   GROUPS.forEach(name => {
     document.getElementById(`group-${name}`).value = "";
   });
-});
-
-const tabs = [...document.querySelectorAll('[role="tab"]')];
-tabs.forEach(tab => {
-  tab.addEventListener("click", () => {
-    tabs.forEach(item => {
-      const selected = item === tab;
-      item.setAttribute("aria-selected", String(selected));
-      document.getElementById(item.getAttribute("aria-controls")).hidden = !selected;
-    });
-  });
+  clearResults();
+  document.getElementById("large-values").hidden = true;
+  document.getElementById("running-message").hidden = true;
+  document.getElementById("running-message-text").textContent = "";
+  document.getElementById("completion-message").hidden = true;
+  document.getElementById("error-message").hidden = true;
+  document.getElementById("error-message-text").textContent = "";
+  delete document.getElementById("error-message").dataset.inputError;
+  document.getElementById("initial-message").hidden = false;
+  document.getElementById("footer").style.display = "none";
+  updateObservationTable();
 });
 
 function renderTable(tableId, rows, columns, digits = 2) {
@@ -113,6 +127,67 @@ function renderTable(tableId, rows, columns, digits = 2) {
   table.appendChild(body);
 }
 
+function getParsedGroups() {
+  return GROUPS.map(name => {
+    const raw = document.getElementById(`group-${name}`).value;
+    const cleaned = raw.replace(/(?<=\d),(?=\d)/g, "");
+    const tokens = cleaned.split(/[^0-9.-]+/).filter(token => token.trim());
+    const values = tokens.map(token => Number(token));
+    if (values.some(value => !Number.isFinite(value))) {
+      throw new Error(`Group ${name} の入力に数値として解釈できない部分があります。`);
+    }
+    return [name, values];
+  }).filter(([, values]) => values.length > 0);
+}
+
+function getObservationRows(parsedGroups) {
+  return parsedGroups.map(([name, values]) => {
+    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+    const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
+    return {
+      Group: name,
+      N: values.length.toLocaleString(),
+      Mean: mean.toFixed(2),
+      Std: Math.sqrt(variance).toFixed(2),
+      Min: Math.min(...values).toFixed(2),
+      Max: Math.max(...values).toFixed(2)
+    };
+  });
+}
+
+function updateObservationTable() {
+  const errorMessage = document.getElementById("error-message");
+  const errorMessageText = document.getElementById("error-message-text");
+  try {
+    const parsedGroups = getParsedGroups();
+    const rows = getObservationRows(parsedGroups);
+    const rowsByGroup = new Map(rows.map(row => [row.Group, row]));
+    document.querySelectorAll("#observations tbody tr").forEach(tableRow => {
+      const row = rowsByGroup.get(tableRow.dataset.group);
+      const cells = tableRow.querySelectorAll("td");
+      cells[0].textContent = row?.N ?? "";
+      cells[1].textContent = row?.Mean ?? "";
+      cells[2].textContent = row?.Std ?? "";
+      cells[3].textContent = row?.Min ?? "";
+      cells[4].textContent = row?.Max ?? "";
+    });
+    document.getElementById("estimate-button").disabled = isEstimating || parsedGroups.length === 0;
+    if (errorMessage.dataset.inputError) {
+      errorMessage.hidden = true;
+      errorMessageText.textContent = "";
+      delete errorMessage.dataset.inputError;
+    }
+  } catch (error) {
+    document.querySelectorAll("#observations tbody td").forEach(cell => {
+      cell.textContent = "";
+    });
+    document.getElementById("estimate-button").disabled = true;
+    errorMessageText.textContent = error.message;
+    errorMessage.dataset.inputError = "true";
+    errorMessage.hidden = false;
+  }
+}
+
 function showPlots(plots) {
   const plotIds = {
     means: "means-plot",
@@ -126,62 +201,32 @@ function showPlots(plots) {
 }
 
 function clearResults() {
-  document.getElementById("observations").replaceChildren();
   document.getElementById("means-summary").replaceChildren();
   document.getElementById("diagnostics").replaceChildren();
   document.getElementById("mcse-ratios").replaceChildren();
   document.querySelectorAll(".plot").forEach(plot => plot.removeAttribute("src"));
-  document.querySelectorAll("#results details").forEach(details => {
-    details.open = details.querySelector("summary")?.textContent.trim() === "Summary";
-  });
 }
-
-function resetView() {
-  requestVersion += 1;
-  activeRequestController?.abort();
-  activeRequestController = null;
-
-  document.getElementById("estimate-button").disabled = false;
-  document.getElementById("results").hidden = true;
-  document.getElementById("observations-section").hidden = true;
-  document.getElementById("large-values").hidden = true;
-  document.getElementById("intro").hidden = false;
-  document.getElementById("running-message").hidden = true;
-  document.getElementById("completion-message").hidden = true;
-  document.getElementById("error-message").hidden = true;
-  document.getElementById("footer").style.display = "none";
-  document.getElementById("running-message-text").textContent = "";
-  tabs.forEach((tab, index) => {
-    const selected = index === 0;
-    tab.setAttribute("aria-selected", String(selected));
-    document.getElementById(tab.getAttribute("aria-controls")).hidden = !selected;
-  });
-  clearResults();
-}
-
-document.getElementById("reset-button").addEventListener("click", resetView);
 
 document.getElementById("estimate-button").addEventListener("click", async () => {
   const version = ++requestVersion;
   const controller = new AbortController();
   activeRequestController = controller;
   const button = document.getElementById("estimate-button");
-  const results = document.getElementById("results");
   const largeValues = document.getElementById("large-values");
-  const intro = document.getElementById("intro");
-  const observationsSection = document.getElementById("observations-section");
   const runningMessage = document.getElementById("running-message");
   const runningMessageText = document.getElementById("running-message-text");
   const completionMessage = document.getElementById("completion-message");
+  const initialMessage = document.getElementById("initial-message");
   const errorMessage = document.getElementById("error-message");
+  const errorMessageText = document.getElementById("error-message-text");
 
+  isEstimating = true;
   button.disabled = true;
-  results.hidden = true;
-  observationsSection.hidden = true;
   largeValues.hidden = true;
-  intro.hidden = true;
+  initialMessage.hidden = true;
   completionMessage.hidden = true;
   errorMessage.hidden = true;
+  delete errorMessage.dataset.inputError;
   runningMessage.hidden = true;
   document.getElementById("footer").style.display = "none";
 
@@ -194,40 +239,12 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
       name,
       document.getElementById(`group-${name}`).value
     ]));
-    const parsedGroups = Object.entries(groups).map(([name, raw]) => {
-      const cleaned = raw.replace(/(?<=\d),(?=\d)/g, "");
-      const tokens = cleaned.split(/[^0-9.-]+/).filter(token => token.trim());
-      const values = tokens.map(token => Number(token));
-      if (values.some(value => !Number.isFinite(value))) {
-        throw new Error(`Group ${name} の入力に数値として解釈できない部分があります。`);
-      }
-      return [name, values];
-    }).filter(([, values]) => values.length > 0);
+    const parsedGroups = getParsedGroups();
 
     if (parsedGroups.length < 2) {
       throw new EstimateInputError("推定には少なくとも2つの群にデータ入力が必要です。");
     }
-    const observationRows = parsedGroups.map(([name, values]) => {
-      const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-      const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
-      return {
-        Group: name,
-        "データ件数": values.length,
-        "平均値 (Mean)": mean,
-        "標準偏差 (Std)": Math.sqrt(variance),
-        "最小値": Math.min(...values),
-        "最大値": Math.max(...values)
-      };
-    });
-    renderTable("observations", observationRows, [
-      ["Group", "Group"],
-      ["データ件数", "データ件数"],
-      ["平均値 (Mean)", "平均値 (Mean)"],
-      ["標準偏差 (Std)", "標準偏差 (Std)"],
-      ["最小値", "最小値"],
-      ["最大値", "最大値"]
-    ]);
-    observationsSection.hidden = false;
+    updateObservationTable();
     runningMessageText.textContent = `${parsedGroups.length}群でベイズ推定の実行中... MCMCサンプリングが終わるまで待ってにゃん`;
     runningMessage.hidden = false;
 
@@ -273,22 +290,23 @@ document.getElementById("estimate-button").addEventListener("click", async () =>
     ], 4);
     showPlots(data.plots);
     largeValues.hidden = !data.large_values;
-    results.hidden = false;
     runningMessage.hidden = true;
-    completionMessage.textContent = "推定完了！解説やPointを参考にしながら推定結果を読み解いてください。";
     completionMessage.hidden = false;
     document.getElementById("footer").style.display = "block";
   } catch (error) {
     if (error.name === "AbortError" || version !== requestVersion) return;
     runningMessage.hidden = true;
-    errorMessage.textContent = error instanceof EstimateInputError
+    errorMessageText.textContent = error instanceof EstimateInputError
       ? error.message
       : `推定に失敗しました: ${error.message}`;
     errorMessage.hidden = false;
   } finally {
     if (version === requestVersion) {
-      button.disabled = false;
+      isEstimating = false;
+      updateObservationTable();
       activeRequestController = null;
     }
   }
 });
+
+updateObservationTable();

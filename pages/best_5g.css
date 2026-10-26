@@ -1,10 +1,12 @@
 @charset "utf-8";
 
-/* page_common.css 併用のための調整（beat_5g.css と同じ。2カラム版: <body class="layout-3col l3-2col">） */
+/* page_common.css 併用のための調整（beat_5g.css と同じ3カラムレイアウト） */
 
 .layout-3col {
   --l3-content-max: min(95%, 1400px);
 }
+
+
 
 :where(#content) button {
   cursor: pointer;
@@ -16,95 +18,98 @@
   font-family: inherit;
 }
 
-:where(#content) a {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: inherit;
-  text-decoration: none;
-}
-
-#header h1 {
-  margin-bottom: revert;
-}
-
-#content h2 {
-  all: revert;
-}
-
-#content :is(p, ul, ol) {
-  margin-block: revert;
-}
-
 body {
-  background: #fff;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
-}
-
-#content {
-  font-size: 0.9rem;
 }
 
 [hidden] {
   display: none !important;
 }
 
-/* 基本は縦並び（スマホ用） */
-.main-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.input-area {
+  container-type: inline-size;
+  margin-bottom: 1.25rem;
 }
 
-.sidebar {
-  flex: 0 0 auto;
-  width: 100%;
-}
-
-/* 768px以上の時だけ左右に分ける */
-@media (min-width: 768px) {
-  .main-container {
-    flex-direction: row;
-    gap: 2.5rem;
-    align-items: flex-start;
-  }
-
-  .sidebar {
-    flex: 0 0 320px;
-  }
-}
-
-.result-area {
-  max-width: 100%;
-  min-width: 0;
-  flex: 1;
-}
-
-/* 入力エリア（群ごとに縦に並べる） */
-#group-inputs {
-  display: flex;
-  flex-direction: column;
+.input-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "group-a group-b group-c"
+    "group-d group-e sample-buttons";
   gap: 1rem;
-  margin: 1rem 0;
+}
+
+.group-a {
+  grid-area: group-a;
+}
+
+.group-b {
+  grid-area: group-b;
+}
+
+.group-c {
+  grid-area: group-c;
+}
+
+.group-d {
+  grid-area: group-d;
+}
+
+.group-e {
+  grid-area: group-e;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.sample-buttons {
+  display: flex;
+  grid-area: sample-buttons;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@container (max-width: 42rem) {
+  .input-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "group-a group-b"
+      "group-c group-d"
+      "group-e sample-buttons";
+  }
+}
+
+@container (max-width: 30rem) {
+  .input-fields {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "group-a"
+      "group-b"
+      "group-c"
+      "group-d"
+      "group-e"
+      "sample-buttons";
+  }
 }
 
 .input-group label {
+  font-size: 0.85rem;
   min-height: 1.5rem;
   padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   line-height: 1.2;
-  gap: 0;
   text-align: center;
-  color: #0d90f3;
-  background-color: #d0ebfd;
-  border: 1px solid #a5d1f1;
+  flex: 1 0 auto;
+  color: var(--c-brand);
+  background-color: var(--c-brand2-2);
+  border: 1px solid var(--c-brand2-3);
   border-bottom: none;
 }
 
@@ -112,15 +117,21 @@ textarea,
 input {
   font-size: 0.85rem;
   padding: 0.75rem;
-  border: 1px solid #a5d1f1;
+  border: 1px solid var(--c-brand2-3);
   box-sizing: border-box;
 }
 
+textarea:focus,
+input:focus {
+  outline: none;
+  border-color: var(--c-brand-vivid);
+  background-color: var(--c-brand2-1);
+}
+
 .input-group textarea {
-  height: 5.5rem;
+  height: 4.75rem;
   width: 100%;
-  resize: vertical;
-  font-family: inherit;
+  flex: none;
 }
 
 details {
@@ -128,76 +139,89 @@ details {
   cursor: pointer;
 }
 
-.details-content {
-  cursor: auto;
-}
-
 summary {
+  cursor: pointer;
   font-size: 0.85rem;
-  color: #666;
-  outline: none;
-}
-
-/* ボタン関係 */
-.action-buttons {
-  margin-top: 1rem;
-  display: flex;
-  align-items: stretch;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  color: var(--c-text-sub);
 }
 
 .btn-primary,
 .btn-secondary {
   padding: 0.5rem 1rem;
   font-size: 1rem;
-  border: 1px solid #68779a;
+  border: 1px solid var(--c-brand);
   border-radius: 0.5rem;
-  flex: 1;
-  max-width: 200px;
 }
 
-@media (max-width: 480px) {
-  .action-buttons {
-    flex-direction: column;
-  }
+.confirm-run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1.5rem;
+}
 
-  .btn-primary,
-  .btn-secondary {
-    width: 100%;
-    max-width: none;
-    min-height: 3.5rem;
-  }
+.confirm-table-wrap {
+  flex: 2 1 22rem;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.run-box {
+  display: flex;
+  flex: 1 1 14rem;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 22rem;
+}
+
+.run-box .btn-primary,
+.run-box .btn-secondary {
+  width: 100%;
+}
+
+.run-box .stepper-button {
+  width: 2.5rem;
+}
+
+.run-box details {
+  margin-top: 1rem;
 }
 
 .btn-primary {
-  background: #cbe8fa;
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+  color: #fff;
+  font-weight: bold;
 }
 
 .btn-secondary {
-  background: #fff;
+  background: var(--c-bg);
+  color: var(--c-brand-dark);
 }
 
-.btn-primary:hover {
-  background-color: #E6A1C0;
+.btn-primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--c-accent) 85%, white);
+  border-color: color-mix(in srgb, var(--c-accent) 85%, white);
 }
 
 .btn-secondary:hover {
-  background-color: #FFFF00;
+  background: var(--c-brand2-1);
 }
 
-.btn-primary:disabled,
-.btn-secondary:disabled {
+#sample-button {
+  background: var(--c-brand-light);
+  border-color: var(--c-brand-light);
+  color: #fff;
+}
+
+#sample-button:hover {
+  background: color-mix(in srgb, var(--c-brand-light) 85%, white);
+  border-color: color-mix(in srgb, var(--c-brand-light) 85%, white);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
-  opacity: .6;
-}
-
-.btn-primary:disabled:hover {
-  background-color: #cbe8fa;
-}
-
-.btn-secondary:disabled:hover {
-  background-color: #fff;
 }
 
 /* Tune / Draws のステッパー（best 独自） */
@@ -227,53 +251,34 @@ summary {
   font-variant-numeric: tabular-nums;
 }
 
-.muted {
-  color: #666;
-}
-
 /* メッセージ類 */
 .mdc-info-box,
 .mdc-warn-box,
-.mdc-info2-box,
-.error {
-  padding: 0.25rem 1rem;
+.mdc-alert-box {
   margin: 1.25rem 0;
-  border-radius: 0.5rem;
 }
 
-.mdc-info-box {
-  background-color: #e8f5e9;
-  color: #155724;
+#header .mdc-note-box {
+  margin: 1rem 0;
+  line-height: 1.4;
 }
 
-.mdc-warn-box {
-  background-color: #FFF3CD;
-  border-color: #FFEEBA;
-  border-left: none;
-  color: #856404;
+#header .mdc-note-box > p {
+  margin-block: 0.8em;
 }
 
-.mdc-info2-box {
-  background-color: #e0f0ff;
-  border-color: #b8daff;
-  color: #004085;
-}
-
-.error {
-  background-color: #f2dede;
-  color: #d9534f;
-}
-
-#running-message,
-#completion-message,
-#error-message {
-  padding: 0.75rem 1rem;
+.initial-message {
+  background: none;
 }
 
 .running-message {
   display: flex;
   align-items: center;
   gap: 0.625rem;
+}
+
+.running-message[hidden] {
+  display: none;
 }
 
 .spinner {
@@ -299,45 +304,10 @@ summary {
   }
 }
 
-/* タブ（切り替えは aria-selected / hidden で行う） */
-.tabs {
-  display: flex;
-  border-bottom: 2px solid #ddd;
-  gap: 4px;
-  margin-bottom: 1.5rem;
-}
-
-.tab-btn {
-  background: none;
-  border: none;
-  border-radius: 8px 8px 0 0;
-  padding: 0.75rem 1.25rem;
-  color: #666;
-  position: relative;
-  bottom: -2px;
-  font-size: 1rem;
-}
-
-.tab-btn:hover {
-  background-color: skyblue;
-}
-
-.tab-btn[aria-selected="true"] {
-  background: #fff;
-  color: #000000;
-  font-weight: bold;
-  border: 2px solid #ddd;
-  border-bottom-color: #fff;
-}
-
-@media (max-width: 767px) {
-  .tabs {
-    overflow-x: auto;
-  }
-
-  .tab-btn {
-    flex: 0 0 auto;
-  }
+.result-section + .result-section {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
 }
 
 /* 画像・表 */
@@ -345,6 +315,10 @@ summary {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.plot:not([src]) {
+  display: none;
 }
 
 .table-wrap {
@@ -387,6 +361,16 @@ summary {
 
 .summary-table tr:hover {
   background-color: #f1f1f1;
+}
+
+#observations {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+#observations th,
+#observations td {
+  padding: 0.4rem 0.5rem;
 }
 
 #footer {
