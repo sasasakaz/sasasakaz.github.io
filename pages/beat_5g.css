@@ -252,6 +252,24 @@ summary {
   margin: 1.25rem 0;
 }
 
+/* ヘッダーの中にある note-box だけ上下のマージンをスッキリさせる */
+#header .mdc-note-box {
+  margin: 1.0em 0em;
+  line-height: 1.4;
+}
+
+#header .mdc-note-box>p {
+  margin-block: 0.8em;
+}
+
+#header .mdc-note-box>ul {
+  margin-block: 0 0.6em;
+}
+
+
+
+
+
 /* 初期案内は背景なし */
 .initial-message {
   background: none;

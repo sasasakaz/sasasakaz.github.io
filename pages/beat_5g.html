@@ -53,10 +53,13 @@
       <header id="header">
         <h1>Bayesian Comparison of Proportions</h1>
         <p>A/Bテスト結果を入力してClickボタンを押してください。比率の差のベイズ推定ができます。</p>
-        <ul>
-          <li>比率（クリック率や購入率のような%指標）の元となるデータを入力してください。</li>
-          <li>入力データはどこにも送信されません。ブラウザのみで動作します。</li>
-        </ul>
+        <div class="mdc-note-box">        
+          <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
+          <ul>
+            <li>Sample Size: ユーザー数や送信者数などの分母</li>
+            <li>Events: コンバージョン数や購入者数などの分子</li>
+          </ul>
+        </div>
       </header>
 
       <!-- 入力エリア: 広いときは [分母][分子] の右にボタンを縦に2つ、狭いときは入力欄の下にボタンを横に並べる -->
@@ -64,11 +67,11 @@
         <div class="input-fields">
           <div class="input-group">
             <label for="denoms">Sample Size</label>
-            <textarea id="denoms" rows="5" autocomplete="off" placeholder="分母：試行回数や総ユーザー数など（例: 配布数、PV）"></textarea>
+            <textarea id="denoms" rows="5" autocomplete="off" placeholder="1000 2000 1500 ..."></textarea>
           </div>
           <div class="input-group">
             <label for="numers">Events</label>
-            <textarea id="numers" rows="5" autocomplete="off" placeholder="分子：成功数や達成数など（例: 購入者数、クリック数）"></textarea>
+            <textarea id="numers" rows="5" autocomplete="off" placeholder="70 120 95 ..."></textarea>
           </div>
         </div>
 
