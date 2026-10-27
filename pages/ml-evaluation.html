@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>機械学習の評価指標</title>
-  <link rel="canonical" href="https://sasasakaz.github.io/pages/ml_evaluation.html">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/ml-evaluation.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description"
     content="機械学習の分類モデルをどう評価するかを解説。Accuracy, Precision, Recall, F1-score, ROC-AUC, PR-AUCなどの意味や違いなどなど紹介します。">
@@ -13,14 +13,14 @@
   <meta property="og:title" content="機械学習の評価指標">
   <meta property="og:description"
     content="機械学習の分類モデルをどう評価するかを解説。Accuracy, Precision, Recall, F1-score, ROC-AUC, PR-AUCなどの意味や違いなどなど紹介します。">
-  <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_evaluation.html">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/ml-evaluation.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
-  <link rel="stylesheet" href="page_common.css">
-  <script src="page_layout.js" defer></script>
+  <link rel="stylesheet" href="page-common.css">
+  <script src="page-layout.js" defer></script>
 
   <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page-layout.js と同じ */
     try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
 
@@ -221,7 +221,7 @@ y_pred_train = model.predict_proba(X_train)[:, 1]
         </ul>
       </div>
 
-      <img src="../images/ml_evaluation_confusion_matrix.jpg" alt="サンプルデータでの混同行列">
+      <img src="../images/ml-evaluation-confusion-matrix.jpg" alt="サンプルデータでの混同行列">
 
       <p>サンプル事例での結果は、合計5,662人のうち実際の購入者は1,718人（出現率30%）、非購入者は3,944人。この4セルのどこに注目するか。</p>
       <blockquote>
@@ -795,7 +795,7 @@ J 0.10（実際：0）※間違い、空振り
       <h3 id="auc-metric-usage">ROC-AUCとPR-AUCの使い分け</h3>
       <p>どちらが優れているというものではなく、注目するポイントが異なる。</p>
 
-      <img src="../images/ml_evaluation_roc_pr_curve.jpg" alt="ROC曲線とPR曲線">
+      <img src="../images/ml-evaluation-roc-pr-curve.jpg" alt="ROC曲線とPR曲線">
 
       <table>
         <thead>

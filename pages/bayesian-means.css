@@ -211,7 +211,7 @@ summary {
   cursor: not-allowed;
 }
 
-/* Tune / Draws のステッパー（best 独自） */
+/* Tune / Draws のステッパー（bayesian-means 独自） */
 .parameter-select {
   margin: 0.875rem 0;
 }
@@ -246,7 +246,7 @@ summary {
   margin: 1.25rem 0;
 }
 
-/* 青いボックス（beat_5g.css と同じ定義。page_common.css に無いのでここに置く） */
+/* 青いボックス（bayesian-means.css と同じ定義。page-common.css に無いのでここに置く） */
 .mdc-info2-box {
   background-color: var(--c-brand2-2);
   border-left: 5px solid var(--c-brand-light);

@@ -1,22 +1,22 @@
 @charset "utf-8";
 
 /* =====================================================================
-   beat_5g.css — beat_5g.html 専用の追加CSS（page_common.css の後に読み込む）
+   bayesian-props.css — bayesian-props.html 専用の追加CSS（page-common.css の後に読み込む）
    3カラム版（<body class="layout-3col">）の縦並びレイアウト。
 
-   見出し・表・ボックス類（.mdc-*-box）の見た目は page_common.css をそのまま使う。
-   ここには、page_common.css に無い部品（ボタン・入力欄・確認表・スピナー）と、
+   見出し・表・ボックス類（.mdc-*-box）の見た目は page-common.css をそのまま使う。
+   ここには、page-common.css に無い部品（ボタン・入力欄・確認表・スピナー）と、
    グラフ出力まわり（下半分。従来どおり）だけを書く。
-   色は page_common.css の変数（--c-*）を使う。
+   色は page-common.css の変数（--c-*）を使う。
    ===================================================================== */
 
-/* 旧 common.css から引き継ぎ（スマホで横に揺れない／文字サイズの自動調整をオフ） */
+/* スマホで横に揺れない／文字サイズの自動調整をオフ */
 body {
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
-/* 旧 common.css の button の設定。:where() で詳細度を 0 にして、本文内(#content)だけに限定する */
+/* button の設定。:where() で詳細度を 0 にして、本文内(#content)だけに限定する */
 :where(#content) button {
   cursor: pointer;
   transition: all 0.2s ease;
@@ -136,7 +136,7 @@ input:focus {
   max-width: 22rem;
 }
 
-/* 確認表: 5行固定。page_common.css の表より詰める */
+/* 確認表: 5行固定。page-common.css の表より詰める */
 #confirmation-table {
   margin: 0;
   font-size: 0.85rem;
@@ -295,7 +295,7 @@ summary {
   background: none;
 }
 
-/* 青いボックス（page_common.css に無いので、warn-box と同じ作りでここに置く） */
+/* 青いボックス（page-common.css に無いので、warn-box と同じ作りでここに置く） */
 .mdc-info2-box {
   background-color: var(--c-brand2-2);
   border-left: 5px solid var(--c-brand-light);

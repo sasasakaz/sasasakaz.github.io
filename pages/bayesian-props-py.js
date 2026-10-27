@@ -1,26 +1,26 @@
 // =====================================================================
-// beat_5g のPythonコード（Pyodide上で実行）を、JS文字列 BEAT_5G_PY として保持するファイル。
+// bayesian-props のPythonコード（Pyodide上で実行）を、JS文字列 BAYESIAN_PROPS_PY として保持するファイル。
 //
 // 【仕組み】
-//  - beat_5g.html が本ファイルを beat_5g.js より先に <script> で読み込む。
-//  - beat_5g.js の loadPyodideRuntime() が Pyodide(CDN)と numpy/matplotlib を読み込み、
-//    pyodide.runPython(BEAT_5G_PY) で下のコードを評価する。
-//  - 実行ボタンで beat_5g.js が Python の run(denoms, numers, num_samples) を呼ぶと、
+//  - bayesian-props.html が本ファイルを bayesian-props.js より先に <script> で読み込む。
+//  - bayesian-props.js の loadPyodideRuntime() が Pyodide(CDN)と numpy/matplotlib を読み込み、
+//    pyodide.runPython(BAYESIAN_PROPS_PY) で下のコードを評価する。
+//  - 実行ボタンで bayesian-props.js が Python の run(denoms, numers, num_samples) を呼ぶと、
 //    各グラフのSVG文字列などを含むJSONが返り、JSが下記のidのdivに innerHTML で挿入する。
 //      posterior -> #summary-chart / hdis -> #summary-hdi
 //      forest    -> #diff-hdi      / diffs -> #diff-chart（1枚ずつ .diff-plot で包む）
-//    hover はツールチップ用データ（beat_5g.js の attachPosteriorHover が使用）。
-//  - 図の表示サイズは beat_5g.css（各idのwidthと svg{width:100%}）で決まり、
+//    hover はツールチップ用データ（bayesian-props.js の attachPosteriorHover が使用）。
+//  - 図の表示サイズは bayesian-props.css（各idのwidthと svg{width:100%}）で決まり、
 //    ここの figsize(px指定) は縦横比と文字の相対サイズを決める。
 //
 // 【編集時の注意】
 //  - file:// でも動くよう fetch せず文字列で埋め込んでいる。バッククォート(\`)と
 //    \${ は文字列を壊すので、Pythonコード内に書かないこと（f-stringの {} 単体は可）。
-//  - run() の戻り値のキーを変えたら beat_5g.js 側も合わせて直すこと。
+//  - run() の戻り値のキーを変えたら bayesian-props.js 側も合わせて直すこと。
 //  - 純粋なPythonは先頭/末尾のバッククォート行の間だけ。インデントはPythonの文法そのもの。
 // =====================================================================
-const BEAT_5G_PY = String.raw`
-"""beat_5g: ベイズ推定の計算とmatplotlibによる描画（Pyodide上で実行）"""
+const BAYESIAN_PROPS_PY = String.raw`
+"""bayesian-props: ベイズ推定の計算とmatplotlibによる描画（Pyodide上で実行）"""
 import io
 import json
 

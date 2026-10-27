@@ -5,21 +5,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>アップリフトモデリング（実践）</title>
-  <link rel="canonical" href="https://sasasakaz.github.io/pages/uplift_advanced.html">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/uplift-advanced.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="アップリフトモデリングの実践。キャリブレーション、推定値の妥当性、Qini曲線やAUUCなどモデル評価、期待純利益シミュレーションなどについて紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="アップリフトモデリング（実践）">
   <meta property="og:description"
     content="アップリフトモデリングの実践。キャリブレーション、推定値の妥当性、Qini曲線やAUUCなどモデル評価、期待純利益シミュレーションなどについて紹介します。">
-  <meta property="og:url" content="https://sasasakaz.github.io/pages/uplift_advanced.html">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/uplift-advanced.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
-  <link rel="stylesheet" href="page_common.css">
-  <script src="page_layout.js" defer></script>
+  <link rel="stylesheet" href="page-common.css">
+  <script src="page-layout.js" defer></script>
 
   <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page-layout.js と同じ */
     try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
 
@@ -364,8 +364,8 @@ model.fit(X, y)
         </p>
       </div>
 
-      <img src="../images/uplift_advanced_calibration_before_after.jpg" alt="キャリブレーション前後の比較">
-      <img src="../images/uplift_advanced_calibration_metrics.jpg" alt="キャリブレーション前後の指標比較">
+      <img src="../images/uplift-advanced-calibration-before-after.jpg" alt="キャリブレーション前後の比較">
+      <img src="../images/uplift-advanced-calibration-metrics.jpg" alt="キャリブレーション前後の指標比較">
 
 
       <h4>予測確率の分布</h4>
@@ -533,7 +533,7 @@ model.fit(X, y)
         </ul>
       </ul>
 
-      <img src="../images/uplift_advanced_prob_dist_st.jpg" alt="S,T-Learnerの予測確率分布">
+      <img src="../images/uplift-advanced-prob-dist-st.jpg" alt="S,T-Learnerの予測確率分布">
 
 
       <h4>X-Learnerの分布</h4>
@@ -558,7 +558,7 @@ model.fit(X, y)
         <li>差の平均は2つの推定値の系統的なズレ、差の標準偏差は顧客ごとのズレのバラツキを表す。</li>
         <li>ズレが大きい場合は、処置群/対照群のデータ量や特徴量の分布などを確認し、推定が不安定になっていないかを調べる。</li>
       </ul>
-      <img src="../images/uplift_advanced_prob_dist_x.jpg" alt="X-Learnerの予測確率分布">
+      <img src="../images/uplift-advanced-prob-dist-x.jpg" alt="X-Learnerの予測確率分布">
 
 
       <h4>S,T,X-Learnerのアップリフト</h4>
@@ -606,7 +606,7 @@ model.fit(X, y)
         </tbody>
       </table>
 
-      <img src="../images/uplift_advanced_prob_dist_uplift.jpg" alt="アップリフトの予測分布">
+      <img src="../images/uplift-advanced-prob-dist-uplift.jpg" alt="アップリフトの予測分布">
 
 
 
@@ -616,7 +616,7 @@ model.fit(X, y)
         傾向スコアモデル（<code>g</code>）の<code>predict_proba()</code>から、処置を受ける確率を取り出し、処置群/対照群別に傾向スコア（PS）の分布をプロットする。2群の分布がどの程度重なっているかを確認することで、似たような特徴を持つ顧客について、<strong>処置群と対照群を比較できるだけのデータがあるか</strong>を把握する。X-LearnerやIPWを含む因果効果推定で重要な診断のひとつ。
       </p>
 
-      <img src="../images/uplift_advanced_ps_overlap.jpg" alt="傾向スコアの分布の重なり">
+      <img src="../images/uplift-advanced-ps-overlap.jpg" alt="傾向スコアの分布の重なり">
 
 
       <strong>2群の分布が十分に重なっている場合</strong>
@@ -709,7 +709,7 @@ model.fit(X, y)
         <p>※共変量バランスが改善しても、未観測の交絡などが残っている可能性があるため、それだけで因果効果を正しく推定できると保証されるわけではない。</p>
       </div>
 
-      <img src="../images/uplift_advanced_covariate_balance.jpg" alt="共変量バランスの可視化">
+      <img src="../images/uplift-advanced-covariate-balance.jpg" alt="共変量バランスの可視化">
 
 
 
@@ -819,7 +819,7 @@ model.fit(X, y)
         <li>各Learnerが対角線（ランダムな対象者選定）を上回るだけでなく、ベースライン（通常の購入予測モデル:
           処置有無を使わずに購入しそうな顧客を予測）よりも累積増分成果が大きければ、<strong>アップリフトモデリングを使って施策対象者を選定する意義</strong>がより明確になる。</li>
       </ul>
-      <img src="../images/uplift_advanced_qini_curve.jpg" alt="Qini曲線とAUUC">
+      <img src="../images/uplift-advanced-qini-curve.jpg" alt="Qini曲線とAUUC">
 
 
       <p><strong>Qini曲線の軸を実数にするか割り算値にするか</strong></p>

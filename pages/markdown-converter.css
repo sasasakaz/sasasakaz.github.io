@@ -1,8 +1,8 @@
-/* markdown_converter.css
-   markdown_converter.html 専用。page_common.css（ドロワー型 <body class="layout-3col l3-drawer">）の「後」に読み込むこと。
-   ・上書きは page_common.css と同じ詳細度で書き、読み込み順で勝たせている。
+/* markdown-converter.css
+   markdown-converter.html 専用。page-common.css（ドロワー型 <body class="layout-3col l3-drawer">）の「後」に読み込むこと。
+   ・上書きは page-common.css と同じ詳細度で書き、読み込み順で勝たせている。
    ・旧 common.css から移した設定（body の文字サイズ、a、button）もここにある。
-   ・色は page_common.css の :root にある変数（--c-*）を使う。色を変えたいときは :root 側を直す。 */
+   ・色は page-common.css の :root にある変数（--c-*）を使う。色を変えたいときは :root 側を直す。 */
 
 /* ===== 旧 common.css から移した設定 ===== */
 
@@ -23,7 +23,7 @@
   margin-bottom: 2rem;
 }
 
-/* リンク要素（page_common.css には無い設定）。詳細度は最低にして、他の指定を邪魔しない */
+/* リンク要素（page-common.css には無い設定）。詳細度は最低にして、他の指定を邪魔しない */
 a {
   cursor: pointer;
   transition: all 0.2s ease;
@@ -268,7 +268,7 @@ button:hover {
   opacity: 0.8;
 }
 
-/* 目立つ操作ボタンは、opacity ではなく page_common.css の :root にある hover 用の色に変える
+/* 目立つ操作ボタンは、opacity ではなく page-common.css の :root にある hover 用の色に変える
    （色の濃さを変えたいときは :root の --c-*-hover だけ直す） */
 .btn-preview:hover,
 .css-preset-btn.active:hover {
@@ -284,7 +284,7 @@ button:hover {
 }
 
 /* ===== 上部バー（site の .topbar に、このツールの操作ボタンを同居させる） =====
-   背景（白）と下線は site 既定のまま。page_common.css の .layout-3col .topbar（高さ44px固定）を、
+   背景（白）と下線は site 既定のまま。page-common.css の .layout-3col .topbar（高さ44px固定）を、
    「44px以上・折り返し可」に上書きする。詳細度を同じ(0,2,0)にして、後から読み込む本ファイルで勝たせる。 */
 .layout-3col .topbar {
   /* 設定パネル(40)・ドロワー(40)より上。バー内のドロップダウンが隠れないように */
@@ -310,7 +310,7 @@ button:hover {
   opacity: 1;
 }
 
-/* ページ名。page_common.css の h1 装飾（青い左線・背景・余白）を打ち消す */
+/* ページ名。page-common.css の h1 装飾（青い左線・背景・余白）を打ち消す */
 .layout-3col .topbar h1 {
   font-size: 1.2rem;
   margin: 0;

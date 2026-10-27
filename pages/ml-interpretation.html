@@ -5,20 +5,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>機械学習モデルの解釈</title>
-  <link rel="canonical" href="https://sasasakaz.github.io/pages/ml_interpretation.html">
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/ml-interpretation.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="機械学習モデルをどのように解釈するのかを解説。PFI, SHAP, PDP, ICEなど代表的な手法を紹介します。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="機械学習モデルの解釈">
   <meta property="og:description" content="機械学習モデルをどのように解釈するのかを解説。PFI, SHAP, PDP, ICEなど、モデルの予測を解釈する代表的な手法を紹介します。">
-  <meta property="og:url" content="https://sasasakaz.github.io/pages/ml_interpretation.html">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/ml-interpretation.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
-  <link rel="stylesheet" href="page_common.css">
-  <script src="page_layout.js" defer></script>
+  <link rel="stylesheet" href="page-common.css">
+  <script src="page-layout.js" defer></script>
 
   <script>
-    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page_layout.js と同じ */
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page-layout.js と同じ */
     try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
   </script>
 
@@ -147,7 +147,7 @@
         <li>特徴量の重要度がドメイン知識に沿っているかを確認することで、適切なモデルになっているかのチェックにもなる。</li>
       </ul>
 
-      <img src="../images/ml_interpretation_pfi.jpg" alt="pfiグラフ">
+      <img src="../images/ml-interpretation-pfi.jpg" alt="pfiグラフ">
 
       <p>モデルの評価指標は、scoringで指定する。それに応じて「重要」の意味合いは変わる。</p>
       <ul>
@@ -207,7 +207,7 @@
         <p>サンプル事例では、特徴量の値の変化が、モデルの予測対数オッズ（log-odds 確率の対数比）に与える影響度合い。base_value + shap値の合計 = 対数オッズの予測値</p>
       </div>
 
-      <img src="../images/ml_interpretation_shap_bar.jpg" alt="shap_barグラフ">
+      <img src="../images/ml-interpretation-shap-bar.jpg" alt="shap_barグラフ">
 
       <p>PFIは予測誤差の悪化度合いを重要度としており、SHAP barは各観測値における予測への寄与の絶対値を集計したもの。見ているものが異なるため、特徴量の順位が一致するとは限らない。</p>
 
@@ -219,13 +219,13 @@
         <li>寄与度の大きさ: 色で表す。一般的な表示では、赤は特徴量の値が高い、青は低い。</li>
       </ul>
 
-      <img src="../images/ml_interpretation_shap_beeswarm.jpg" alt="shap_beeswarmグラフ">
+      <img src="../images/ml-interpretation-shap-beeswarm.jpg" alt="shap_beeswarmグラフ">
 
 
       <h3>SHAP waterfall</h3>
       <p>ある顧客が「ラテを購入する確率が高い」と予測されたのは、どの特徴量が予測を押し上げ、どの特徴量が押し下げたのかを表す。</p>
       <p>下図の場合は「赤が長いほど買う確率を大きく上げ、青が長いほど下げる」と読む。</p>
-      <img src="../images/ml_interpretation_shap_waterfall.jpg" alt="shap_waterfallグラフ">
+      <img src="../images/ml-interpretation-shap-waterfall.jpg" alt="shap_waterfallグラフ">
 
 
       <h3>SHAP Dependence Plot</h3>
@@ -238,7 +238,7 @@
         <li>基本的にはもっとも交互作用の強い特徴量を探して色付けしてくれる。そのため、予期せぬ発見がある（設定やデータの素性次第では一番強いものが選ばれない場合があったり、直接指定もできる）。</li>
       </ul>
 
-      <img src="../images/ml_interpretation_shap_dependence.jpg" alt="shap_dependenceグラフ">
+      <img src="../images/ml-interpretation-shap-dependence.jpg" alt="shap_dependenceグラフ">
 
 
       <h3>SHAPの注意点</h3>
@@ -271,9 +271,9 @@
       </ol>
 
 
-      <img src="../images/ml_interpretation_pdp.jpg" alt="pdpグラフ">
+      <img src="../images/ml-interpretation-pdp.jpg" alt="pdpグラフ">
 
-      <img src="../images/ml_interpretation_ice.jpg" alt="iceグラフ">
+      <img src="../images/ml-interpretation-ice.jpg" alt="iceグラフ">
 
 
       <table>

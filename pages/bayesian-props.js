@@ -1,11 +1,11 @@
 // =====================================================================
-// beat_5g.html 用のJS。入力パース・確認テーブル・状態メッセージ・Pyodide呼び出しを担当。
+// bayesian-props.html 用のJS。入力パース・確認テーブル・状態メッセージ・Pyodide呼び出しを担当。
 //
 // 【仕組み】
-//  - 計算とグラフ描画は beat_5g_py.js 内のPythonコード（BEAT_5G_PY）がPyodide上で行う。
+//  - 計算とグラフ描画は bayesian-props-py.js 内のPythonコード（BAYESIAN_PROPS_PY）がPyodide上で行う。
 //    Pythonの run() は各グラフのSVG文字列をJSONで返し、ここで下記idのdivに挿入する。
 //      #summary-chart / #summary-hdi / #diff-hdi / #diff-chart / #summary-table-container
-//  - これらのidは beat_5g.html と beat_5g.css に対応する。
+//  - これらのidは bayesian-props.html と bayesian-props.css に対応する。
 //    id を変える時は html / css / このファイルを同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
 //    ここでは各セルの文字だけを更新する（行数が変わらないので、下のパーツがずれない）。
@@ -118,7 +118,7 @@ function updateConfirmationTable() {
   }
 }
 
-// --- Pyodide（計算・描画はbeat_5g.pyで実行） ---
+// --- Pyodide（計算・描画はbayesian-props.pyで実行） ---
 const PYODIDE_VERSION = 'v0.27.7';
 const PYODIDE_BASE = `https://cdn.jsdelivr.net/pyodide/${PYODIDE_VERSION}/full/`;
 let pyodidePromise = null;
@@ -135,7 +135,7 @@ function loadPyodideRuntime() {
     });
     const pyodide = await loadPyodide({ indexURL: PYODIDE_BASE });
     await pyodide.loadPackage(['numpy', 'matplotlib']);
-    pyodide.runPython(BEAT_5G_PY);
+    pyodide.runPython(BAYESIAN_PROPS_PY);
     return pyodide;
   })().catch((e) => {
     pyodidePromise = null;

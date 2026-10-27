@@ -1,14 +1,14 @@
 /*!
- * page_layout.js — 3カラムレイアウト（左: ページ一覧 / 中央: 本文 / 右: 目次）
+ * page-layout.js — 3カラムレイアウト（左: ページ一覧 / 中央: 本文 / 右: 目次）
  *
  * 使い方（各ページ）
  *   1. <body class="layout-3col"> にする
- *   2. <head> に <script src="page_layout.js" defer></script> を入れる
+ *   2. <head> に <script src="page-layout.js" defer></script> を入れる
  *   3. 本文を <main id="content"> で囲み、左右に <nav id="site-nav"> / <nav id="page-toc"> を置く
  *   4. 標準（下の A/B）のページは、左右の開閉状態を復元する短い <script> を <head> に入れる
  *      （ちらつき防止。ml_for_structured_data.html の <head> のものと同じ。ドロワー型には不要）
  *
- * 4つの型（詳しくは page_common.css 冒頭）
+ * 4つの型（詳しくは page-common.css 冒頭）
  *                 目次あり                  目次なし
  *   標準          A: layout-3col            B: layout-3col（#page-toc と #btn-right を置かない）
  *   ドロワー型    C: layout-3col l3-drawer  D: layout-3col l3-drawer（#page-toc と #btn-right を置かない）
@@ -42,26 +42,26 @@
     {
       group: 'Articles',
       items: [
-        ['📘 AI 70年', 'pages/ai_70_years.html'],
-        ['🤖 機械学習の歴史', 'pages/ml_history.html'],
-        ['🤖 機械学習の手法', 'pages/ml_for_structured_data.html'],
-        ['🤖 機械学習の評価指標', 'pages/ml_evaluation.html'],
-        ['🤖 機械学習モデルの解釈', 'pages/ml_interpretation.html'],
-        ['🎯 アップリフトモデリング（基礎）', 'pages/uplift_basic.html'],
-        ['🎯 アップリフトモデリング（実践）', 'pages/uplift_advanced.html']
+        ['📘 AI 70年', 'pages/ai-70-years.html'],
+        ['🤖 機械学習の歴史', 'pages/ml-history.html'],
+        ['🤖 機械学習の手法', 'pages/ml-for-structured-data.html'],
+        ['🤖 機械学習の評価指標', 'pages/ml-evaluation.html'],
+        ['🤖 機械学習モデルの解釈', 'pages/ml-interpretation.html'],
+        ['🎯 アップリフトモデリング（基礎）', 'pages/uplift-basic.html'],
+        ['🎯 アップリフトモデリング（実践）', 'pages/uplift-advanced.html']
       ]
     },
     {
       group: 'Tools',
       items: [
         ['💬 Dify', 'pages/dify.html'],
-        ['🦊 Bayesian Comparison of Means', 'pages/best_5g.html'],
-        ['🦁 Bayesian Comparison of Proportions', 'pages/beat_5g.html'],
-        ['🐶 Markdown Converter', 'pages/markdown_converter.html'],
-        ['🐯 Diff Viewer', 'pages/diff_viewer.html'],
-        ['🦄 Color Comparison', 'pages/color_comparison.html'],
-        ['🐹 Amazon Clean', 'pages/amazon_clean.html'],
-        ['🐼 QR Code Creator', 'pages/qr_code_creator.html']
+        ['🦊 Bayesian Comparison of Means', 'pages/bayesian-means.html'],
+        ['🦁 Bayesian Comparison of Proportions', 'pages/bayesian-props.html'],
+        ['🐶 Markdown Converter', 'pages/markdown-converter.html'],
+        ['🐯 Diff Viewer', 'pages/diff-viewer.html'],
+        ['🦄 Color Comparison', 'pages/color-comparison.html'],
+        ['🐹 Amazon Clean', 'pages/amazon-clean.html'],
+        ['🐼 QR Code Creator', 'pages/qr-code-creator.html']
       ]
     }
   ];
@@ -368,7 +368,7 @@
   /* ===================== 目次なしページ: 上部バーのページ名 ===================== */
   // 本文の h1 が上部バーの下に隠れたら #topbar-title にページ名を出し、見えたら消す。
   // 目次があるページ（章名を #topbar-title に出す）とは干渉しないよう、目次がないページ(B/D)だけで動かす。
-  // 表示・非表示の切り替えは page_common.css（:has(#page-toc) で判定）。
+  // 表示・非表示の切り替えは page-common.css（:has(#page-toc) で判定）。
 
   function setupPageTitle() {
     var box = document.getElementById('topbar-title');
