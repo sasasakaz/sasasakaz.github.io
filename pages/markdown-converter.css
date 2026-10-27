@@ -1,22 +1,21 @@
 /* markdown-converter.css
    markdown-converter.html 専用。page-common.css（ドロワー型 <body class="layout-3col l3-drawer">）の「後」に読み込むこと。
    ・上書きは page-common.css と同じ詳細度で書き、読み込み順で勝たせている。
-   ・旧 common.css から移した設定（body の文字サイズ、a、button）もここにある。
+   ・body の文字サイズ、a、buttonもここにある。
    ・色は page-common.css の :root にある変数（--c-*）を使う。色を変えたいときは :root 側を直す。 */
 
-/* ===== 旧 common.css から移した設定 ===== */
 
 .layout-3col {
   /* 本文の最大幅。none = 画面幅いっぱい（上限を付けるなら min(95%, 1400px) など） */
   --l3-content-max: none;
 
-  /* 旧 body の設定のうち、余白・中央寄せ・幅以外（文字サイズなど） */
+  /* 余白・中央寄せ・幅以外（文字サイズなど） */
   font-size: 0.9rem;
   overflow-x: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
-/* 旧 body の余白・下マージン。横の余白は .layout の padding(1rem) が担当。
+/* 余白・下マージン。横の余白は .layout の padding(1rem) が担当。
    上の 0.75rem が「バーと入出力欄の間隔」。入出力欄の高さ計算（- 0.75rem）と必ず揃えること */
 .layout-3col.l3-drawer #content {
   padding: 0.75rem 0 1rem;
@@ -150,14 +149,25 @@ textarea,
   color: white;
 }
 
-.css-mode-hint {
+.settings-help {
   font-size: 0.75rem;
-  color: var(--c-accent);
-  margin-bottom: 0.3rem;
+  color: var(--c-text-sub);
+  margin-bottom: 0.6rem;
 }
 
-.css-mode-hint.hidden {
-  display: none;
+.settings-help summary {
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.settings-help ul {
+  margin: 0.3rem 0 0;
+  padding-left: 1.2rem;
+}
+
+#wrapper-input {
+  height: 55vh;
+  font-family: monospace;
 }
 
 /* 他タブでの更新を知らせるバナー */
@@ -351,6 +361,23 @@ button:hover {
   color: var(--c-text-sub);
   padding: 0.4rem 0.6rem;
   font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* 💡 記号の歯車だけを大きく、少し濃い色にする */
+/* .btn-icon-symbol {
+  font-size: 1.25rem;
+  color: var(--c-text);
+  line-height: 1;
+} */
+
+
+
+/* 文字ラベル付きの設定ボタンは、隣の Preview / Copy HTML と同じ文字サイズにそろえる */
+#settings-btn {
+  font-size: 0.8rem;
 }
 
 /* 設定パネルが開いている間の設定ボタン（閉じる操作はこのボタンの再クリックだけなので、開閉の状態が分かるようにする） */

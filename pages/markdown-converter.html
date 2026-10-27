@@ -69,7 +69,7 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       <button type="button" class="btn-copy" id="copy-btn" onclick="copyToClipboard()"><span class="btn-label">Copy
           HTML</span><span class="btn-done" aria-hidden="true">✓</span></button>
       <button type="button" class="icon-btn" id="settings-btn" title="Preview設定（CSS / HTML）。もう一度押すと閉じる"
-        aria-expanded="false">⚙</button>
+        aria-expanded="false">Settings</button>
     </div>
   </header>
   <div id="side-backdrop" class="side-backdrop"></div>
@@ -115,52 +115,73 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
   <aside class="settings-wrapper settings-panel" id="settings-wrapper" aria-label="Preview設定">
     <div class="panel-head">
       <strong>⚙ Preview設定</strong>
-      <button type="button" class="css-preset-btn" onclick="resetSettings()">初期値に戻す</button>
+      <button type="button" class="css-preset-btn" onclick="resetSettings()">この設定を初期値に戻す</button>
     </div>
+    <details class="settings-help" open>
+      <summary>このページでできること</summary>
+      <ul>
+        <li>MarkdownをHTMLに変換できます。タイトル横の ⇄ ボタンで、HTML→Markdownの逆向きも可能です。</li>
+        <li>Previewに適用するCSS・JS・styleは自分で設定できます。設定は「設定1」「設定2」の2つまで保存でき、自由に切り替えられます。</li>
+        <li>入力内容と設定内容は、使用中のブラウザ内（ローカルストレージ）に保存されます。</li>
+      </ul>
+    </details>
     <div class="settings-area">
-      <label>Preview画面に適用するCSS</label>
       <div class="css-preset-buttons">
-        <button type="button" class="css-preset-btn active" id="preset-inline-btn"
-          onclick="applyCssPreset('inline')">🖊️ インライン入力</button>
-        <button type="button" class="css-preset-btn" id="preset-external-btn" onclick="applyCssPreset('external')">🔗
-          外部ファイル参照</button>
+        <button type="button" class="css-preset-btn active" id="slot-1-btn" onclick="selectSlot(1)">設定1（外部ファイル参照）</button>
+        <button type="button" class="css-preset-btn" id="slot-2-btn" onclick="selectSlot(2)">設定2（style直書き）</button>
       </div>
-      <div class="css-mode-hint hidden" id="css-mode-hint"></div>
-      <textarea id="css-input"></textarea>
-    </div>
-
-    <div class="settings-area">
-      <label>Preview画面に適用するHTML {{content}}部分に変換結果が入る</label>
-      <textarea id="wrapper-input"></textarea>
+      <label for="wrapper-input">Preview画面のHTML全体。外部CSS/JSの&lt;link&gt;・&lt;script&gt;や&lt;style&gt;を自由に記述。{{content}}の部分に変換結果が入ります</label>
+      <textarea id="wrapper-input" spellcheck="false"></textarea>
     </div>
   </aside>
 
   <script>
-    const defaultCSS = `body { font-family: sans-serif; line-height: 1.6; padding: 2.5rem; max-width: 768px; margin: auto; background: white; color: #333; }
-blockquote { border-left: 0.25rem solid #ccc; margin: 1.5rem 1.25rem; padding: 0.5rem 1.25rem; color: #666; background-color: #f9f9f9; }
-mark { background-color: #fff176; }
-.inline-note { background-color: #f0f0f0; color: #c7254e; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 90%; margin: 0 2px; }
-.inline-code { background-color: #f0f0f0; color: #c7254e; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 90%; margin: 0 2px; }
-.inline-mark { background-color: #fff176; padding: 0 2px; }
-.inline-pink { background-color: #f8bbd0; padding: 0 2px; }
-.inline-marker { background: linear-gradient(transparent 60%, #fff176 60%); padding: 0 2px; }
-.inline-gray { background-color: #eceff1; padding: 0 2px; }
-.mdc-info-box { background-color: #e8f5e9; border-left: 0.25rem solid #4caf50; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
-.mdc-warn-box { background-color: #fff3e0; border-left: 0.25rem solid #ff9800; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
-.mdc-alert-box { background-color: #ffebee; border-left: 0.25rem solid #f44336; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
-.mdc-note-box { background-color: #eceff1; border-left: 0.25rem solid #607d8b; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
-.post-body table { width: 100%; border-collapse: collapse; margin: 20px 0; line-height: 1.6; border: 1px solid #d0e7f5; }
-.post-body th, .post-body td { border: 1px solid #d0e7f5; }
-.post-body th { padding: 12px 8px; font-weight: bold; text-align: left; background-color: #e8f4fc; color: #2b5b84; white-space: nowrap; }
-.post-body td { padding: 16px 8px; text-align: left; vertical-align: top; }`;
-
-    const defaultWrapper = `<!DOCTYPE html>
+    // 設定1: 外部ファイル参照 / 設定2: <style>直書き。どちらも{{content}}に変換結果が入る
+    const defaultWrappers = {
+      1: `<!DOCTYPE html>
 <html>
 <head>
     <title>HTML Preview</title>
+    <link rel="stylesheet" href="https://sasasakaz.github.io/pages/page-common.css">
+    <!-- syntax highlighter start -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer><\/script>
+    <script>
+      // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
+      window.addEventListener('DOMContentLoaded', () => {
+        hljs.highlightAll();
+      });
+    <\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    <!-- syntax highlighter end -->
+</head>
+<body>
+  {{content}}
+</body>
+</html>`,
+      2: `<!DOCTYPE html>
+<html>
+<head>
+    <title>HTML Preview</title>
+    <style>
+      body { font-family: sans-serif; line-height: 1.6; padding: 2.5rem; max-width: 768px; margin: auto; background: white; color: #333; }
+      blockquote { border-left: 0.25rem solid #ccc; margin: 1.5rem 1.25rem; padding: 0.5rem 1.25rem; color: #666; background-color: #f9f9f9; }
+      mark { background-color: #fff176; }
+      .inline-note, .inline-code { background-color: #f0f0f0; color: #c7254e; padding: 2px 4px; border-radius: 4px; font-family: monospace; font-size: 90%; margin: 0 2px; }
+      .inline-mark { background-color: #fff176; padding: 0 2px; }
+      .inline-pink { background-color: #f8bbd0; padding: 0 2px; }
+      .inline-marker { background: linear-gradient(transparent 60%, #fff176 60%); padding: 0 2px; }
+      .inline-gray { background-color: #eceff1; padding: 0 2px; }
+      .mdc-info-box { background-color: #e8f5e9; border-left: 0.25rem solid #4caf50; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
+      .mdc-warn-box { background-color: #fff3e0; border-left: 0.25rem solid #ff9800; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
+      .mdc-alert-box { background-color: #ffebee; border-left: 0.25rem solid #f44336; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
+      .mdc-note-box { background-color: #eceff1; border-left: 0.25rem solid #607d8b; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
+      .post-body table { width: 100%; border-collapse: collapse; margin: 20px 0; line-height: 1.6; border: 1px solid #d0e7f5; }
+      .post-body th, .post-body td { border: 1px solid #d0e7f5; }
+      .post-body th { padding: 12px 8px; font-weight: bold; text-align: left; background-color: #e8f4fc; color: #2b5b84; white-space: nowrap; }
+      .post-body td { padding: 16px 8px; text-align: left; vertical-align: top; }
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"><\/script>
-    <style>{{css}}</style>
 </head>
 <body>
   <div class="post-body">
@@ -168,27 +189,11 @@ mark { background-color: #fff176; }
   </div>
   <script>hljs.highlightAll();<\/script>
 </body>
-</html>`;
-
-    // 外部ファイル参照モード用テンプレート（{{css}}は使わず、<link>で直接読み込む）
-    // hrefはサンプルとして公開CSSを指定。実際使う時は自分のCSSファイルへのパス（相対/絶対どちらも可）に書き換えてOK
-    // インライン入力モードと違い、highlight.jsは含めない（Preview用途をシンプルに保つため。必要なら手動で足し戻してOK）
-    const defaultWrapperExternal = `<!DOCTYPE html>
-<html>
-<head>
-    <title>HTML Preview</title>
-    <link rel="stylesheet" href="https://sasasakaz.github.io/pages/page-common.css">
-</head>
-<body>
-  <div class="post-body">
-    {{content}}
-  </div>
-</body>
-</html>`;
+</html>`
+    };
 
     const input = document.getElementById('markdown-input');
     const output = document.getElementById('html-output');
-    const cssInput = document.getElementById('css-input');
     const wrapperInput = document.getElementById('wrapper-input');
     const turndownService = new TurndownService({ headingStyle: 'atx', bulletListMarker: '-' });
 
@@ -196,9 +201,8 @@ mark { background-color: #fff176; }
     const STORAGE_KEY_CONTENT = 'mdConverter_content';
     const STORAGE_KEY_MODE = 'mdConverter_mode';
     const STORAGE_KEY_DRAFT = 'mdConverter_draft';
-    const STORAGE_KEY_CSS = 'mdConverter_css';
-    const STORAGE_KEY_WRAPPER = 'mdConverter_wrapper';
-    const STORAGE_KEY_CSS_PRESET = 'mdConverter_cssPreset';
+    const STORAGE_KEY_WRAPPER_PREFIX = 'mdConverter_wrapper_slot';
+    const STORAGE_KEY_SLOT = 'mdConverter_activeSlot';
 
     function saveState() {
       try {
@@ -210,55 +214,27 @@ mark { background-color: #fff176; }
       }
     }
 
-    // CSS欄・wrapper欄（プリセット選択含む）の保存
-    function saveCssSettings() {
+    let currentSlot = 1;
+    const slotBtns = { 1: document.getElementById('slot-1-btn'), 2: document.getElementById('slot-2-btn') };
+
+    // 現在の枠の内容と、選択中の枠番号を保存する
+    function saveSettings() {
       try {
-        localStorage.setItem(STORAGE_KEY_CSS, cssInput.value);
-        localStorage.setItem(STORAGE_KEY_WRAPPER, wrapperInput.value);
-        localStorage.setItem(STORAGE_KEY_CSS_PRESET, currentCssPreset);
+        localStorage.setItem(STORAGE_KEY_WRAPPER_PREFIX + currentSlot, wrapperInput.value);
+        localStorage.setItem(STORAGE_KEY_SLOT, String(currentSlot));
       } catch (e) {
-        console.warn('CSS設定のlocalStorageへの保存に失敗しました', e);
+        console.warn('Preview設定のlocalStorageへの保存に失敗しました', e);
       }
     }
 
-    // 現在選択中のCSSプリセット（'inline' or 'external'）
-    let currentCssPreset = 'inline';
-    const presetInlineBtn = document.getElementById('preset-inline-btn');
-    const presetExternalBtn = document.getElementById('preset-external-btn');
-    const cssModeHint = document.getElementById('css-mode-hint');
-
-    function applyCssPreset(preset, options = {}) {
-      currentCssPreset = preset;
-      // ボタンの見た目を切り替え
-      presetInlineBtn.classList.toggle('active', preset === 'inline');
-      presetExternalBtn.classList.toggle('active', preset === 'external');
-
-      // ボタンクリックによる明示的な切り替え時のみ、wrapper側のテンプレを差し替える
-      // （復元時は保存済みのwrapper内容をそのまま尊重したいので、ここではスキップできるようにしてある）
-      if (!options.skipTemplateSwap) {
-        wrapperInput.value = (preset === 'inline') ? defaultWrapper : defaultWrapperExternal;
-      }
-      updateCssModeHint();
-      saveCssSettings();
-    }
-
-    // 外部ファイル参照モードの時、wrapper-input内の<link>タグから参照先を検出して表示する
-    // （css-input欄が使われないことも併せて明示）
-    function updateCssModeHint() {
-      if (currentCssPreset !== 'external') {
-        cssModeHint.classList.add('hidden');
-        return;
-      }
-      cssModeHint.classList.remove('hidden');
-
-      // cdnjs（highlight.js用）以外のstylesheetリンクを「参照中のファイル」とみなす
-      const matches = [...wrapperInput.value.matchAll(/<link[^>]*href=["']([^"']+)["'][^>]*>/g)];
-      const hrefs = matches.map(m => m[1]).filter(h => !h.includes('cdnjs.cloudflare.com'));
-      const href = hrefs.length ? hrefs[hrefs.length - 1] : null;
-
-      cssModeHint.textContent = href
-        ? `🔗 参照中: ${href} （下のCSS欄の内容はPreviewに反映されません）`
-        : '⚠️ wrapper内に外部CSSの<link>タグが見つかりません（下のCSS欄の内容もPreviewに反映されません）';
+    // 枠を切り替える。切替前の枠は保存済みなので、各枠の内容は互いに影響しない
+    function selectSlot(slot) {
+      currentSlot = slot;
+      for (const n of [1, 2]) slotBtns[n].classList.toggle('active', n === slot);
+      let saved = null;
+      try { saved = localStorage.getItem(STORAGE_KEY_WRAPPER_PREFIX + slot); } catch (e) { }
+      wrapperInput.value = saved !== null ? saved : defaultWrappers[slot];
+      try { localStorage.setItem(STORAGE_KEY_SLOT, String(slot)); } catch (e) { }
     }
 
     // 予備欄（避難用メモ）はメイン欄・モードとは独立して保存する
@@ -272,12 +248,7 @@ mark { background-color: #fff176; }
     }
     draftInput.addEventListener('input', saveDraftState);
 
-    // CSS欄・wrapper欄を手動で編集した場合も保存する
-    cssInput.addEventListener('input', saveCssSettings);
-    wrapperInput.addEventListener('input', () => {
-      updateCssModeHint();
-      saveCssSettings();
-    });
+    wrapperInput.addEventListener('input', saveSettings);
 
     // デフォルトは3スペース固定インデント（オプション化されていないため上書き）。
     // ハイフンリストは2スペース、番号付きリストは4スペース固定でインデントする。
@@ -307,8 +278,7 @@ mark { background-color: #fff176; }
     });
 
     // 初期化
-    cssInput.value = defaultCSS;
-    wrapperInput.value = defaultWrapper;
+    wrapperInput.value = defaultWrappers[1];
 
     // 変換方向（'md2html' or 'html2md'）
     let currentMode = 'md2html';
@@ -386,9 +356,9 @@ mark { background-color: #fff176; }
     }
     settingsBtn.addEventListener('click', () => toggleSettings());
     function resetSettings() {
-      if (!confirm('CSS欄とHTML欄を初期値に戻します。よろしいですか？')) return;
-      cssInput.value = defaultCSS;
-      applyCssPreset('inline'); // wrapperも初期化して保存まで行う
+      if (!confirm(`設定${currentSlot}を初期値に戻します。よろしいですか？`)) return;
+      wrapperInput.value = defaultWrappers[currentSlot];
+      saveSettings();
     }
 
     // 上部バーの高さをCSS変数に反映（入力欄の高さ・設定パネル・左ドロワーの位置に使う）
@@ -515,11 +485,8 @@ mark { background-color: #fff176; }
 
     function openPreview() {
       const markdownHTML = marked.parse(input.value);
-      const userCSS = cssInput.value;
-      let fullHTML = wrapperInput.value;
-      // プレースホルダーの置換
-      fullHTML = fullHTML.replaceAll('{{css}}', userCSS);
-      fullHTML = fullHTML.replaceAll('{{content}}', markdownHTML);
+      // 置換文字列中の$&等が特殊解釈されないよう関数で置換する
+      const fullHTML = wrapperInput.value.replaceAll('{{content}}', () => markdownHTML);
       const previewWin = window.open('', 'previewWin', 'width=800,height=600');
       previewWin.document.write(fullHTML);
       previewWin.document.close();
@@ -587,20 +554,8 @@ mark { background-color: #fff176; }
           draftInput.value = savedDraft;
         }
 
-        // CSS欄・wrapper欄・プリセット選択の復元
-        const savedPreset = localStorage.getItem(STORAGE_KEY_CSS_PRESET);
-        const savedCss = localStorage.getItem(STORAGE_KEY_CSS);
-        const savedWrapper = localStorage.getItem(STORAGE_KEY_WRAPPER);
-
-        if (savedCss !== null) {
-          cssInput.value = savedCss;
-        }
-        if (savedWrapper !== null) {
-          wrapperInput.value = savedWrapper;
-        }
-        // ボタンの見た目・ヒント表示だけ復元し、wrapperの中身は保存されていたものをそのまま尊重する
-        // （skipTemplateSwap: trueで、テンプレの強制上書きを防ぐ）
-        applyCssPreset(savedPreset === 'external' ? 'external' : 'inline', { skipTemplateSwap: true });
+        // 選択中の枠と、その枠の内容を復元
+        selectSlot(localStorage.getItem(STORAGE_KEY_SLOT) === '2' ? 2 : 1);
 
         updateOutput();
       } catch (e) {
@@ -618,7 +573,7 @@ mark { background-color: #fff176; }
     const syncBanner = document.getElementById('sync-banner');
     const watchedStorageKeys = [
       STORAGE_KEY_CONTENT, STORAGE_KEY_MODE, STORAGE_KEY_DRAFT,
-      STORAGE_KEY_CSS, STORAGE_KEY_WRAPPER, STORAGE_KEY_CSS_PRESET
+      STORAGE_KEY_WRAPPER_PREFIX + '1', STORAGE_KEY_WRAPPER_PREFIX + '2', STORAGE_KEY_SLOT
     ];
 
     window.addEventListener('storage', (e) => {
