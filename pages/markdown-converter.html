@@ -24,8 +24,8 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
   <link rel="stylesheet" href="page-common.css">
   <link rel="stylesheet" href="markdown-converter.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js" integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/turndown@7.2.4/dist/turndown.js" integrity="sha384-VRHmZZ8b5mH5yknWcg48OJS6RmXZmlgvsqhOXJqY0rwvwirs1M12xd+49c3NpW6a" crossorigin="anonymous"></script>
   <script src="page-layout.js" defer></script>
 
   <!-- Google tag (gtag.js) -->
@@ -67,7 +67,7 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
     <div class="right-tools">
       <button type="button" class="btn-preview" id="preview-btn" onclick="openPreview()">Preview</button>
       <button type="button" class="btn-copy" id="copy-btn" onclick="copyToClipboard()"><span class="btn-label">Copy
-          HTML</span><span class="btn-done" aria-hidden="true">✓</span></button>
+          HTML</span><span class="btn-done" aria-hidden="true">✓ Copied</span></button>
       <button type="button" class="icon-btn" id="settings-btn" title="Preview設定（CSS / HTML）。もう一度押すと閉じる"
         aria-expanded="false">Settings</button>
     </div>
@@ -144,14 +144,14 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
     <title>HTML Preview</title>
     <link rel="stylesheet" href="https://sasasakaz.github.io/pages/page-common.css">
     <!-- syntax highlighter start -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer><\/script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous" defer><\/script>
     <script>
       // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
       window.addEventListener('DOMContentLoaded', () => {
         hljs.highlightAll();
       });
     <\/script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css" integrity="sha384-BE+nmfgoK1j3fBxbLI64Jzf52Mx/QAyw+4O7GyPYevJnAyrljCoRtQkYNfCfuWPF" crossorigin="anonymous">
     <!-- syntax highlighter end -->
 </head>
 <body>
@@ -180,8 +180,8 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       .post-body th { padding: 12px 8px; font-weight: bold; text-align: left; background-color: #e8f4fc; color: #2b5b84; white-space: nowrap; }
       .post-body td { padding: 16px 8px; text-align: left; vertical-align: top; }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"><\/script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css" integrity="sha384-BE+nmfgoK1j3fBxbLI64Jzf52Mx/QAyw+4O7GyPYevJnAyrljCoRtQkYNfCfuWPF" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"><\/script>
 </head>
 <body>
   <div class="post-body">
@@ -488,8 +488,18 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       // 置換文字列中の$&等が特殊解釈されないよう関数で置換する
       const fullHTML = wrapperInput.value.replaceAll('{{content}}', () => markdownHTML);
       const previewWin = window.open('', 'previewWin', 'width=800,height=600');
-      previewWin.document.write(fullHTML);
+      if (!previewWin) return;
+      previewWin.opener = null;
+      // 外枠は固定の最小HTML。ユーザーのHTMLは allow-same-origin なしのsandbox iframeで動かし、
+      // このサイトのlocalStorage等から隔離する（スクリプト自体は動く）
+      previewWin.document.open();
+      previewWin.document.write('<!DOCTYPE html><meta charset="utf-8"><title>Preview</title>'
+        + '<style>html,body{margin:0;height:100%}iframe{border:0;width:100%;height:100%}</style>');
       previewWin.document.close();
+      const frame = previewWin.document.createElement('iframe');
+      frame.setAttribute('sandbox', 'allow-scripts');
+      frame.srcdoc = fullHTML;
+      previewWin.document.body.appendChild(frame);
     }
 
 

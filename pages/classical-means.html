@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classical Comparison of Means</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/classical-means.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="5群までの平均の差を、Welch ANOVA・Welchのt検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Means.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Classical Comparison of Means">
+  <meta property="og:description" content="5群までの平均の差を、Welch ANOVA・Welchのt検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Means.">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/classical-means.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+  <link rel="stylesheet" href="page-common.css">
+  <link rel="stylesheet" href="classical-means.css">
+  <script src="page-layout.js" defer></script>
+  <script src="classical-means-py.js" defer></script>
+  <script src="classical-means.js" defer></script>
+
+  <script>
+    try {
+      var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}');
+      if (s.left) document.documentElement.classList.add('left-closed');
+      if (s.right) document.documentElement.classList.add('right-closed');
+    } catch (e) { }
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
+</head>
+
+<body class="layout-3col">
+  <div class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+    <button type="button" id="btn-right" class="topbar-btn" aria-controls="page-toc" aria-expanded="true"></button>
+  </div>
+  <div id="side-backdrop" class="side-backdrop"></div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <header id="header">
+        <h1>Classical Comparison of Means</h1>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差の古典的な検定（Welch ANOVA・Welchのt検定・多重比較・信頼区間）ができます。</p>
+        <div class="mdc-note-box">
+          <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
+          <p>各群のデータを数値で入力してください。カンマ、スペース、改行で区切って入力できます。</p>
+        </div>
+      </header>
+
+      <div class="input-area">
+        <div id="group-inputs" class="input-fields">
+          <div class="sample-buttons">
+            <button id="sample-button" class="btn-secondary" type="button">⚡️ Sample Data</button>
+            <button id="clear-button" class="btn-secondary" type="button">🗑️ Clear All</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirm-run">
+        <div class="confirm-table-wrap">
+          <table id="confirmation-table" class="summary-table">
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>N</th>
+                <th>Mean</th>
+                <th>Std</th>
+                <th>Min</th>
+                <th>Max</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr data-group="A">
+                <th scope="row">Group A</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="B">
+                <th scope="row">Group B</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="C">
+                <th scope="row">Group C</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="D">
+                <th scope="row">Group D</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr data-group="E">
+                <th scope="row">Group E</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="run-box">
+          <button id="run-button" class="btn-primary" type="button" title="検定実行" disabled>🚀 Test</button>
+          <div class="parameter-select">
+            <label for="alpha-select">有意水準 α</label>
+            <select id="alpha-select">
+              <option value="0.05" selected>0.05（95%CI）</option>
+              <option value="0.01">0.01（99%CI）</option>
+              <option value="0.1">0.10（90%CI）</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="running-message" class="mdc-warn-box running-message" role="status" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <p id="running-message-text"></p>
+      </div>
+      <div id="completion-message" class="mdc-info-box" role="status" aria-live="polite" hidden>
+        <p>検定完了！ 以下の結果を確認してください。</p>
+      </div>
+      <div id="initial-message" class="mdc-info-box initial-message" role="status">
+        <p>検定を実行すると、以下に結果が表示されます</p>
+      </div>
+      <div id="error-message" class="mdc-alert-box" role="alert" hidden>
+        <p id="error-message-text"></p>
+      </div>
+
+      <div id="results">
+        <h2 id="result-group">各群の平均と信頼区間</h2>
+        <ul>
+          <li>各群の平均値と、平均に対する信頼区間（t分布を用いた区間）です。</li>
+          <li>群ごとに個別に求めた区間なので、群間の差の有無はこの図だけでは判断できません。差の検定は以降のWelchのt検定を参照してください。</li>
+        </ul>
+        <div class="table-wrap" id="group-table"></div>
+        <div id="group-chart"></div>
+
+        <h2 id="result-omni">全体の検定（Welch ANOVA）</h2>
+        <ul>
+          <li>帰無仮説: 全群の平均が等しい。等分散を仮定しない検定です。</li>
+        </ul>
+        <div id="omni-summary"></div>
+        <div id="omni-skipped" class="mdc-info-box" hidden>
+          <p>2群のため、全体の検定は以降のWelchのt検定と同じです。</p>
+        </div>
+
+        <h2 id="result-pair">2群ごとの平均の差の検定（Welchのt検定）</h2>
+        <ul>
+          <li>全ペアでWelchのt検定を行います。差分は「後の群 − 前の群」です（例: B - A）。</li>
+          <li>群の順序は入力順です。先頭をControl、以降をTestとみなすと解釈しやすいです。</li>
+        </ul>
+
+        <h3 id="result-pair-p">t値とp値</h3>
+        <p>有意なp値は黄色で表示します。</p>
+        <div class="table-wrap" id="pair-t-table"></div>
+
+        <h3 id="result-pair-chart">平均の差の信頼区間（未補正）</h3>
+        <div id="pair-chart"></div>
+        <div class="mdc-warn-box">
+          <p>3群以上では、この信頼区間は多重比較の補正をしていない点に注意してください。</p>
+        </div>
+
+        <div id="pair-section">
+          <h3 id="result-pair-adj">多重比較の補正（3群以上）</h3>
+          <ul>
+            <li><strong>Bonferroni / Holm</strong>: 1つでも偽陽性を出す確率（FWER）を抑えます。HolmはBonferroniより検出力が高いです。</li>
+            <li><strong>Benjamini-Hochberg（BH）</strong>: 有意とされたもののうち偽陽性が占める割合（FDR）を抑えます。FWERほど厳しくありません。</li>
+          </ul>
+          <div class="table-wrap" id="pair-adj-table"></div>
+        </div>
+        <div id="pair-skipped" class="mdc-info-box" hidden>
+          <p>2群のため、多重比較の補正は不要です。</p>
+        </div>
+      </div>
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
+  </div>
+</body>
+
+</html>

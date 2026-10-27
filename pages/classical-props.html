@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Classical Comparison of Proportions</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/classical-props.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="5群までの比率の差を、カイ二乗検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Proportions.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Classical Comparison of Proportions">
+  <meta property="og:description" content="5群までの比率の差を、カイ二乗検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Proportions.">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/classical-props.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+  <link rel="stylesheet" href="page-common.css">
+  <link rel="stylesheet" href="classical-props.css">
+
+  <script src="page-layout.js" defer></script>
+  <script src="classical-props-py.js" defer></script>
+  <script src="classical-props.js" defer></script>
+
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page-layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
+</head>
+
+<body class="layout-3col">
+  <div class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+    <button type="button" id="btn-right" class="topbar-btn" aria-controls="page-toc" aria-expanded="true"></button>
+  </div>
+  <div id="side-backdrop" class="side-backdrop"></div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <header id="header">
+        <h1>Classical Comparison of Proportions</h1>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。比率の差の古典的な検定（カイ二乗検定・多重比較・信頼区間）ができます。</p>
+        <div class="mdc-note-box">
+          <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
+          <ul>
+            <li>Sample Size: ユーザー数や送信者数などの分母</li>
+            <li>Events: コンバージョン数や購入者数などの分子</li>
+          </ul>
+        </div>
+      </header>
+
+      <!-- 入力エリア: 広いときは [分母][分子] の右にボタンを縦に2つ、狭いときは入力欄の下にボタンを横に並べる -->
+      <div class="input-area">
+        <div class="input-fields">
+          <div class="input-group">
+            <label for="denoms">Sample Size</label>
+            <textarea id="denoms" rows="5" autocomplete="off" placeholder="1000 2000 1500 ..."></textarea>
+          </div>
+          <div class="input-group">
+            <label for="numers">Events</label>
+            <textarea id="numers" rows="5" autocomplete="off" placeholder="70 120 95 ..."></textarea>
+          </div>
+        </div>
+
+        <div class="sample-buttons">
+          <button type="button" id="sample-button" class="btn-secondary">⚡️ Sample Data</button>
+          <button type="button" id="clear-button" class="btn-secondary">🗑️ Clear All</button>
+        </div>
+      </div>
+
+      <div class="confirm-run">
+        <div class="confirm-table-wrap">
+          <table id="confirmation-table">
+            <thead>
+              <tr>
+                <th>Group</th>
+                <th>Sample Size</th>
+                <th>Events</th>
+                <th>%</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Group A</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group B</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group C</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group D</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+              <tr>
+                <th scope="row">Group E</th>
+                <td></td>
+                <td></td>
+                <td></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="run-box">
+          <button type="button" onclick="runClassicalTest();" class="btn-primary" id="run-button" title="検定実行"
+            disabled>🚀 Test</button>
+          <div class="parameter-select">
+            <label for="alpha-select">有意水準 α</label>
+            <select id="alpha-select">
+              <option value="0.05" selected>0.05（95%CI）</option>
+              <option value="0.01">0.01（99%CI）</option>
+              <option value="0.1">0.10（90%CI）</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div id="running-message" class="mdc-warn-box running-message" role="status" aria-live="polite" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <p id="running-message-text"></p>
+      </div>
+      <div id="completion-message" class="mdc-info-box" role="status" aria-live="polite" hidden>
+        <p>検定完了！ 以下の結果を確認してください</p>
+      </div>
+
+      <div id="initial-message" class="mdc-info-box initial-message" role="status">
+        <p>検定を実行すると、以下に結果が表示されます</p>
+      </div>
+      <div id="error-message" class="mdc-alert-box" role="alert" hidden>
+        <p>検定失敗: ネットワーク環境などを確認してもう一度試してみてにゃん</p>
+      </div>
+
+
+
+      <div id="results">
+        <h2 id="result-omni">全体の検定（Pearsonのカイ二乗検定）</h2>
+        <ul>
+          <li>帰無仮説: 全群の比率が等しい。</li>
+          <li>信頼区間は各群の比率に対するWilson区間です。</li>
+        </ul>
+
+        <h3 id="result-omni-test">検定結果</h3>
+        <div id="omni-summary"></div>
+
+        <h3 id="result-omni-ci">各群の比率と信頼区間</h3>
+        <div id="omni-table"></div>
+        <div id="omni-chart"></div>
+
+        <h2 id="result-pair">2群ごとの比率の差の検定</h2>
+        <div id="pair-skipped" class="mdc-info-box" hidden>
+          <p>2群のため、2群ごとの検定は上記の全体の検定と同じです。</p>
+        </div>
+
+        <div id="pair-section">
+          <ul>
+            <li><strong>補正なし</strong>: 各ペアをPearsonカイ二乗検定（連続性補正なし）。比率の差のCIはWald区間。<strong>多重比較を考慮していない</strong>ので、群数が増えるほど「偽陽性」が出やすくなります（あえて比較用に掲載）。</li>
+            <li><strong>Bonferroni / Holm / Benjamini-Hochberg(BH)</strong>: 上記のp値を補正したものです（BHはFDR制御）。</li>
+            <li><strong>Tukey-Kramer</strong>: 本来は平均の比較手法です。ここでは0/1データとして、要約値（群の比率と分母）から等分散を仮定したTukey-Kramerを計算しています。近似である点に注意してください。</li>
+            <li>同時信頼区間: Bonferroni（α/ペア数）とTukeyの同時CIも併記します。</li>
+          </ul>
+
+          <h3 id="result-pair-p">p値</h3>
+          <p id="pair-count"></p>
+          <p>有意なp値は黄色で表示します。diff A - B: A群の比率からB群の比率を差し引いた値です。</p>
+          <div id="pair-p-table"></div>
+
+          <h3 id="result-pair-ci">差の信頼区間</h3>
+          <div id="pair-ci-table"></div>
+
+          <h3 id="result-pair-chart">差の信頼区間の比較（補正なし / Bonferroni / Tukey）</h3>
+          <div id="pair-chart"></div>
+        </div>
+      </div>
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
+  </div>
+</body>
+
+</html>
