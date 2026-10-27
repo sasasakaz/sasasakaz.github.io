@@ -3,7 +3,7 @@
 /* =====================================================================
    色の定義（色を変えたいときは、ここだけ直せば全ページに反映される）
    ・用途を限定しない名前にしてある（使い道はコメントを参照）
-   ・ツール系ページの専用CSS（page_common.css の後に読み込むもの）からも使う
+   ・ツール系ページの専用CSS（page-common.css の後に読み込むもの）からも使う
    ===================================================================== */
 :root {
   /* ブランド（primary青系） */
@@ -59,6 +59,14 @@
   /* 派生色（hoverなど）。black を white にすると「少し明るく」に変わる */
   --c-brand-vivid-hover: color-mix(in srgb, var(--c-brand-vivid) 85%, black);
   --c-accent-hover: color-mix(in srgb, var(--c-accent) 85%, black);
+
+  /* フォント。差し替えたいときは、ここだけ直せば全ページに反映される。
+     本文: Macのシステム欧文 → Windowsの欧文 → 日本語の端末フォント → 汎用。
+     Webフォントに移行するときは、先頭に "Noto Sans JP" などを足す。
+     ヒラギノは ProN を先にする（Chrome で "Hiragino Sans" を先にすると W4 が当たり、他より太く見えたため。ProN は W3）。 */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol";
+  /* コード: 等幅の端末フォント */
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace;
 }
 
 /* すべての要素でサイズ計算を正確にする */
@@ -67,7 +75,9 @@
 }
 
 body {
-  font-family: "Open Sans", verdana, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol";
+  font-family: var(--font-sans);
+  /* 和文と英数字の間に、ブラウザが小さなスペースを自動で入れる（非対応のブラウザは無視するだけ） */
+  text-autospace: normal;
   /* 文字色：真っ黒より少しだけ優しい黒 */
   color: var(--c-text);
   /* 行間（日本語の長文を読みやすくする）。表・見出し・コードなど、別の値が合うものは個別に指定する */
@@ -81,6 +91,20 @@ body {
 
 html {
   scroll-behavior: smooth;
+}
+
+/* コード用フォント。フォント名を指定すると、ブラウザ既定の「等幅は少し小さく表示」が効かなくなるため、大きさをここで合わせる */
+pre,
+code,
+kbd,
+samp {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+}
+
+pre code {
+  font-size: 1em;
+  /* pre の中の code は二重に小さくしない */
 }
 
 
@@ -110,16 +134,28 @@ ol {
 /* 入れ子のリストは、外側のリストの一部として余白なし */
 li>ul,
 li>ol {
+  margin-top: 0;
   margin-bottom: 0;
 }
 
+/* li 同士の余白。最初の li には付かない（2つ目以降の上だけ）。
+   行間 1.8 で折り返し行は広めなので、「次の項目に移った」ことが分かる程度の差にしてある */
+li+li {
+  margin-top: 0.4em;
+}
+
+/* 入れ子の中の li は半分 */
+li li+li {
+  margin-top: 0.2em;
+}
 
 
 /* 見出しは折り返したときに間延びしないよう、本文より詰める */
 h1,
 h2,
 h3,
-h4 {
+h4,
+h5 {
   line-height: 1.4;
 }
 
@@ -130,14 +166,11 @@ h1 {
 
 h2 {
   font-size: 1.75em;
-  color: var(--c-brand-dark);
-  /* 濃いネイビー */
-  border-left: 6px solid var(--c-brand);
-  /* 太い左線 */
-  background-color: var(--c-brand2-1);
-  /* うすい背景色 */
-  padding: 0.4em 0.7em;
-  border-radius: 0 4px 4px 0;
+  color: #fff;
+  /* 濃い塗りに白文字 */
+  background-color: var(--c-brand);
+  padding: 0.45em 0.8em;
+  border-radius: 4px;
   margin-top: 3.0em;
   margin-bottom: 0.6em;
 }
@@ -156,21 +189,24 @@ h3 {
 h4 {
   font-size: 1.2em;
   color: var(--c-brand-dark);
-  border-left: 3px solid var(--c-brand-light);
-  padding-left: 0.5em;
+  border-bottom: 2px solid var(--c-brand-light);
+  /* 下線型。h3（左線＋背景）と形を変える */
+  padding: 0 0 0.25em;
   margin-top: 2em;
-  margin-bottom: 0em;
-  /* 下はゼロにする */
+  margin-bottom: 0.4em;
 }
 
-
-/* h4の直後は少し上に詰める */
-h4+ul,
-h4+ol,
-h4+p {
-  margin-top: 0.8em;
+/* h5: 用語などの小見出し。目次には出ない */
+h5 {
+  font-size: 1.1em;
+  font-weight: bold;
+  color: var(--c-brand);
+  border-bottom: 1px solid var(--c-brand2-3);
+  /* h4 より細く薄い下線 */
+  padding: 0 0 0.15em;
+  margin-top: 1.6em;
+  margin-bottom: 0.3em;
 }
-
 
 
 /* 画像が親要素を突き抜けないように */
@@ -369,39 +405,6 @@ td {
 }
 
 
-
-
-/* 用語集の見出し */
-.term {
-  /* font-weight: bold; */
-  font-size: 1.1em;
-  color: var(--c-brand);
-  margin: 1.2em 0 .2em;
-
-  /* 左線の装飾 */
-  /* border-left: 3.5px solid #4a5568;
-  padding-left: 0.6em; */
-}
-
-/* 用語集の先頭の絵文字 */
-.term::before {
-  content: "🦊";
-  margin-right: 0.4em;
-  /* アイコンと文字の間の隙間 */
-  font-size: 0.9em;
-  vertical-align: 0.05em;
-}
-
-
-/* 用語集の見出しの直後のulは少し上に詰める */
-.term+ul,
-.term+ol,
-.term+p {
-  margin-top: .2em;
-}
-
-
-
 /* 日付エリア全体（控えめな薄いグレー＆小ぶりなフォント） */
 .entry-meta {
   display: flex;
@@ -440,9 +443,6 @@ td {
 }
 
 
-
-
-
 .references p {
   font-size: 0.9em;
   line-height: 1.4;
@@ -452,8 +452,6 @@ td {
 .reference-label {
   font-weight: bold;
 }
-
-
 
 
 /* =====================================================================
@@ -479,7 +477,6 @@ td {
        メイン幅が足りない／画面幅いっぱい使いたいページ向け。本文の上限は既定 960px。
        変えたいページは <style> で .layout-3col { --l3-content-max: ... } を上書きする。
      ・1150px未満: 標準もドロワーとして動く。
-     ・l3-2col は l3-drawer の旧名（移行用の別名）。全ページを置き換えたら、このファイルとJSの l3-2col を消してよい。
 
    ■ 本文の幅（標準）
      ・--l3-content-max … 中央カラムの外枠（左線・左右の余白を含む）の上限
@@ -487,7 +484,7 @@ td {
      ・文字の幅 ＝ --l3-content-max − --l3-content-pad × 2 − 1px（左線）
        → 既定は 780px − 40px × 2 − 1px ≒ 700px（16px で約43字）
 
-   ※ブレークポイント(1150px)は page_layout.js の WIDE_QUERY と揃えること。
+   ※ブレークポイント(1150px)は page-layout.js の WIDE_QUERY と揃えること。
      目安 = 中央の最低幅 + (側幅 + 余白)×2 + 端の余白(2rem) + スクロールバー(約17) + 余裕
    ===================================================================== */
 
@@ -517,7 +514,7 @@ td {
 
 /* ドロワー型の既定。:where() で詳細度を 0 にしてあるので、ページ側の <style> の
    .layout-3col { --l3-content-max: ... } で上書きできる。 */
-.layout-3col:where(.l3-drawer, .l3-2col) {
+.layout-3col:where(.l3-drawer) {
   --l3-content-max: 960px;
   --l3-content-pad: 0px;
 }
@@ -538,7 +535,7 @@ td {
   border-bottom: 1px solid var(--c-brand2-3);
 }
 
-/* 開閉ボタン（中身のSVGアイコンは page_layout.js が入れる） */
+/* 開閉ボタン（中身のSVGアイコンは page-layout.js が入れる） */
 .layout-3col .topbar-btn {
   position: relative;
   flex: none;
@@ -631,7 +628,7 @@ td {
   white-space: nowrap;
 }
 
-/* 目次（#page-toc）がないページ: ページ名は、本文の h1 が上部バーの下に隠れたときだけ表示する（page_layout.js が .is-visible を付ける）。
+/* 目次（#page-toc）がないページ: ページ名は、本文の h1 が上部バーの下に隠れたときだけ表示する（page-layout.js が .is-visible を付ける）。
    ・display ではなく opacity/visibility で切り替えるので、バーの高さは変わらない。
    ・目次があるページは、章名を常に表示する（切り替えなし）。 */
 .layout-3col:where(:not(:has(#page-toc))) .topbar-title {
@@ -652,7 +649,6 @@ td {
 }
 
 
-
 /* ---------- ドロワー（基本形） ----------
    左右カラムは、閉じた状態から、ボタンで本文に重ねて開く。
    ・1150px未満の全ページと、ドロワー型（C/D）の全画面幅で使う。
@@ -669,7 +665,7 @@ td {
 }
 
 /* 標準の狭い画面: 左右の余白ぶんを引いて、広い画面と文字の幅をそろえる */
-.layout-3col:where(:not(.l3-drawer, .l3-2col)) #content {
+.layout-3col:where(:not(.l3-drawer)) #content {
   max-width: calc(var(--l3-content-max) - 2 * var(--l3-content-pad));
 }
 
@@ -733,13 +729,13 @@ html.right-open .layout-3col .side-backdrop {
 @media (min-width: 1150px) {
 
   /* 閉じた側は非表示にするだけで、列の幅は残す（本文の幅と位置が変わらないようにする） */
-  html.left-closed .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-left,
-  html.right-closed .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-right {
+  html.left-closed .layout-3col:where(:not(.l3-drawer)) .side-left,
+  html.right-closed .layout-3col:where(:not(.l3-drawer)) .side-right {
     display: none;
   }
 
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .layout,
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar {
+  .layout-3col:where(:not(.l3-drawer)) .layout,
+  .layout-3col:where(:not(.l3-drawer)) .topbar {
     display: grid;
     grid-template-columns: var(--l3-left-w) minmax(0, 1fr) var(--l3-right-w);
     width: 100%;
@@ -749,7 +745,7 @@ html.right-open .layout-3col .side-backdrop {
   }
 
   /* 上部バー: 全体幅のうち、中央カラムの範囲だけに背景と下線を引き、ボタンを左右端に置く */
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar {
+  .layout-3col:where(:not(.l3-drawer)) .topbar {
     grid-template-rows: var(--l3-topbar-h);
     gap: 0;
     background: none;
@@ -758,7 +754,7 @@ html.right-open .layout-3col .side-backdrop {
     /* 左右カラムの上はクリックを素通しさせる */
   }
 
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar::before {
+  .layout-3col:where(:not(.l3-drawer)) .topbar::before {
     content: "";
     grid-column: 2;
     grid-row: 1;
@@ -768,7 +764,7 @@ html.right-open .layout-3col .side-backdrop {
     border-bottom: 1px solid var(--c-brand2-3);
   }
 
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar>* {
+  .layout-3col:where(:not(.l3-drawer)) .topbar>* {
     grid-column: 2;
     grid-row: 1;
     align-self: center;
@@ -776,17 +772,17 @@ html.right-open .layout-3col .side-backdrop {
   }
 
   /* ボタンは、本文の文字の端にアイコンの線をそろえる（ボタン内のアイコンの余白は左右 8px、左線は 1px） */
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) #btn-left {
+  .layout-3col:where(:not(.l3-drawer)) #btn-left {
     justify-self: start;
     margin-left: calc(var(--l3-content-pad) - 7px);
   }
 
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) #btn-right {
+  .layout-3col:where(:not(.l3-drawer)) #btn-right {
     justify-self: end;
     margin-right: calc(var(--l3-content-pad) - 8px);
   }
 
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .topbar-title {
+  .layout-3col:where(:not(.l3-drawer)) .topbar-title {
     justify-self: center;
     margin-right: 0;
     /* grid では中央にそろうので、右ボタンがなくても補正しない */
@@ -794,7 +790,7 @@ html.right-open .layout-3col .side-backdrop {
   }
 
   /* 本文: 左右に余白を取る。左線は常に 1px 確保して、色だけ切り替える（開閉で幅がずれない） */
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) #content {
+  .layout-3col:where(:not(.l3-drawer)) #content {
     grid-column: 2;
     min-width: 0;
     max-width: none;
@@ -804,12 +800,12 @@ html.right-open .layout-3col .side-backdrop {
   }
 
   /* 左カラムが開いているとき: 本文の左端に薄い線を引く（本文と同じ高さまで続く） */
-  html:not(.left-closed) .layout-3col:where(:not(.l3-drawer, .l3-2col)) #content {
+  html:not(.left-closed) .layout-3col:where(:not(.l3-drawer)) #content {
     border-left-color: var(--c-border);
   }
 
   /* 左右カラム: スクロールに追随（ドロワー基本形を打ち消す） */
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side {
+  .layout-3col:where(:not(.l3-drawer)) .side {
     position: sticky;
     top: 1rem;
     bottom: auto;
@@ -828,12 +824,12 @@ html.right-open .layout-3col .side-backdrop {
     transition: none;
   }
 
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-left {
+  .layout-3col:where(:not(.l3-drawer)) .side-left {
     grid-column: 1;
     justify-self: start;
   }
 
-  .layout-3col:where(:not(.l3-drawer, .l3-2col)) .side-right {
+  .layout-3col:where(:not(.l3-drawer)) .side-right {
     grid-column: 3;
     justify-self: end;
     border-left: 1px solid var(--c-border);

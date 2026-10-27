@@ -52,23 +52,56 @@ const groupInputs = document.getElementById("group-inputs");
 GROUPS.forEach(name => {
   const group = document.createElement("div");
   group.className = `input-group group-${name.toLowerCase()}`;
+  const header = document.createElement("div");
+  header.className = "input-group-header";
   const label = document.createElement("label");
   label.htmlFor = `group-${name}`;
   label.textContent = `Group ${name}`;
+  const clearButton = document.createElement("button");
+  clearButton.id = `clear-group-${name}`;
+  clearButton.className = "input-clear-button";
+  clearButton.type = "button";
+  clearButton.textContent = "×";
+  clearButton.setAttribute("aria-label", `Group ${name} のデータをクリア`);
+  clearButton.hidden = true;
   const textarea = document.createElement("textarea");
   textarea.id = `group-${name}`;
   textarea.name = `group-${name}`;
   textarea.placeholder = PLACEHOLDER_DATA[GROUPS.indexOf(name)] ?? "";
   textarea.setAttribute("aria-label", `Group ${name} のデータ`);
-  textarea.addEventListener("input", updateConfirmationTable);
-  group.append(label, textarea);
+  textarea.addEventListener("input", () => {
+    updateInputClearButton(name);
+    updateConfirmationTable();
+  });
+  clearButton.addEventListener("click", () => {
+    textarea.value = "";
+    updateInputClearButton(name);
+    updateConfirmationTable();
+    textarea.focus();
+  });
+  header.append(label, clearButton);
+  group.append(header, textarea);
   groupInputs.appendChild(group);
 });
 groupInputs.appendChild(groupInputs.querySelector(".sample-buttons"));
 
+function updateInputClearButton(name) {
+  const textarea = document.getElementById(`group-${name}`);
+  const clearButton = document.getElementById(`clear-group-${name}`);
+  clearButton.hidden = textarea.value.trim() === "";
+}
+
 document.getElementById("sample-button").addEventListener("click", () => {
+  const hasInput = GROUPS.some(name =>
+    document.getElementById(`group-${name}`).value.trim() !== ""
+  );
+  if (hasInput && !window.confirm("入力データをサンプルデータで置き換えます。よろしいですか？")) {
+    return;
+  }
+
   GROUPS.forEach((name, index) => {
     document.getElementById(`group-${name}`).value = SAMPLE_DATA[index];
+    updateInputClearButton(name);
   });
   updateConfirmationTable();
 });
@@ -81,6 +114,7 @@ document.getElementById("clear-button").addEventListener("click", () => {
 
   GROUPS.forEach(name => {
     document.getElementById(`group-${name}`).value = "";
+    updateInputClearButton(name);
   });
   clearResults();
   document.getElementById("large-values").hidden = true;

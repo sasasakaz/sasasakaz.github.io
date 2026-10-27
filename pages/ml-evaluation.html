@@ -777,14 +777,13 @@ J 0.10（実際：0）※間違い、空振り
           <tr>
             <td align="left">PR-AUC</td>
             <td align="left">正例を見つける能力に焦点を当てた識別性能</td>
-            <td align="left">購入者を見つけるときに、どれだけ効率よく購入者を拾えるか</td>
+            <td align="left">購入者を見つけるときに、どれだけ効率よく購入者を拾えるか（正例を多く見つけつつ、誤検出を抑えられるか）</td>
           </tr>
         </tbody>
       </table>
-      <p>※効率よく＝正例を多く見つけながら、誤検出をどれだけ抑えられるか</p>
 
       <div class="mdc-note-box">
-        <div class="term">PR-AUCとAverage Precision</div>
+        <p><strong>PR-AUCとAverage Precision</strong></p>
         <p>PR曲線を描いて、その下の面積を全部足し算（積分）した値。その代表的な方法がPR-AUCだけども、「PR-AUC」と「Average Precision（AP）」は同じものとは限らないことに注意。</p>
         <p>
           Precision-Recall曲線の面積を単純に台形公式などで計算する方法と、scikit-learnのaverage_precision_scoreのように、Recallの変化量を重みとしてPrecisionを平均する方法では、結果が異なる場合がある。

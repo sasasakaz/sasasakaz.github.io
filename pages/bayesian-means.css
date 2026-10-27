@@ -89,6 +89,14 @@ body {
   }
 }
 
+.input-group-header {
+  display: flex;
+  align-items: stretch;
+  background-color: var(--c-brand2-2);
+  border: 1px solid var(--c-brand2-3);
+  border-bottom: none;
+}
+
 .input-group label {
   font-size: 0.85rem;
   min-height: 1.5rem;
@@ -100,9 +108,27 @@ body {
   text-align: center;
   flex: 1 0 auto;
   color: var(--c-brand);
-  background-color: var(--c-brand2-2);
-  border: 1px solid var(--c-brand2-3);
-  border-bottom: none;
+}
+
+.input-clear-button {
+  flex: none;
+  min-height: 0;
+  width: 2rem;
+  margin: 0.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: var(--c-text-sub);
+  font-size: 1.25rem;
+  line-height: 1;
+  opacity: 0.65;
+}
+
+.input-clear-button:hover,
+.input-clear-button:focus-visible {
+  background: var(--c-brand2-1);
+  opacity: 1;
 }
 
 textarea,
@@ -136,7 +162,7 @@ summary {
 .btn-secondary {
   padding: 0.5rem 1rem;
   font-size: 1rem;
-  border: 1px solid var(--c-brand);
+  border: 1px solid var(--c-brand2-3);
   border-radius: 0.5rem;
 }
 
@@ -195,6 +221,7 @@ summary {
   background: var(--c-brand2-1);
 }
 
+/* サンプルデータ: 青の塗りボタン（clear all は .btn-secondary のまま） */
 #sample-button {
   background: var(--c-brand-light);
   border-color: var(--c-brand-light);

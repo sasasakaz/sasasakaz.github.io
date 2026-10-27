@@ -199,7 +199,7 @@ input:focus {
 .btn-secondary {
   padding: 0.5rem 1rem;
   font-size: 1rem;
-  border: 1px solid var(--c-brand);
+  border: 1px solid var(--c-brand2-3);
   border-radius: 0.5rem;
 }
 

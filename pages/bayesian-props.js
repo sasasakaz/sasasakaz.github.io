@@ -290,6 +290,11 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // サンプルデータ：値を入れても input イベントは出ないので、確認表は自分で更新する
   document.getElementById('sample-button').addEventListener('click', () => {
+    const hasInput = dArea.value.trim() !== '' || nArea.value.trim() !== '';
+    if (hasInput && !window.confirm('入力データをサンプルデータで置き換えます。よろしいですか？')) {
+      return;
+    }
+
     dArea.value = SAMPLE_DENOMS;
     nArea.value = SAMPLE_NUMERS;
     updateConfirmationTable();

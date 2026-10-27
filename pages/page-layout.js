@@ -6,7 +6,7 @@
  *   2. <head> に <script src="page-layout.js" defer></script> を入れる
  *   3. 本文を <main id="content"> で囲み、左右に <nav id="site-nav"> / <nav id="page-toc"> を置く
  *   4. 標準（下の A/B）のページは、左右の開閉状態を復元する短い <script> を <head> に入れる
- *      （ちらつき防止。ml_for_structured_data.html の <head> のものと同じ。ドロワー型には不要）
+ *      （ちらつき防止。ml-for-structured-data.html の <head> のものと同じ。ドロワー型には不要）
  *
  * 4つの型（詳しくは page-common.css 冒頭）
  *                 目次あり                  目次なし
@@ -15,13 +15,12 @@
  *
  *   ・標準: 広い画面では左右を常設し、閉じても本文の幅と位置は変わらない。狭い画面ではドロワー。
  *   ・ドロワー型: 画面幅に関係なく、左右カラムは閉じた状態から、ボタンで本文に重ねて開く（オーバーレイ）。
- *   ・l3-2col は l3-drawer の旧名（移行用の別名）。
  *
  * 上部バー中央(#topbar-title)の表示
  *   ・目次あり(A/C): いま読んでいる章の名前を出す。
  *   ・目次なし(B/D): 本文の h1 が上部バーの下に隠れたときだけ、ページ名を出す。
  *     対象は「#topbar-title と #content #header h1 の両方があるページ」。どちらかがなければ何もしない
- *     （markdown_converter は #topbar-title を置かないので対象外）。
+ *     （markdown-converter は #topbar-title を置かないので対象外）。
  *     バーに出す文字を変えたいときは <h1 data-topbar-title="短い名前"> にする（なければ h1 の文字を使う）。
  *
  * ページを追加したとき: 下の SITE_NAV に1行足すだけでよい。
@@ -77,10 +76,10 @@
   var mq = window.matchMedia(WIDE_QUERY);
   var state = loadState();
 
-  // ドロワー型(body.l3-drawer。旧名 l3-2col)かどうか。画面幅に関係なく、ドロワー(オーバーレイ)として動かす。
+  // ドロワー型(body.l3-drawer)かどうか。画面幅に関係なく、ドロワー(オーバーレイ)として動かす。
   function isDrawerType() {
     var c = document.body.classList;
-    return c.contains('l3-drawer') || c.contains('l3-2col');
+    return c.contains('l3-drawer');
   }
 
   // 広い画面で左右を並べる（常設する）動作かどうか。標準(A/B)の広い画面だけ true。
