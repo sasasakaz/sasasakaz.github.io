@@ -133,11 +133,17 @@
           <details>
             <summary>推定がうまくいかないとき用</summary>
             <div class="setting-group">
-              <p>
-                <label for="sample-count">Number of sampling times</label>
-                <input type="number" id="sample-count" autocomplete="off" value="10000" step="5000" min="10000"
-                  max="50000" style="text-align: right;">
-              </p>
+              <div class="parameter-select">
+                <span id="sample-count-label">Number of sampling times</span>
+                <div class="stepper">
+                  <button id="sample-count-decrement" class="btn-secondary stepper-button" type="button"
+                    aria-label="サンプリング回数を5000減らす" aria-describedby="sample-count-label">−</button>
+                  <output id="sample-count" class="stepper-value"
+                    for="sample-count-decrement sample-count-increment">10000</output>
+                  <button id="sample-count-increment" class="btn-secondary stepper-button" type="button"
+                    aria-label="サンプリング回数を5000増やす" aria-describedby="sample-count-label">+</button>
+                </div>
+              </div>
               <p>増やしてみるとうまくいく場合もあります（スマホでは処理が重いため増やさない方がいいです）</p>
             </div>
           </details>
@@ -159,40 +165,42 @@
         <p>推定失敗: ネットワーク環境などを確認してもう一度試してみてにゃん</p>
       </div>
 
+
+
       <h2 id="result-summary">全体結果（比率の事後分布）</h2>
       <ul>
         <li>各群の比率がとりそうな値の範囲を表します。</li>
+        <li>Mean（平均）は、各群の比率がとりそうな値を<strong>点</strong>で推定した結果です。</li>
+        <li>94%HDI（Highest Density
+          Interval）は、各群の比率がとりそうな値を<strong>区間</strong>で推定した結果です。下図各群の分布において、密度の高い部分から確率を合計して94%になる範囲を取ってきた両端の値です。</li>      
       </ul>
+
       <div id="summary-chart"></div>
       <div id="summary-hdi"></div>
-
-      <ul>
-        <li>Mean（平均）は、各群の比率がとりそうな値を<strong>点</strong>で推定した結果です。</li>
-        <li>94%HDIは、各群の比率がとりそうな値を<strong>区間</strong>で推定した結果です。上図各群の分布においてデータ全体100%から中央の94%を取ってきた両端の値です（Highest
-          Density Interval 事後分布の中で最も密度が高い範囲）。</li>
-      </ul>
 
       <div class="mdc-warn-box">
         <p>✅ Point:</p>
         <ul>
-          <li>入力された観測データ件数（分母）が十分に多い場合は、Meanと入力データの比率はほぼ一致します。グラフは尖った形になりやすく、推定結果の確からしさを表します。</li>
-          <li>入力された観測データ件数（分母）が少ない場合はやや違いが生じるときもあります。グラフは裾が広い形になりやすく、推定結果の不確かさを表します。</li>
+          <li>入力された観測データ件数（Sample Size）が十分に多い場合は、Meanと入力データの比率はほぼ一致します。分布は尖った形になりやすく、推定結果の確からしさを表します。</li>
+          <li>観測データ件数が少ない場合はやや違いが生じるときもあります。分布は裾が広い形になりやすく、推定結果の不確かさを表します。</li>
         </ul>
       </div>
 
-      <div class="mdc-info2-box">
-        <p>🏷️ 推定結果の不確かさが大きいときの対応策:</p>
+      <div class="mdc-note-box">
+        <p>推定結果の不確かさが大きいときの対応策</p>
         <ol>
-          <li>入力データが変な値で読み取られていないか集計値を確認する</li>
-          <li>A/Bテスト実施中であればテスト期間を延長するなどして観測データ件数を増やす</li>
-          <li>実行ボタンの下の「推定がうまくいかないとき用」で推定方法を調整して再度実行してみる</li>
+          <li>入力データが正しく読み取られているか、集計値を確認する</li>
+          <li>A/Bテスト実施中であればテスト期間を延長するなどして、観測データ件数を増やす</li>
+          <li>🚀 ボタンの下の「推定がうまくいかないとき用」で推定方法を調整して再度実行してみる</li>
         </ol>
       </div>
 
       <details class="summary-table-details">
-        <summary>データテーブル</summary>
+        <summary>データテーブル（コピペ用）</summary>
         <div id="summary-table-container"></div>
       </details>
+
+
 
       <h2 id="result-diff">各群間の比較（比率の差分）</h2>
       <ul>
@@ -200,6 +208,7 @@
         <li>横棒がオレンジ線をまたいでいない（94%HDIが0を含まない）場合は、各群間の比率に十分な差があると解釈しやすいです。</li>
         <li>diff A - B: A群の比率からB群の比率を差し引いた値（以降同様です）</li>
       </ul>
+      
       <div id="diff-hdi"></div>
       <div id="diff-chart"></div>
 

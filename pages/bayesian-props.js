@@ -28,6 +28,32 @@ const DEFAULT_HDI_50 = 0.5;
 const SAMPLE_DENOMS = "1000 2000 1500 1200 1600";
 const SAMPLE_NUMERS = "70 120 95 110 150";
 
+function setupSampleCountStepper() {
+  const valueElement = document.getElementById("sample-count");
+  const decrementButton = document.getElementById("sample-count-decrement");
+  const incrementButton = document.getElementById("sample-count-increment");
+  let value = 10000;
+
+  const render = () => {
+    valueElement.value = String(value);
+    valueElement.textContent = String(value);
+    decrementButton.disabled = value <= 10000;
+    incrementButton.disabled = value >= 50000;
+  };
+
+  decrementButton.addEventListener("click", () => {
+    value = Math.max(10000, value - 5000);
+    render();
+  });
+  incrementButton.addEventListener("click", () => {
+    value = Math.min(50000, value + 5000);
+    render();
+  });
+  render();
+}
+
+setupSampleCountStepper();
+
 // 推定中は true（実行ボタンを無効にしておくための印）
 let isRunning = false;
 

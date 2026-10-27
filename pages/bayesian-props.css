@@ -154,7 +154,6 @@ input:focus {
   font-weight: normal;
 }
 
-/* 色は best_5g の確認表（.summary-table）と同じ灰色系にそろえる */
 #confirmation-table {
   background-color: #fff;
   border: 1px solid var(--c-border);
@@ -247,6 +246,32 @@ input:focus {
   width: 100%;
 }
 
+.parameter-select {
+  margin: 0.875rem 0;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.stepper-button {
+  flex: none;
+  width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0.25rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.stepper-value {
+  min-width: 3.5rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 /* 推定がうまくいかないとき用（実行ボタンの下） */
 .run-box details {
   margin-top: 1rem;
@@ -267,8 +292,7 @@ summary {
 
 .mdc-info-box,
 .mdc-warn-box,
-.mdc-alert-box,
-.mdc-info2-box {
+.mdc-alert-box {
   margin: 1.25rem 0;
 }
 
@@ -295,15 +319,6 @@ summary {
   background: none;
 }
 
-/* 青いボックス（page-common.css に無いので、warn-box と同じ作りでここに置く） */
-.mdc-info2-box {
-  background-color: var(--c-brand2-2);
-  border-left: 5px solid var(--c-brand-light);
-  padding: 0.2em 0.8em;
-  border-radius: 4px;
-  color: var(--c-brand-dark);
-}
-
 .running-message {
   display: flex;
   align-items: center;
@@ -315,7 +330,7 @@ summary {
   display: none;
 }
 
-/* スピナー（best_5g.css と同じ） */
+/* スピナー */
 .spinner {
   flex: 0 0 1.1rem;
   width: 1.1rem;
