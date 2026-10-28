@@ -200,6 +200,10 @@ summary {
   margin-top: 1rem;
 }
 
+.result-details {
+  margin: 0.5rem 0;
+}
+
 .btn-primary {
   background: var(--c-accent);
   border-color: var(--c-accent);
@@ -289,6 +293,11 @@ summary {
   display: flex;
   align-items: center;
   gap: 0.625rem;
+}
+
+#running-message-text {
+  margin: 0;
+  line-height: 1.4;
 }
 
 .running-message[hidden] {
@@ -389,7 +398,7 @@ summary {
 
 /* matplotlibが出力するSVGは親の幅に合わせて拡縮する */
 #group-chart,
-#pair-chart {
+#pair-adj-chart {
   width: 640px;
   max-width: 100%;
   margin: 0.5rem 0 1.25rem;
@@ -399,10 +408,30 @@ summary {
 }
 
 #group-chart svg,
-#pair-chart svg {
+#pair-adj-chart svg {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.pair-chart-tooltip {
+  position: fixed;
+  z-index: 1000;
+  display: none;
+  max-width: min(20rem, calc(100vw - 1rem));
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.pair-chart-tooltip.visible {
+  display: block;
 }
 
 .parameter-select select {

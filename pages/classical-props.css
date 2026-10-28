@@ -325,6 +325,11 @@ summary {
   gap: 0.625rem;
 }
 
+#running-message-text {
+  margin: 0;
+  line-height: 1.4;
+}
+
 /* display:flex が hidden 属性より強いので、hidden のときは自分で消す */
 .running-message[hidden] {
   display: none;
@@ -375,6 +380,26 @@ summary {
   height: auto;
 }
 
+.pair-chart-tooltip {
+  position: fixed;
+  z-index: 1000;
+  display: none;
+  max-width: min(20rem, calc(100vw - 1rem));
+  padding: 0.35rem 0.55rem;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background: #fff;
+  color: #333;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+.pair-chart-tooltip.visible {
+  display: block;
+}
+
 /* 表は列数が多いので、狭い画面では横スクロールにする */
 #omni-table,
 #pair-p-table,
@@ -423,4 +448,3 @@ summary {
 .summary-table tr:hover {
   background-color: #f1f1f1;
 }
-

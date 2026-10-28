@@ -8,29 +8,29 @@
 :root {
   /* ブランド（primary青系） */
   --c-brand-dark: #1a365d;
-  /* dark-navy, h2 color */
+  /* dark-navy, h3・h4 の文字色, 目次の現在位置 */
   --c-brand: #2b5b84;
-  /* muted-dark-blue, h2 border-left */
+  /* muted-dark-blue, h2 の塗り, h5・th の文字色 */
   --c-brand-light: #3182ce;
-  /* medium blue, h3 border-left */
+  /* medium blue, h3 の左線, h4 の下線, フォーカス枠 */
   --c-brand-vivid: #007aff;
   /* vivid-blue, button */
 
   /* ブランド（secondary薄青系。番号が大きいほど濃い） */
   --c-brand2-1: #f0f4f8;
-  /* h2 bg 一番薄い */
+  /* 一番薄い。h3 の背景, inline-gray, hover */
   --c-brand2-2: #e8f4fc;
-  /* th, site-nav-current */
+  /* th の背景, 左ナビの現在地 */
   --c-brand2-3: #d0e7f5;
-  /* table border */
+  /* 表の罫線, h5 の下線, 上部バーの下線 */
 
   /* アクセント（オレンジ系） */
   --c-accent-dark: #7a4a00;
   /* dark-brown */
   --c-accent: #f57c00;
-  /* orange */
+  /* orange, mdc-warn-box の左線, ボタン */
   --c-accent-light: #fff3e0;
-  /* creamy-orange */
+  /* creamy-orange, mdc-warn-box の背景 */
 
   /* アクセント2（グリーン系） */
   --c-accent2-dark: #155724;
@@ -44,7 +44,7 @@
   --c-text: #333333;
   /* main */
   --c-text-sub: #666666;
-  /* medium-gray, blockquote */
+  /* medium-gray, blockquote の文字色, 補足テキスト */
   --c-text-weak: #999999;
   /* medium-light-gray */
 
@@ -52,9 +52,17 @@
   --c-bg: #ffffff;
   /* white */
   --c-bg-subtle: #f5f5f5;
-  /* mdc-note-box bg */
+  /* mdc-note-box, inline-code の背景 */
   --c-border: #dddddd;
-  /* light-gray */
+  /* light-gray, blockquote の左線, 区切り線 */
+
+  /* 強調（黄色系）。inline-mark は長文にも使うので、塗りは柔らかめ。
+     inline-marker は下半分だけの線なので、塗りより少し濃くして見えやすくする */
+  --c-mark: #fff59d;
+  --c-marker: #ffe97a;
+
+  /* ブロック同士の間隔（ul/ol の下、画像、表、mdc-* ボックス、blockquote で共通） */
+  --space-block: 1.5em;
 
   /* 派生色（hoverなど）。black を white にすると「少し明るく」に変わる */
   --c-brand-vivid-hover: color-mix(in srgb, var(--c-brand-vivid) 85%, black);
@@ -89,8 +97,11 @@ body {
 }
 
 
-html {
-  scroll-behavior: smooth;
+/* アニメーションを減らす設定の人には、なめらかスクロールを使わない */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 /* コード用フォント。フォント名を指定すると、ブラウザ既定の「等幅は少し小さく表示」が効かなくなるため、大きさをここで合わせる */
@@ -107,15 +118,33 @@ pre code {
   /* pre の中の code は二重に小さくしない */
 }
 
+/* コードブロック（3カラム以外のページも含む）。
+   <pre><code>…</code></pre> でも <blockquote><pre>…</pre></blockquote> でも同じ。
+   幅を超える分は枠の中でスクロールさせる */
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+/* 長いインラインコード（code タグ）が本文を突き抜けないように。span.inline-code は下で指定 */
+:not(pre)>code {
+  overflow-wrap: anywhere;
+}
+
 
 /* pとul,olをひとかたまりで見せたいとき用 */
 /* ul,olのすぐ上にある pの下余白を詰める */
 p:has(+ ul),
 p:has(+ ol) {
-  margin-top: 1.6em;
-  /* 上とは開ける */
   margin-bottom: 0.4em;
   /* 下のulに引き寄せる */
+}
+
+/* 前の段落とは開ける。見出しの直後などは見出し側の余白に任せたいので、p の直後（p+p）のときだけ */
+p+p:has(+ ul),
+p+p:has(+ ol) {
+  margin-top: 1.6em;
 }
 
 /* その直後の ul,olの上余白もゼロにする */
@@ -128,7 +157,7 @@ p+ol {
 /* リストの下に余白を多めに取る */
 ul,
 ol {
-  margin-bottom: 1.5em;
+  margin-bottom: var(--space-block);
 }
 
 /* 入れ子のリストは、外側のリストの一部として余白なし */
@@ -166,8 +195,8 @@ h1 {
 
 h2 {
   font-size: 1.75em;
-  color: #fff;
-  /* 濃い塗りに白文字 */
+  color: var(--c-bg);
+  /* 濃い塗りに白文字（白は --c-bg と同じ） */
   background-color: var(--c-brand);
   padding: 0.45em 0.8em;
   border-radius: 4px;
@@ -184,6 +213,12 @@ h3 {
   padding: 0.3em 0.6em;
   margin-top: 2.5em;
   margin-bottom: 0.4em;
+}
+
+/* h2 の直後に h3 が来るとき: h3 の上余白(2.5em)が h2 の下余白に勝って広く空くので、
+   h2 → 本文 の間隔(約 17px)に近づける（0.7em × h3 の文字サイズ 24px ≒ 17px） */
+h2+h3 {
+  margin-top: 0.7em;
 }
 
 h4 {
@@ -215,8 +250,8 @@ img {
   height: auto;
   display: block;
   /* ブロック要素にして中央寄せを効きやすくする */
-  margin: 1.5em auto;
-  /* 上下に 1.5em、左右は自動で中央配置 */
+  margin: var(--space-block) auto;
+  /* 上下は --space-block、左右は自動で中央配置 */
 }
 
 #footer {
@@ -254,7 +289,7 @@ img {
   margin: 1em auto 0;
   padding: 0.6em 1.2em;
   background: var(--c-accent);
-  color: #fff;
+  color: var(--c-bg);
   text-decoration: none;
   font-weight: bold;
   border-radius: 0.3em;
@@ -264,46 +299,63 @@ img {
   background: var(--c-accent-hover);
 }
 
+/* 引用。mdc-note-box（灰色の面）と区別するため、面ではなく「字下げ＋左線」で引用らしく見せる。
+   上下に padding は付けない（中の p や pre の margin が外側に畳まれ、左線は中身の高さになる） */
 blockquote {
-  margin: 1em 0;
-  padding: 0.5em 1em;
-  /* border-left: 0.25em solid #ccc; */
-  background-color: var(--c-bg-subtle);
+  margin: var(--space-block) 0 var(--space-block) 2em;
+  padding: 0 0 0 1em;
+  border-left: 4px solid var(--c-border);
+  background-color: var(--c-bg);
   color: var(--c-text-sub);
 }
 
 
-/* インラインコード用 */
+/* inline-* に共通の設定
+   ・複数行にまたがっても、各行の端に padding と角丸が付くようにする（clone）
+   ・padding は、text-autospace（和文と英数字の間の自動スペース）を入れた表示に合わせて整えるためのもの。
+     行間 1.8 で行が離れているので、上下の padding は隣の行にぶつからない範囲で付けられる */
+.inline-code,
+.inline-mark,
+.inline-marker,
+.inline-pink,
+.inline-gray {
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.inline-code,
+.inline-mark,
+.inline-pink,
+.inline-gray {
+  border-radius: 0.3em;
+}
+
+/* インラインコード用（<span class="inline-code">）。
+   code タグではないので、等幅フォントと大きさ（pre, code と同じ 0.85em）、折り返しはここで指定する */
 .inline-code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
   background-color: var(--c-bg-subtle);
   /* ほんのりグレー */
   color: #9b2c2c;
   /* 赤系の色 */
-  font-size: 0.9em;
   padding: 0.15em 0.4em;
-  border-radius: 0.3em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  overflow-wrap: anywhere;
 }
 
 .inline-mark {
-  background-color: #ffeb3b;
+  background-color: var(--c-mark);
   color: #1a1a1a;
   /* 本文の #333 よりほんの少しだけ濃いダークグレー */
   /* font-size: 0.9em; */
-  /* padding: 0.1em 0.3em; */
-  border-radius: 0.3em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  padding: 0.1em 0.1em;
 }
 
 /* ポイント・弱: 蛍光ペン風の下線 */
 .inline-marker {
-  background: linear-gradient(transparent 55%, #fff3a0 55%);
+  background: linear-gradient(transparent 55%, var(--c-marker) 55%);
   /* font-weight: bold; */
-  /* 2行にまたがっても、各行に下線が付くようにする */
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  padding: 0 0.1em;
 }
 
 
@@ -313,10 +365,7 @@ blockquote {
   color: #c2185b;
   /* font-size: 0.9em; */
   /* font-weight: bold; */
-  /* padding: 0.1em 0.3em; */
-  border-radius: 0.3em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  padding: 0.1em 0.25em;
 }
 
 /* 注釈のインライン版やちょっとしたフレーズ用 */
@@ -327,44 +376,50 @@ blockquote {
   /* ダークグレー（黒すぎない上品な色） */
   font-size: 0.9em;
   padding: 0.15em 0.4em;
-  border-radius: 0.3em;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
 }
 
 
-/* 装飾ボックス */
+/* 装飾ボックス（中には p, ul, ol などが入る）
+   ・上下の margin は --space-block。隣り合うブロックの margin は大きい方に畳まれるので、連続しても二重にならない
+   ・中身の最初と最後の要素の margin は 0 にして、内側の余白は padding だけで決める
+     （p:has(+ ul) などの余白で、ボックスの上だけ広くならないようにする） */
+.mdc-info-box,
+.mdc-warn-box,
+.mdc-alert-box,
+.mdc-note-box {
+  margin: var(--space-block) 0;
+  padding: 0.7em 1em;
+  border-radius: 4px;
+}
+
+:is(.mdc-info-box, .mdc-warn-box, .mdc-alert-box, .mdc-note-box)>:first-child {
+  margin-top: 0;
+}
+
+:is(.mdc-info-box, .mdc-warn-box, .mdc-alert-box, .mdc-note-box)>:last-child {
+  margin-bottom: 0;
+}
+
+/* info は warn ほど目立たせない用途なので、左線なし */
 .mdc-info-box {
   background-color: var(--c-accent2-light);
   /* border-left: 5px solid var(--c-accent2); */
-  /* margin: 0.5em 1em; */
-  padding: 0.2em 0.8em;
-  border-radius: 4px;
 }
 
 .mdc-warn-box {
   background-color: var(--c-accent-light);
   border-left: 5px solid var(--c-accent);
-  /* margin: 1em 1.5em; */
-  padding: 0.2em 0.8em;
-  border-radius: 4px;
 }
 
 .mdc-alert-box {
   background-color: #ffebee;
   border-left: 5px solid #f44336;
-  /* margin: 0em 0.5em; */
-  padding: 0.2em 0.8em;
-  border-radius: 4px;
 }
 
-/* 注釈のボックス版 */
+/* 注釈のボックス版。左右に margin を取って、本文より一段引っ込んだ「注釈」に見せる */
 .mdc-note-box {
   background-color: var(--c-bg-subtle);
-  /* border-left: 5px solid #f44336; */
-  margin: 0.5em 0em;
-  padding: 0.1em 0.8em;
-  border-radius: 4px;
+  margin-inline: 1.5em;
   font-size: 0.9em;
 }
 
@@ -374,7 +429,7 @@ blockquote {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 20px 0;
+  margin: var(--space-block) 0;
   line-height: 1.6;
   border: 1px solid var(--c-brand2-3);
   /* 表の外枠 */
@@ -387,7 +442,7 @@ td {
 }
 
 th {
-  padding: 12px 8px;
+  padding: 0.75em 0.5em;
   font-weight: bold;
   text-align: left;
   background-color: var(--c-brand2-2);
@@ -399,7 +454,7 @@ th {
 }
 
 td {
-  padding: 16px 8px;
+  padding: 1em 0.5em;
   text-align: left;
   vertical-align: top;
 }
@@ -410,12 +465,12 @@ td {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 0.5rem;
   font-size: 0.875rem;
   /* 約14px（少し小さめ） */
   color: var(--c-text-sub);
   /* 主張しすぎないグレー */
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
   /* 本文との間の余白 */
 }
 
@@ -427,7 +482,7 @@ td {
 
 /* 絵文字アイコンの大きさと余白 */
 .meta-icon {
-  margin-right: 4px;
+  margin-right: 0.25em;
   font-size: 0.9em;
 }
 
@@ -589,7 +644,7 @@ td {
   font-size: 0.75rem;
   line-height: 1.4;
   white-space: nowrap;
-  color: #fff;
+  color: var(--c-bg);
   background: var(--c-text);
   border-radius: 0.3em;
   opacity: 0;
@@ -930,31 +985,47 @@ html.right-open .layout-3col .side-backdrop {
 
 /* ---------- 本文まわり ---------- */
 
-/* 上部バーに見出しが隠れないようにする */
+/* 上部バーに見出しが隠れないようにする。
+   目次に出る見出し（page-layout.js の TOC_SELECTOR = h1, h2, h3）と揃えてある。
+   h4 以下に直リンクを張るページがあれば、ここに足す */
 .layout-3col #header,
-.layout-3col #content :is(h2, h3, h4) {
+.layout-3col #content :is(h1, h2, h3) {
   scroll-margin-top: calc(var(--l3-topbar-h) + 1rem);
 }
 
-/* コードブロックと表は、本文幅からはみ出す分を枠の中でスクロールさせる */
-.layout-3col #content pre {
-  max-width: 100%;
-  overflow-x: auto;
-  line-height: 1.5;
-}
-
+/* 表は、本文幅からはみ出す分を枠の中でスクロールさせる（コードブロックは上の共通設定 pre） */
 .layout-3col .table-scroll {
   max-width: 100%;
   overflow-x: auto;
 }
 
-/* 長いインラインコードが本文を突き抜けないように */
-.layout-3col #content :not(pre)>code {
-  overflow-wrap: anywhere;
-}
-
 
 @media print {
+
+  /* h2 は「濃い塗り＋白文字」。背景を印刷しない設定だと文字が消えるので、印刷では線に変える */
+  h2 {
+    color: var(--c-brand);
+    background: none;
+    border-bottom: 2px solid var(--c-brand);
+    border-radius: 0;
+    padding: 0.2em 0 0.3em;
+  }
+
+  /* 薄い背景で区別している要素は、背景も印刷する */
+  h3,
+  th,
+  .inline-code,
+  .inline-mark,
+  .inline-marker,
+  .inline-pink,
+  .inline-gray,
+  .mdc-info-box,
+  .mdc-warn-box,
+  .mdc-alert-box,
+  .mdc-note-box {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
 
   .layout-3col .topbar,
   .layout-3col .side,

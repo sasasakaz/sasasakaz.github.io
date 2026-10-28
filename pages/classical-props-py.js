@@ -8,7 +8,7 @@
 //  - 実行ボタンで classical-props.js が Python の run(denoms, numers, alpha) を呼ぶと、
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
 //      omni -> #omni-summary / omni_table -> #omni-table / omni_chart -> #omni-chart
-//      pair（3群以上のみ。2群は null）-> #pair-p-table / #pair-ci-table / #pair-chart
+//      pair -> #pair-p-table / #pair-ci-table / #pair-chart（後2つは3群以上のみ表示）
 //  - 図の表示サイズは classical-props.css（各idのwidthと svg{width:100%}）で決まり、
 //    ここの figsize(px指定) は縦横比と文字の相対サイズを決める。
 //
@@ -34,7 +34,6 @@ from scipy import stats as sps
 DPI = 100
 COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#7f7f7f", "#9467bd"]
 PLOT_BG = "white"
-ORANGE = "#ff8c00"
 SIG_BG = "#fff3a3"
 
 plt.rcParams["svg.fonttype"] = "none"  # 文字をテキストのまま出力（選択可能・軽量）
@@ -186,35 +185,50 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat, n_total):
     p_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["p_raw"], p_bonf[n], p_hol[n], p_bhh[n], r["p_tukey"]]
               for n, r in enumerate(rows)]
     p_table = html_table(
-        ["Pair", "diff (%)", "CI Lower", "CI Upper", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)", "p (Tukey)"],
+        ["Pair", "diff (points)", "CI Lower", "CI Upper", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)", "p (Tukey)"],
         p_rows, highlight_cols=(4, 5, 6, 7, 8), alpha=alpha)
     ci_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"], r["tlo"], r["thi"]] for r in rows]
     ci_table = html_table(
-        ["Pair", "diff (%)", "CI Lower", "CI Upper", "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
+        ["Pair", "diff (points)", "CI Lower", "CI Upper", "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
         ci_rows)
 
     # 差のCI比較（補正なし vs Bonferroni vs Tukey）
     fig, ax = new_fig(640, 55 * m + 150)
-    style_axes(ax, grid_x=True)
-    specs = [("lo", "hi", "補正なし", "#1f77b4", -0.2),
-             ("blo", "bhi", "Bonferroni", "#2ca02c", 0.0),
-             ("tlo", "thi", "Tukey", "#ff7f0e", 0.2)]
-    for lo_c, hi_c, label, c, off in specs:
+    style_axes(ax)
+    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.3),
+             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0),
+             ("tlo", "thi", "Tukey", "tukey", "#ff7f0e", 0.3)]
+    for lo_c, hi_c, label, method, c, off in specs:
         for r, row in enumerate(rows):
-            ax.hlines(r + off, row[lo_c], row[hi_c], color=c, linewidth=2, label=label if r == 0 else None)
-    ax.plot([r["diff"] for r in rows], np.arange(m), "o", markersize=4,
-            markerfacecolor="white", markeredgecolor="black")
-    ax.axvline(0, color=ORANGE, linewidth=2, zorder=0)
+            interval = ax.hlines(r + off, row[lo_c], row[hi_c], color=c, linewidth=3.5,
+                                 label=label if r == 0 else None)
+            interval.set_gid(f"pair-ci-{method}-{r}")
+            mean = ax.plot([row["diff"]], [r + off], "o", markersize=5,
+                           markerfacecolor="white", markeredgecolor="black")[0]
+            mean.set_gid(f"pair-mean-{method}-{r}")
+    ax.axvline(0, color="gray", linestyle="--", linewidth=1.5, zorder=0)
     ax.set_yticks(range(m))
     ax.set_yticklabels([r["pair"] for r in rows])
     ax.invert_yaxis()
-    ax.set_xlabel("Difference in rate (pt)")
+    ax.set_xlabel("Difference in rate (points)")
     ax.set_title(f"Pairwise differences: {level}% CI", pad=24)
     ax.legend(frameon=False, fontsize=8, loc="lower center", bbox_to_anchor=(0.5, 1.02),
               ncol=3, borderaxespad=0)
     fig.tight_layout()
 
-    return {"pairs": m, "p_table": p_table, "ci_table": ci_table, "chart": to_svg(fig)}
+    chart_tooltips = [{
+        "pair": row["pair"],
+        "diff": row["diff"],
+        "intervals": {
+            "unadjusted": [row["lo"], row["hi"]],
+            "bonferroni": [row["blo"], row["bhi"]],
+            "tukey": [row["tlo"], row["thi"]],
+        },
+    } for row in rows]
+    return {
+        "pairs": m, "level": level, "p_table": p_table, "ci_table": ci_table,
+        "chart": to_svg(fig), "chart_tooltips": chart_tooltips,
+    }
 
 
 def run(denoms, numers, alpha):
@@ -226,6 +240,6 @@ def run(denoms, numers, alpha):
     level = int(round((1 - alpha) * 100))
 
     omni, p_hat, n_total = omnibus(denoms, numers, ids, alpha, level)
-    pair = pairwise(denoms, numers, ids, alpha, level, p_hat, n_total) if k >= 3 else None
+    pair = pairwise(denoms, numers, ids, alpha, level, p_hat, n_total)
     return json.dumps({"alpha": alpha, "level": level, "omni": omni, "pair": pair})
 `;

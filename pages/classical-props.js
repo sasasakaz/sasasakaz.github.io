@@ -5,7 +5,7 @@
 //  - 計算とグラフ描画は classical-props-py.js 内のPythonコード（CLASSICAL_PROPS_PY）がPyodide上で行う。
 //    Pythonの run() は表(HTML)とグラフ(SVG)をJSONで返し、ここで下記idのdivに挿入する。
 //      #omni-summary / #omni-table / #omni-chart （全体の検定）
-//      #pair-p-table / #pair-ci-table / #pair-chart （2群ごとの検定。3群以上のみ #pair-section を表示）
+//      #pair-p-table / #pair-ci-table / #pair-chart （2群ごとの検定。#pair-p-table は常に表示、他は3群以上のみ）
 //  - これらのidは classical-props.html と classical-props.css に対応する。
 //    id を変える時は html / css / このファイルを同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
@@ -167,6 +167,57 @@ function renderOmniSummary(omni, alpha) {
     </ul>${warn}`;
 }
 
+function addPairChartTooltips(chart, tooltips, level) {
+  const svg = chart.querySelector('svg');
+  if (!svg) {
+    throw new Error('ペア比較グラフのSVGが見つかりません');
+  }
+
+  const tooltip = document.createElement('div');
+  tooltip.className = 'pair-chart-tooltip';
+  tooltip.setAttribute('role', 'tooltip');
+  chart.appendChild(tooltip);
+
+  const methods = {
+    unadjusted: '補正なし',
+    bonferroni: 'Bonferroni',
+    tukey: 'Tukey'
+  };
+  const addTooltip = (id, text) => {
+    const element = svg.querySelector(`[id="${id}"]`);
+    if (!element) {
+      throw new Error(`グラフ要素が見つかりません: ${id}`);
+    }
+    element.setAttribute('aria-label', text);
+
+    const positionTooltip = (event) => {
+      tooltip.style.left = `${Math.min(event.clientX + 12, window.innerWidth - tooltip.offsetWidth - 8)}px`;
+      tooltip.style.top = `${Math.min(event.clientY + 12, window.innerHeight - tooltip.offsetHeight - 8)}px`;
+    };
+    element.addEventListener('pointerenter', (event) => {
+      tooltip.textContent = text;
+      tooltip.classList.add('visible');
+      positionTooltip(event);
+    });
+    element.addEventListener('pointermove', positionTooltip);
+    element.addEventListener('pointerleave', () => tooltip.classList.remove('visible'));
+  };
+
+  tooltips.forEach((item, row) => {
+    Object.entries(methods).forEach(([method, label]) => {
+      const interval = item.intervals[method];
+      addTooltip(
+        `pair-ci-${method}-${row}`,
+        `${item.pair} / ${label} ${level}% CI: ${interval[0].toFixed(2)}〜${interval[1].toFixed(2)} points`
+      );
+      addTooltip(
+        `pair-mean-${method}-${row}`,
+        `${item.pair} / ${label} difference estimate: ${item.diff.toFixed(2)} points`
+      );
+    });
+  });
+}
+
 /**
  * メイン実行関数：Pyodideで計算・描画してDOMに反映
  */
@@ -206,15 +257,17 @@ async function runClassicalTest() {
     document.getElementById('omni-table').innerHTML = result.omni.table;
     document.getElementById('omni-chart').innerHTML = result.omni.chart;
 
-    const pairSection = document.getElementById('pair-section');
-    const pairSkipped = document.getElementById('pair-skipped');
-    pairSection.hidden = !result.pair;
-    pairSkipped.hidden = !!result.pair;
-    if (result.pair) {
-      document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
+    // 2群のときは、説明とp値だけを表示し、区間の表・グラフは隠す
+    const multi = groupCount >= 3;
+    document.getElementById('pair-section').hidden = !multi;
+    document.getElementById('pair-skipped').hidden = multi;
+    document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
+    document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
+    if (multi) {
       document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
-      document.getElementById('pair-chart').innerHTML = result.pair.chart;
-      document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
+      const pairChart = document.getElementById('pair-chart');
+      pairChart.innerHTML = result.pair.chart;
+      addPairChartTooltips(pairChart, result.pair.chart_tooltips, result.pair.level);
     }
 
     completion.hidden = false;

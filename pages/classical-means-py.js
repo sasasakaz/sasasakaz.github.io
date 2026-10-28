@@ -9,8 +9,8 @@
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
 //      group_table/group_chart -> #group-table/#group-chart
 //      omni（3群以上のみ。2群は null）-> #omni-summary（JSが文章化）
-//      pair_table/pair_chart   -> #pair-t-table/#pair-chart
-//      adj_table（3群以上のみ。2群は null）-> #pair-adj-table
+//      pair_table/adj_chart    -> #pair-t-table/#pair-adj-chart
+//      adj_table -> #pair-adj-table
 //  - 入力が不正なときは {"error": "..."} を返す。
 //
 // 【編集時の注意】
@@ -37,7 +37,6 @@ from scipy import stats as sps
 DPI = 100
 COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#7f7f7f", "#9467bd"]
 PLOT_BG = "white"
-ORANGE = "#ff8c00"
 SIG_BG = "#fff3a3"
 
 plt.rcParams["svg.fonttype"] = "none"  # 文字をテキストのまま出力（選択可能・軽量）
@@ -156,8 +155,14 @@ def pairwise(ids, n, mean, sd, alpha, level):
     pairs = list(itertools.combinations(range(k), 2))
     m = len(pairs)
     rows = []
+    if k >= 3:
+        # Bonferroni は Welch t のまま α/ペア数、Tukey-Kramer は等分散を仮定したプールMSEで計算する
+        n_all = int(np.sum(n))
+        df_err = n_all - k
+        mse = float(np.sum((n - 1) * var) / df_err)
+        q_crit = float(sps.studentized_range.ppf(1 - alpha, k, df_err))
     for i, j in pairs:
-        diff = mean[j] - mean[i]  # 差分は「後の群 − 前の群」
+        diff = mean[i] - mean[j]  # 差分は「前の群 − 後の群」
         se_i = var[i] / n[i]
         se_j = var[j] / n[j]
         se = np.sqrt(se_i + se_j)
@@ -165,37 +170,69 @@ def pairwise(ids, n, mean, sd, alpha, level):
         dof = (se_i + se_j) ** 2 / (se_i ** 2 / (n[i] - 1) + se_j ** 2 / (n[j] - 1))  # Welch-Satterthwaite
         p_val = float(sps.t.sf(abs(t_stat), dof) * 2)
         t_crit = sps.t.ppf(1 - alpha / 2, dof)
-        rows.append({"pair": f"{ids[j]} - {ids[i]}", "diff": float(diff), "se": float(se), "t": float(t_stat),
-                     "dof": float(dof), "p": p_val, "lo": float(diff - t_crit * se), "hi": float(diff + t_crit * se)})
+        row = {"pair": f"{ids[i]} - {ids[j]}", "diff": float(diff), "se": float(se), "t": float(t_stat),
+               "dof": float(dof), "p": p_val, "lo": float(diff - t_crit * se), "hi": float(diff + t_crit * se)}
+        if k >= 3:
+            t_bonf = sps.t.ppf(1 - alpha / (2 * m), dof)
+            se_tukey = np.sqrt(mse / 2 * (1 / n[i] + 1 / n[j]))
+            row.update({"blo": float(diff - t_bonf * se), "bhi": float(diff + t_bonf * se),
+                        "tlo": float(diff - q_crit * se_tukey), "thi": float(diff + q_crit * se_tukey)})
+        rows.append(row)
 
-    t_rows = [[r["pair"], r["diff"], r["se"], r["t"], r["dof"], r["p"], r["lo"], r["hi"]] for r in rows]
-    t_table = html_table(
-        ["Pair", "diff", "SE", "t", "dof", "p", f"{level}%CI Lower", f"{level}%CI Upper"],
-        ["text", "f2", "f2", "f2", "f2", "p", "f2", "f2"], t_rows, alpha)
+    t_rows = [[r["pair"], r["se"], r["t"], r["dof"]] for r in rows]
+    t_table = html_table(["Pair", "SE", "t", "dof"], ["text", "f2", "f2", "f2"], t_rows, alpha)
 
-    fig, ax = new_fig(640, 45 * m + 120)
-    style_axes(ax, grid_x=True)
-    for r, row in enumerate(rows):
-        ax.hlines(r, row["lo"], row["hi"], color="#1f77b4", linewidth=2.5)
-    ax.plot([r["diff"] for r in rows], np.arange(m), "o", markersize=5,
-            markerfacecolor="white", markeredgecolor="#1f77b4")
-    ax.axvline(0, color=ORANGE, linewidth=2, zorder=0)
-    ax.set_yticks(range(m))
-    ax.set_yticklabels([r["pair"] for r in rows])
-    ax.invert_yaxis()
-    ax.set_xlabel("Difference in average (later group - earlier group)")
-    ax.set_title(f"Pairwise differences: {level}% CI (Welch t-test, uncorrected)")
-    fig.tight_layout()
-
-    adj_table = None
+    adj_ci_table = None
     if k >= 3:
-        p_raw = np.array([r["p"] for r in rows])
-        p_bonf, p_hol, p_bhh = p_bonferroni(p_raw), p_holm(p_raw), p_bh(p_raw)
-        adj_rows = [[r["pair"], r["diff"], r["p"], p_bonf[x], p_hol[x], p_bhh[x]] for x, r in enumerate(rows)]
-        adj_table = html_table(
-            ["Pair", "diff", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
-            ["text", "f2", "p", "p", "p", "p"], adj_rows, alpha)
-    return t_table, to_svg(fig), adj_table
+        adj_ci_table = html_table(
+            ["Pair", "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
+            ["text"] + ["f2"] * 4,
+            [[r["pair"], r["blo"], r["bhi"], r["tlo"], r["thi"]] for r in rows])
+
+    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.3),
+             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0),
+             ("tlo", "thi", "Tukey", "tukey", "#ff7f0e", 0.3)]
+
+    def draw_pair_chart(chart_specs, prefix, title, height, legend):
+        fig, ax = new_fig(640, height)
+        style_axes(ax)
+        for lo_c, hi_c, label, method, c, off in chart_specs:
+            for r, row in enumerate(rows):
+                interval = ax.hlines(r + off, row[lo_c], row[hi_c], color=c, linewidth=3.5,
+                                     label=label if r == 0 else None)
+                interval.set_gid(f"{prefix}-ci-{method}-{r}")
+                mean_pt = ax.plot([row["diff"]], [r + off], "o", markersize=5,
+                                  markerfacecolor="white", markeredgecolor="black")[0]
+                mean_pt.set_gid(f"{prefix}-mean-{method}-{r}")
+        ax.axvline(0, color="gray", linestyle="--", linewidth=1.5, zorder=0)
+        ax.set_yticks(range(m))
+        ax.set_yticklabels([r["pair"] for r in rows])
+        ax.invert_yaxis()
+        ax.set_xlabel("Difference in average (earlier group - later group)")
+        ax.set_title(title, pad=24 if legend else 6)
+        if legend:
+            ax.legend(frameon=False, fontsize=8, loc="lower center", bbox_to_anchor=(0.5, 1.02),
+                      ncol=3, borderaxespad=0)
+        fig.tight_layout()
+        return to_svg(fig)
+
+    tooltips = [{
+        "pair": row["pair"], "diff": row["diff"],
+        "intervals": {"unadjusted": [row["lo"], row["hi"]]}
+                     | ({"bonferroni": [row["blo"], row["bhi"]], "tukey": [row["tlo"], row["thi"]]} if k >= 3 else {}),
+    } for row in rows]
+
+    # 2群は補正の違いがないので、補正なしの区間だけを描く
+    adj_chart = draw_pair_chart(specs if k >= 3 else specs[:1], "adjpair", f"Pairwise differences: {level}% CI",
+                                55 * m + 150 if k >= 3 else 50 * m + 120, k >= 3)
+
+    p_raw = np.array([r["p"] for r in rows])
+    p_bonf, p_hol, p_bhh = p_bonferroni(p_raw), p_holm(p_raw), p_bh(p_raw)
+    adj_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["p"], p_bonf[x], p_hol[x], p_bhh[x]] for x, r in enumerate(rows)]
+    adj_table = html_table(
+        ["Pair", "diff", "CI Lower", "CI Upper", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["text", "f2", "f2", "f2", "p", "p", "p", "p"], adj_rows, alpha)
+    return t_table, adj_table, adj_chart, tooltips, adj_ci_table
 
 
 def run(ids, groups, alpha):
@@ -213,14 +250,14 @@ def run(ids, groups, alpha):
         level = int(round((1 - alpha) * 100))
 
         n, mean, sd, group_table, group_chart = group_summary(ids, xs, alpha, level)
-        omni = welch_anova(n, mean, sd, alpha) if k >= 3 else None
-        pair_table, pair_chart, adj_table = pairwise(ids, n, mean, sd, alpha, level)
+        omni = welch_anova(n, mean, sd, alpha)
+        pair_table, adj_table, adj_chart, tooltips, adj_ci_table = pairwise(ids, n, mean, sd, alpha, level)
         return json.dumps({
             "alpha": alpha, "level": level,
             "group_table": group_table, "group_chart": group_chart,
             "omni": omni,
-            "pair_table": pair_table, "pair_chart": pair_chart,
-            "adj_table": adj_table,
+            "pair_table": pair_table,
+            "adj_table": adj_table, "adj_chart": adj_chart, "adj_ci_table": adj_ci_table, "chart_tooltips": tooltips,
         })
     except ValueError as e:
         return json.dumps({"error": str(e)})

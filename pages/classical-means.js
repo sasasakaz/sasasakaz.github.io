@@ -179,7 +179,7 @@ function updateConfirmationTable() {
   }
 }
 
-const RESULT_IDS = ["group-table", "group-chart", "omni-summary", "pair-t-table", "pair-chart", "pair-adj-table"];
+const RESULT_IDS = ["group-table", "group-chart", "omni-summary", "pair-t-table", "pair-adj-table", "pair-adj-chart", "pair-adj-ci-table"];
 
 function clearResults() {
   RESULT_IDS.forEach(id => { document.getElementById(id).replaceChildren(); });
@@ -197,6 +197,52 @@ function renderOmniSummary(omni, alpha) {
       <li>Welch ANOVA: F(${omni.df1}, ${omni.df2.toFixed(1)}) = ${omni.f.toFixed(3)}, p = ${pText}</li>
       <li>結果: <strong>${verdict}</strong></li>
     </ul>`;
+}
+
+/**
+ * 差の信頼区間グラフの線・丸印に、マウスオン時の値表示を付ける
+ * （要素のidは classical-means-py.js の set_gid と対応: {prefix}-ci-{method}-{行} / {prefix}-mean-{method}-{行}）
+ */
+function addPairChartTooltips(chart, prefix, items, level) {
+  const svg = chart.querySelector("svg");
+  if (!svg) {
+    throw new Error("ペア比較グラフのSVGが見つかりません");
+  }
+  const tooltip = document.createElement("div");
+  tooltip.className = "pair-chart-tooltip";
+  tooltip.setAttribute("role", "tooltip");
+  chart.appendChild(tooltip);
+
+  const methods = { unadjusted: "補正なし", bonferroni: "Bonferroni", tukey: "Tukey" };
+  const attach = (id, text) => {
+    const element = svg.querySelector(`[id="${id}"]`);
+    if (!element) {
+      throw new Error(`グラフ要素が見つかりません: ${id}`);
+    }
+    element.setAttribute("aria-label", text);
+    const position = (event) => {
+      tooltip.style.left = `${Math.min(event.clientX + 12, window.innerWidth - tooltip.offsetWidth - 8)}px`;
+      tooltip.style.top = `${Math.min(event.clientY + 12, window.innerHeight - tooltip.offsetHeight - 8)}px`;
+    };
+    element.addEventListener("pointerenter", (event) => {
+      tooltip.textContent = text;
+      tooltip.classList.add("visible");
+      position(event);
+    });
+    element.addEventListener("pointermove", position);
+    element.addEventListener("pointerleave", () => tooltip.classList.remove("visible"));
+  };
+
+  items.forEach((item, row) => {
+    Object.entries(methods).forEach(([method, label]) => {
+      const interval = item.intervals[method];
+      if (!interval || !svg.querySelector(`[id="${prefix}-ci-${method}-${row}"]`)) return;
+      attach(`${prefix}-ci-${method}-${row}`,
+        `${item.pair} / ${label} ${level}% CI: ${interval[0].toFixed(2)}〜${interval[1].toFixed(2)}`);
+      attach(`${prefix}-mean-${method}-${row}`,
+        `${item.pair} / ${label} difference estimate: ${item.diff.toFixed(2)}`);
+    });
+  });
 }
 
 document.getElementById("run-button").addEventListener("click", async () => {
@@ -249,13 +295,18 @@ document.getElementById("run-button").addEventListener("click", async () => {
 
     document.getElementById("group-table").innerHTML = result.group_table;
     document.getElementById("group-chart").innerHTML = result.group_chart;
-    document.getElementById("omni-summary").innerHTML = result.omni ? renderOmniSummary(result.omni, alpha) : "";
-    document.getElementById("omni-skipped").hidden = !!result.omni;
+    document.getElementById("omni-summary").innerHTML = renderOmniSummary(result.omni, alpha);
+    const multi = parsedGroups.length >= 3;
+    document.getElementById("omni-skipped").hidden = multi;
+    document.getElementById("pair-section").hidden = !multi;
     document.getElementById("pair-t-table").innerHTML = result.pair_table;
-    document.getElementById("pair-chart").innerHTML = result.pair_chart;
-    document.getElementById("pair-adj-table").innerHTML = result.adj_table ?? "";
-    document.getElementById("pair-section").hidden = !result.adj_table;
-    document.getElementById("pair-skipped").hidden = !!result.adj_table;
+    document.getElementById("pair-adj-ci-table").innerHTML = result.adj_ci_table ?? "";
+    const adjChart = document.getElementById("pair-adj-chart");
+    adjChart.innerHTML = result.adj_chart ?? "";
+    if (result.adj_chart) {
+      addPairChartTooltips(adjChart, "adjpair", result.chart_tooltips, result.level);
+    }
+    document.getElementById("pair-adj-table").innerHTML = result.adj_table;
 
     runningMessage.hidden = true;
     completionMessage.hidden = false;

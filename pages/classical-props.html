@@ -51,7 +51,7 @@
     <main id="content">
       <header id="header">
         <h1>Classical Comparison of Proportions</h1>
-        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。比率の差の古典的な検定（カイ二乗検定・多重比較・信頼区間）ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。比率の差の検定（カイ二乗検定・多重比較・信頼区間）ができます。</p>
         <div class="mdc-note-box">
           <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
           <ul>
@@ -128,7 +128,7 @@
 
         <div class="run-box">
           <button type="button" onclick="runClassicalTest();" class="btn-primary" id="run-button" title="検定実行"
-            disabled>🚀 Test</button>
+            disabled>🚀 Run</button>
           <div class="parameter-select">
             <label for="alpha-select">有意水準 α</label>
             <select id="alpha-select">
@@ -158,42 +158,47 @@
 
 
       <div id="results">
-        <h2 id="result-omni">全体の検定（Pearsonのカイ二乗検定）</h2>
+        <h2 id="result-omni">全体の検定</h2>
         <ul>
           <li>帰無仮説: 全群の比率が等しい。</li>
           <li>信頼区間は各群の比率に対するWilson区間です。</li>
         </ul>
 
-        <h3 id="result-omni-test">検定結果</h3>
+
+        <h3 id="result-omni-test">Pearsonのカイ二乗検定結果</h3>
         <div id="omni-summary"></div>
+
 
         <h3 id="result-omni-ci">各群の比率と信頼区間</h3>
         <div id="omni-table"></div>
         <div id="omni-chart"></div>
 
+
+
         <h2 id="result-pair">2群ごとの比率の差の検定</h2>
         <div id="pair-skipped" class="mdc-info-box" hidden>
-          <p>2群のため、2群ごとの検定は上記の全体の検定と同じです。</p>
+          <p>2群のため、2群ごとの検定は上記の全体の検定と同じです。参考として、2群の比較をp値で示します。</p>
         </div>
 
+        <ul>
+          <li><strong>補正なし</strong>: 各ペアをPearsonカイ二乗検定（連続性補正なし）。比率の差のCIはWald区間。<span class='inline-mark'>多重比較を考慮していない</span>ので、群数が増えるほど「偽陽性」が出やすくなります（あえて比較用に掲載）。</li>
+          <li><strong>Bonferroni / Holm / Benjamini-Hochberg(BH)</strong>: 上記のp値を補正したものです（BHはFDR制御）。</li>
+          <li><strong>Tukey-Kramer</strong>: 本来は平均の比較手法です。ここでは0/1データとして、要約値（群の比率と分母）から等分散を仮定したTukey-Kramerを計算しています。近似である点に注意してください。</li>
+          <li>同時信頼区間: Bonferroni（α/ペア数）とTukeyの同時CIも併記します。</li>
+        </ul>
+
+        <h3 id="result-pair-p">p値</h3>
+        <p id="pair-count"></p>
+        <ul>
+          <li>有意なp値は黄色で表示します。</li>
+          <li>diff A - B: A群の比率からB群の比率を差し引いた値です。</li>
+        </ul>
+        <div id="pair-p-table"></div>
+
         <div id="pair-section">
-          <ul>
-            <li><strong>補正なし</strong>: 各ペアをPearsonカイ二乗検定（連続性補正なし）。比率の差のCIはWald区間。<strong>多重比較を考慮していない</strong>ので、群数が増えるほど「偽陽性」が出やすくなります（あえて比較用に掲載）。</li>
-            <li><strong>Bonferroni / Holm / Benjamini-Hochberg(BH)</strong>: 上記のp値を補正したものです（BHはFDR制御）。</li>
-            <li><strong>Tukey-Kramer</strong>: 本来は平均の比較手法です。ここでは0/1データとして、要約値（群の比率と分母）から等分散を仮定したTukey-Kramerを計算しています。近似である点に注意してください。</li>
-            <li>同時信頼区間: Bonferroni（α/ペア数）とTukeyの同時CIも併記します。</li>
-          </ul>
-
-          <h3 id="result-pair-p">p値</h3>
-          <p id="pair-count"></p>
-          <p>有意なp値は黄色で表示します。diff A - B: A群の比率からB群の比率を差し引いた値です。</p>
-          <div id="pair-p-table"></div>
-
-          <h3 id="result-pair-ci">差の信頼区間</h3>
-          <div id="pair-ci-table"></div>
-
-          <h3 id="result-pair-chart">差の信頼区間の比較（補正なし / Bonferroni / Tukey）</h3>
+          <h3 id="result-pair-chart">比率の差の信頼区間の比較（補正なし / Bonferroni / Tukey）</h3>
           <div id="pair-chart"></div>
+          <div id="pair-ci-table"></div>
         </div>
       </div>
 

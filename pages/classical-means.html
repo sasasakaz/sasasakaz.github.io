@@ -7,10 +7,12 @@
   <title>Classical Comparison of Means</title>
   <link rel="canonical" href="https://sasasakaz.github.io/pages/classical-means.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
-  <meta name="description" content="5群までの平均の差を、Welch ANOVA・Welchのt検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Means.">
+  <meta name="description"
+    content="5群までの平均の差を、Welch ANOVA・Welchのt検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Means.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Classical Comparison of Means">
-  <meta property="og:description" content="5群までの平均の差を、Welch ANOVA・Welchのt検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Means.">
+  <meta property="og:description"
+    content="5群までの平均の差を、Welch ANOVA・Welchのt検定・多重比較補正・信頼区間でブラウザ上で検定。Classical Comparison of Means.">
   <meta property="og:url" content="https://sasasakaz.github.io/pages/classical-means.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
@@ -53,7 +55,7 @@
     <main id="content">
       <header id="header">
         <h1>Classical Comparison of Means</h1>
-        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差の古典的な検定（Welch ANOVA・Welchのt検定・多重比較・信頼区間）ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差の検定（Welch ANOVA・Welchのt検定・多重比較・信頼区間）ができます。</p>
         <div class="mdc-note-box">
           <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
           <p>各群のデータを数値で入力してください。カンマ、スペース、改行で区切って入力できます。</p>
@@ -127,7 +129,7 @@
           </table>
         </div>
         <div class="run-box">
-          <button id="run-button" class="btn-primary" type="button" title="検定実行" disabled>🚀 Test</button>
+          <button id="run-button" class="btn-primary" type="button" title="検定実行" disabled>🚀 Run</button>
           <div class="parameter-select">
             <label for="alpha-select">有意水準 α</label>
             <select id="alpha-select">
@@ -153,8 +155,19 @@
         <p id="error-message-text"></p>
       </div>
 
+
+
       <div id="results">
-        <h2 id="result-group">各群の平均と信頼区間</h2>
+        <h2 id="result-omni">全体の検定</h2>
+        <ul>
+          <li>帰無仮説: 全群の平均が等しい。等分散を仮定しない検定です。</li>
+        </ul>
+
+
+        <h3 id="result-omni-test">Welch ANOVA 検定結果</h3>
+        <div id="omni-summary"></div>
+
+        <h3 id="result-group">各群の平均と信頼区間</h3>
         <ul>
           <li>各群の平均値と、平均に対する信頼区間（t分布を用いた区間）です。</li>
           <li>群ごとに個別に求めた区間なので、群間の差の有無はこの図だけでは判断できません。差の検定は以降のWelchのt検定を参照してください。</li>
@@ -162,43 +175,41 @@
         <div class="table-wrap" id="group-table"></div>
         <div id="group-chart"></div>
 
-        <h2 id="result-omni">全体の検定（Welch ANOVA）</h2>
-        <ul>
-          <li>帰無仮説: 全群の平均が等しい。等分散を仮定しない検定です。</li>
-        </ul>
-        <div id="omni-summary"></div>
-        <div id="omni-skipped" class="mdc-info-box" hidden>
-          <p>2群のため、全体の検定は以降のWelchのt検定と同じです。</p>
-        </div>
 
-        <h2 id="result-pair">2群ごとの平均の差の検定（Welchのt検定）</h2>
+
+        <h2 id="result-pair">2群ごとの平均の差の検定</h2>
+        <div id="omni-skipped" class="mdc-info-box" hidden>
+          <p>2群のため、上記の全体の検定結果と同じです。</p>
+        </div>
         <ul>
-          <li>全ペアでWelchのt検定を行います。差分は「後の群 − 前の群」です（例: B - A）。</li>
-          <li>群の順序は入力順です。先頭をControl、以降をTestとみなすと解釈しやすいです。</li>
+          <li>全ペアでWelchのt検定を行います。差分は「前の群 − 後の群」です（例: A - B）。</li>
+          <li><strong>Bonferroni / Holm</strong>: 1つでも偽陽性を出す確率（FWER）を抑えます。HolmはBonferroniより検出力が高いです。</li>
+          <li><strong>Benjamini-Hochberg（BH）</strong>: 有意とされたもののうち偽陽性が占める割合（FDR）を抑えます。FWERほど厳しくありません。</li>
+          <li>有意なp値は黄色で表示します。</li>
         </ul>
+
 
         <h3 id="result-pair-p">t値とp値</h3>
-        <p>有意なp値は黄色で表示します。</p>
-        <div class="table-wrap" id="pair-t-table"></div>
+        <details class="result-details">
+          <summary>Welchのt検定の詳細（SE, t, dof）</summary>
+          <div class="table-wrap" id="pair-t-table"></div>
+        </details>
+        <div class="table-wrap" id="pair-adj-table"></div>
 
-        <h3 id="result-pair-chart">平均の差の信頼区間（未補正）</h3>
-        <div id="pair-chart"></div>
-        <div class="mdc-warn-box">
-          <p>3群以上では、この信頼区間は多重比較の補正をしていない点に注意してください。</p>
-        </div>
 
         <div id="pair-section">
-          <h3 id="result-pair-adj">多重比較の補正（3群以上）</h3>
+        <h3 id="result-pair-adj-chart">平均の差の信頼区間の比較（補正なし / Bonferroni / Tukey）</h3>
+        <div id="pair-adj-note">
           <ul>
-            <li><strong>Bonferroni / Holm</strong>: 1つでも偽陽性を出す確率（FWER）を抑えます。HolmはBonferroniより検出力が高いです。</li>
-            <li><strong>Benjamini-Hochberg（BH）</strong>: 有意とされたもののうち偽陽性が占める割合（FDR）を抑えます。FWERほど厳しくありません。</li>
+            <li><strong>Bonferroni</strong>: Welchのt検定の区間を、有意水準α/ペア数で広げたものです。</li>
+            <li><strong>Tukey</strong>: 等分散を仮定したTukey-Kramerの同時信頼区間です。群ごとの分散が大きく異なる場合は、近似である点に注意してください。</li>
           </ul>
-          <div class="table-wrap" id="pair-adj-table"></div>
         </div>
-        <div id="pair-skipped" class="mdc-info-box" hidden>
-          <p>2群のため、多重比較の補正は不要です。</p>
+        <div id="pair-adj-chart"></div>
+        <div class="table-wrap" id="pair-adj-ci-table"></div>
         </div>
       </div>
+
       <footer id="footer">
         <div class="footer-links">
           <a href="https://sasasakaz.github.io/">🏠 Home</a>
