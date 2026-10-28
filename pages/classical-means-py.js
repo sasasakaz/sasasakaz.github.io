@@ -208,7 +208,7 @@ def pairwise(ids, n, mean, sd, alpha, level):
         ax.set_yticks(range(m))
         ax.set_yticklabels([r["pair"] for r in rows])
         ax.invert_yaxis()
-        ax.set_xlabel("Difference in average (earlier group - later group)")
+        ax.set_xlabel("Difference in average (points)")
         ax.set_title(title, pad=24 if legend else 6)
         if legend:
             ax.legend(frameon=False, fontsize=8, loc="lower center", bbox_to_anchor=(0.5, 1.02),

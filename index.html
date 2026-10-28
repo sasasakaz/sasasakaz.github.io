@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>sasasakaz</title>
   <link rel="canonical" href="https://sasasakaz.github.io/index.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
-  <meta name="description"
-    content="書籍『AI 70年: 思考する機械からChatGPTへの道のり』について。機械学習やアップリフトモデリングの解説。ベイズ推定ツールなどを公開しています。">
+  <meta name="description" content="書籍『AI 70年: 思考する機械からChatGPTへの道のり』について。機械学習やアップリフトモデリングの解説。ベイズ推定ツールなどを公開しています。">
   <meta property="og:type" content="website">
   <meta property="og:title" content="sasasakaz">
   <meta property="og:description"
@@ -18,72 +18,6 @@
   <meta property="og:image" content="https://sasasakaz.github.io/images/sasasakaz.png">
 
   <link rel="stylesheet" href="./common.css">
-  <style>
-    body {
-      max-width: 900px;
-    }
-
-    h1 {
-      border-bottom: 2px solid #333;
-      padding-bottom: 0.5rem;
-      margin-bottom: 2rem;
-    }
-
-    /* 段組 */
-    .grid-container {
-      /* 画面幅に合わせて、最小280pxのカードを自動で並べる */
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      /* カード同士の隙間 */
-      /* gap: 1.25rem; */
-      /* スマホの時は隙間を少し小さく、PCではゆったりに可変させる */
-      gap: 1rem;
-    }
-
-    .tool-link {
-      display: flex;
-      flex-direction: column;
-      padding: 1.25rem;
-      background: white;
-      border-radius: 0.75rem;
-      text-decoration: none;
-      color: #333;
-      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05);
-      transition: all 0.2s ease;
-      border: 1px solid #eee;
-    }
-
-    @media (max-width: 480px) {
-      .tool-link {
-        /* スマホではカード内の余白を少し詰めて、画面を有効活用 */
-        padding: 1rem;
-      }
-
-      h1 {
-        /* スマホではタイトルを少し小さくして、一行に収まりやすくする */
-        font-size: 1.5rem;
-      }
-    }
-
-
-    .tool-link:hover {
-      transform: translateY(-0.25rem);
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
-      border-color: #007bff;
-    }
-
-    .tool-link strong {
-      font-size: 1.1em;
-      color: #007bff;
-    }
-
-    .description {
-      font-size: 0.85em;
-      color: #666;
-      margin-top: 0.5rem;
-      line-height: 1.5;
-    }
-  </style>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
@@ -97,84 +31,98 @@
 </head>
 
 <body>
-  <h1>Sasasakaz Works</h1>
-  <div class="grid-container">
-    <a href="pages/ai-70-years.html" class="tool-link">
-      <strong>📘 AI 70年</strong>
-      <div class="description">1950年代からChatGPTまで、AI研究の70年をたどる書籍です。</div>
-    </a>
-    <a href="pages/ml-history.html" class="tool-link">
-      <strong>🤖 機械学習の歴史</strong>
-      <div class="description">決定木、バギング、ブースティング、GBDTなど機械学習の歴史を簡単に。</div>
-    </a>
-    <a href="pages/ml-for-structured-data.html" class="tool-link">
-      <strong>🤖 機械学習の手法</strong>
-      <div class="description">構造化データにおける代表的な機械学習手法。</div>
-    </a>
-    <a href="pages/ml-evaluation.html" class="tool-link">
-      <strong>🤖 機械学習の評価指標</strong>
-      <div class="description">分類モデルの評価指標（Accuracy, Precision, Recall, F1-score, MCC, ROC-AUC, PR-AUCなど）について。</div>
-    </a>
-    <a href="pages/ml-interpretation.html" class="tool-link">
-      <strong>🤖 機械学習モデルの解釈</strong>
-      <div class="description">PFI, SHAP, PDP, ICEなど機械学習モデルの解釈手法について。</div>
-    </a>
-    <a href="pages/uplift-basic.html" class="tool-link">
-      <strong>🎯 アップリフトモデリング（基礎）</strong>
-      <div class="description">アップリフトモデリングの基礎情報。</div>
-    </a>
-    <a href="pages/uplift-advanced.html" class="tool-link">
-      <strong>🎯 アップリフトモデリング（実践）</strong>
-      <div class="description">アップリフトモデリングの実践。</div>
-    </a>
-    <a href="pages/dify.html" class="tool-link">
-      <strong>💬 Dify</strong>
-      <div class="description">AIチャットボット。</div>
-    </a>
-    <a href="pages/bayesian-means.html" class="tool-link">
-      <strong>🦊 Bayesian Comparison of Means</strong>
-      <div class="description">平均の差のベイズ推定を簡単実行。</div>
-    </a>
-    <a href="pages/bayesian-props.html" class="tool-link">
-      <strong>🦊 Bayesian Comparison of Proportions</strong>
-      <div class="description">比率の差のベイズ推定を簡単実行。</div>
-    </a>
-    <a href="pages/classical-means.html" class="tool-link">
-      <strong>🦁 Classical Means</strong>
-      <div class="description">平均の差の検定を簡単実行。</div>
-    </a>
-    <a href="pages/classical-props.html" class="tool-link">
-      <strong>🦁 Classical Proportions</strong>
-      <div class="description">比率の差の検定を簡単実行。</div>
-    </a>
-    <a href="pages/markdown-converter.html" class="tool-link">
-      <strong>🐶 Markdown Converter</strong>
-      <div class="description">MarkdownをHTMLに変換する。</div>
-    </a>
-    <a href="pages/diff-viewer.html" class="tool-link">
-      <strong>🐯 Diff Viewer</strong>
-      <div class="description">テキストの差分を左右で視覚的に比較。</div>
-    </a>
-    <a href="pages/color-comparison.html" class="tool-link">
-      <strong>🦄 Color Comparison</strong>
-      <div class="description">4色の塗りつぶし・枠線・文字色を並べて比較。</div>
-    </a>
-    <a href="pages/amazon-clean.html" class="tool-link">
-      <strong>🐹 Amazon Clean</strong>
-      <div class="description">Amazonの長いURLを不要箇所削って短くする。</div>
-    </a>
-    <a href="pages/qr-code-creator.html" class="tool-link">
-      <strong>🐼 QR Code Creator</strong>
-      <div class="description">連絡先登録用・サイト表示用のQRコードを作成。</div>
-    </a>
+  <h1><img src="https://sasasakaz.github.io/images/sasasakaz.png" alt="" class="site-logo">Sasasakaz Works</h1>
+
+  <div class="sections">
+    <section class="section sec-articles">
+      <h2>Articles</h2>
+      <div class="card-list">
+        <a href="pages/ai-70-years.html" class="card">
+          <strong>📘 AI 70年</strong>
+          <div class="description">1950年代からChatGPTまで、AI研究の70年をたどる書籍です。</div>
+        </a>
+        <a href="pages/ml-history.html" class="card">
+          <strong>🤖 機械学習の歴史</strong>
+          <div class="description">決定木、バギング、ブースティング、GBDTなど機械学習の歴史を簡単に。</div>
+        </a>
+        <a href="pages/ml-for-structured-data.html" class="card">
+          <strong>🤖 機械学習の手法</strong>
+          <div class="description">構造化データにおける代表的な機械学習手法。</div>
+        </a>
+        <a href="pages/ml-evaluation.html" class="card">
+          <strong>🤖 機械学習の評価指標</strong>
+          <div class="description">分類モデルの評価指標（Accuracy, Precision, Recall, F1-score, MCC, ROC-AUC, PR-AUCなど）について。</div>
+        </a>
+        <a href="pages/ml-interpretation.html" class="card">
+          <strong>🤖 機械学習モデルの解釈</strong>
+          <div class="description">PFI, SHAP, PDP, ICEなど機械学習モデルの解釈手法について。</div>
+        </a>
+        <a href="pages/uplift-basic.html" class="card">
+          <strong>🎯 アップリフトモデリング（基礎）</strong>
+          <div class="description">アップリフトモデリングの基礎情報。</div>
+        </a>
+        <a href="pages/uplift-advanced.html" class="card">
+          <strong>🎯 アップリフトモデリング（実践）</strong>
+          <div class="description">アップリフトモデリングの実践。</div>
+        </a>
+      </div>
+    </section>
+
+    <section class="section sec-tools">
+      <h2>Tools</h2>
+      <div class="card-list">
+        <a href="pages/dify.html" class="card">
+          <strong>💬 Dify</strong>
+          <div class="description">AIチャットボット。</div>
+        </a>
+        <a href="pages/bayesian-means.html" class="card">
+          <strong>🦊 Bayesian Comparison of Means</strong>
+          <div class="description">平均の差のベイズ推定を簡単実行。</div>
+        </a>
+        <a href="pages/bayesian-props.html" class="card">
+          <strong>🦊 Bayesian Comparison of Proportions</strong>
+          <div class="description">比率の差のベイズ推定を簡単実行。</div>
+        </a>
+        <a href="pages/classical-means.html" class="card">
+          <strong>🦁 Classical Means</strong>
+          <div class="description">平均の差の検定を簡単実行。</div>
+        </a>
+        <a href="pages/classical-props.html" class="card">
+          <strong>🦁 Classical Proportions</strong>
+          <div class="description">比率の差の検定を簡単実行。</div>
+        </a>
+        <a href="pages/markdown-converter.html" class="card">
+          <strong>🐶 Markdown Converter</strong>
+          <div class="description">MarkdownをHTMLに変換する。</div>
+        </a>
+        <a href="pages/diff-viewer.html" class="card">
+          <strong>🐯 Diff Viewer</strong>
+          <div class="description">テキストの差分を左右で視覚的に比較。</div>
+        </a>
+        <a href="pages/color-comparison.html" class="card">
+          <strong>🦄 Color Comparison</strong>
+          <div class="description">4色の塗りつぶし・枠線・文字色を並べて比較。</div>
+        </a>
+        <a href="pages/amazon-clean.html" class="card">
+          <strong>🐹 Amazon Clean</strong>
+          <div class="description">Amazonの長いURLを不要箇所削って短くする。</div>
+        </a>
+        <a href="pages/qr-code-creator.html" class="card">
+          <strong>🐼 QR Code Creator</strong>
+          <div class="description">連絡先登録用・サイト表示用のQRコードを作成。</div>
+        </a>
+      </div>
+    </section>
   </div>
-  <footer id="footer">
-    <div class="footer-links">
-      <a href="https://github.com/sasasakaz">⭐ Profile</a>
-      <span class="separator">|</span>
-      <a href="pages/contact.html">Contact</a>
+
+  <section class="section sec-others">
+    <h2>Others</h2>
+    <div class="chip-list">
+      <a href="https://github.com/sasasakaz" class="chip">⭐ Profile</a>
+      <a href="pages/contact.html" class="chip">✉️ Contact</a>
     </div>
-    <p>Author: sasasakaz 2022-2026</p>
-  </footer>
+    <p class="author">Author: sasasakaz 2022-2026</p>
+  </section>
 </body>
+
 </html>

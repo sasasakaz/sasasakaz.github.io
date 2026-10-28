@@ -1,64 +1,217 @@
 @charset "utf-8";
 
-/* すべての要素でサイズ計算を正確にする */
+/* =====================================================================
+   トップページ（index.html）専用のCSS
+   ・配下ページは page-common.css を使う。こちらは index だけ。
+   ・:root の値は page-common.css からのコピー。色を変えるときは両方直すこと
+   ===================================================================== */
+:root {
+  --c-brand-dark: #1a365d;
+  --c-brand-light: #3182ce;
+  --c-brand2-1: #f0f4f8;
+  --c-brand2-2: #e8f4fc;
+  --c-brand2-3: #d0e7f5;
+
+  --c-accent: #f57c00;
+  --c-accent-dark: #7a4a00;
+  --c-accent-light: #fff3e0;
+
+  --c-accent2: #34c759;
+  --c-accent2-dark: #155724;
+  --c-accent2-light: #e8f5e9;
+
+  --c-text: #333333;
+  --c-text-sub: #666666;
+  --c-bg: #ffffff;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Yu Gothic", "Meiryo", "Noto Sans JP", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol";
+}
+
 * {
   box-sizing: border-box;
 }
 
-body {
-  font-family: "Open Sans", verdana, arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Segoe UI Symbol";
-  /* 背景色：少し落ち着いたグレー */
-  background: #f4f4f4;
-  /* 文字色：真っ黒より少しだけ優しい黒 */
-  color: #333;
-  /* 画面が大きくても広がらないように */
-  max-width: 1280px;
-  margin: 0 auto 2rem;
-  padding: 1rem;
-  /* スマホで横揺れするのを防ぐ */
-  overflow-x: hidden;
-  /* 文字サイズの自動調整をオフにして意図しない挙動を防ぐ */
+html {
   -webkit-text-size-adjust: 100%;
 }
 
-/* 画像が親要素を突き抜けないように */
-img {
-  max-width: 100%;
-  height: auto;
+body {
+  font-family: var(--font-sans);
+  text-autospace: normal;
+  color: var(--c-text);
+  background: var(--c-bg);
+  line-height: 1.8;
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 3rem;
 }
 
-
-/* リンク要素 */
 a {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  /* 親の文字色を引き継ぐ */
   color: inherit;
-  /* 余計な装飾をしない（下線を消すなど） */
   text-decoration: none;
 }
 
-/* ボタン要素 */
-button {
-  cursor: pointer;
-  transition: all 0.2s ease;
-  /* 指で押しやすくするために、最低でも44px程度の高さを意識しやすくする */
-  min-height: 3rem;
-  display: inline-flex;
-  align-items: center;
-  /* 横方向も中央に */
-  justify-content: center;
-  /* ボタンだけフォントが変わるのを防ぐ */
-  font-family: inherit;
+a:focus-visible {
+  outline: 2px solid var(--c-brand-light);
+  outline-offset: 2px;
+}
+
+h1,
+h2 {
+  line-height: 1.4;
+}
+
+/* タイトル。先頭のロゴ画像は文字と同じ高さ（1em）にそろえる */
+h1 {
+  font-size: 1.8em;
+  color: var(--c-brand-dark);
+  margin: 0 0 1.5rem;
+}
+
+.site-logo {
+  height: 1.1em;
+  width: auto;
+  vertical-align: middle;
+  margin-right: 0.2em;
+  position: relative;
+  top: -0.05em;
 }
 
 
-#footer {
-  width: 100%;
+/* =====================================================================
+   グループごとの色（青 = Articles / 橙 = Tools / 緑 = Others）
+   --sec: 強い色（hover の枠）、--sec-dark: 文字、--sec-bg: 薄い面、--sec-line: 通常の枠
+   ===================================================================== */
+.sec-articles {
+  --sec: var(--c-brand-light);
+  --sec-dark: var(--c-brand-dark);
+  --sec-bg: var(--c-brand2-2);
+  --sec-line: var(--c-brand2-3);
+}
+
+.sec-tools {
+  --sec: var(--c-accent);
+  --sec-dark: var(--c-accent-dark);
+  --sec-bg: var(--c-accent-light);
+  --sec-line: color-mix(in srgb, var(--c-accent) 30%, white);
+}
+
+.sec-others {
+  --sec: var(--c-accent2);
+  --sec-dark: var(--c-accent2-dark);
+  --sec-bg: var(--c-accent2-light);
+  --sec-line: color-mix(in srgb, var(--c-accent2) 35%, white);
+}
+
+/* グループ見出し（h2 タグのまま、見た目は丸いラベル）。
+   配下ページの h2（濃い塗り＋白文字）は重いので、トップでは薄い面＋濃い文字にする */
+.section h2 {
+  display: inline-block;
+  font-size: 1.05em;
+  color: var(--sec-dark);
+  background: var(--sec-bg);
+  border: 2px solid var(--sec);
+  border-radius: 999px;
+  padding: 0.1em 1em;
+  margin: 0 0 0.9rem;
+}
+
+
+/* =====================================================================
+   上段: Articles | Tools の2列（狭い画面では Articles → Tools → Others の縦並び）
+   ===================================================================== */
+.sections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem 1.25rem;
+  /* 件数が違っても、短い方を引き伸ばさず上揃えにする */
+  align-items: start;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* 項目（カード）。影と浮く動きはなし。色の変化だけで「押せる」ことを伝える */
+.card {
+  display: block;
+  padding: 0.6rem 0.9rem;
+  background: var(--c-bg);
+  border: 1px solid var(--sec-line);
+  border-radius: 0.75rem;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  background: var(--sec-bg);
+  border-color: var(--sec);
+}
+
+.card strong {
+  display: block;
+  font-size: 1.05em;
+  line-height: 1.5;
+  color: var(--sec-dark);
+}
+
+.description {
   font-size: 0.85em;
-  text-align: center;
-  margin-top: 2rem;
-  padding: 1rem 0;
-  border-top: 1px solid #ddd;
-  clear: both;
+  line-height: 1.5;
+  color: var(--c-text-sub);
+  margin-top: 0.15rem;
+}
+
+
+/* =====================================================================
+   下段: Others（旧フッターの内容）
+   ===================================================================== */
+.section.sec-others {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--sec-line);
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  font-size: 0.95em;
+  color: var(--sec-dark);
+  background: var(--c-bg);
+  border: 1px solid var(--sec-line);
+  border-radius: 999px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  background: var(--sec-bg);
+  border-color: var(--sec);
+}
+
+.author {
+  margin: 1.25rem 0 0;
+  font-size: 0.85em;
+  color: var(--c-text-sub);
+}
+
+
+@media (max-width: 720px) {
+  body {
+    padding: 1.5rem 1rem 2rem;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+
+  .sections {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

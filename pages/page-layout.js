@@ -64,6 +64,13 @@
         ['🐹 Amazon Clean', 'pages/amazon-clean.html'],
         ['🐼 QR Code Creator', 'pages/qr-code-creator.html']
       ]
+    },
+    {
+      group: 'Others',
+      items: [
+        ['⭐ Profile', 'https://github.com/sasasakaz'],
+        ['✉️ Contact', 'pages/contact.html']
+      ]
     }
   ];
 

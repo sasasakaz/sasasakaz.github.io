@@ -155,14 +155,14 @@ lightgbm 4.6.0
       <p>分類器（モデル）とは別に、モデルが出力した確率やスコア（CVしやすさ、増分の大きさなど）を、実際の発生率に対応するように変換する較正器（キャリブレーター）を追加する。</p>
       <p>キャリブレーションには複数の手法がある。ここでは、scikit-learnの<code>CalibratedClassifierCV</code>で利用できる手法のうち2つを取り上げる。</p>
       <ul>
-        <li><span class='inline-gray'>Sigmoid（Platt Scaling）</span>
+        <li><strong>Sigmoid（Platt Scaling）</strong>
           <ul>
             <li>シグモイド関数を使って、モデルの出力を確率に変換する方法。</li>
             <li>確率のズレが、シグモイド関数で十分に表現できる場合に適している（Isotonicよりも較正器の自由度が低い）。</li>
             <li>較正用データが少ない場合にも使いやすい。</li>
           </ul>
         </li>
-        <li><span class='inline-gray'>Isotonic（等調回帰）</span>
+        <li><strong>Isotonic（等調回帰）</strong>
           <ul>
             <li>データから単調な変換関数を学習する方法。</li>
             <li>特定の関数の形を仮定せず、データに合わせて柔軟に確率を調整できる。</li>
@@ -404,9 +404,9 @@ model.fit(X, y)
       </ul>
       <p>グラフの見方（横軸に予測、縦軸に実際）</p>
       <ul>
-        <li><span class='inline-gray'>対角線に近い</span> → 予測と実際が近い（望ましい状態）</li>
-        <li><span class='inline-gray'>対角線より下</span> → 予測を高く出しすぎ（過大評価）</li>
-        <li><span class='inline-gray'>対角線より上</span> → 予測を低く出しすぎ（過小評価）</li>
+        <li><strong>対角線に近い</strong> → 予測と実際が近い（望ましい状態）</li>
+        <li><strong>対角線より下</strong> → 予測を高く出しすぎ（過大評価）</li>
+        <li><strong>対角線より上</strong> → 予測を低く出しすぎ（過小評価）</li>
       </ul>
 
       <div class="mdc-note-box">
@@ -440,8 +440,8 @@ model.fit(X, y)
       <p>見方</p>
       <ul>
         <li>予測確率も実際の発生率も0〜1なので、その差の絶対値は0〜1の値を取る。</li>
-        <li><span class='inline-gray'>ECEが小さい</span> → 予測確率と実際の発生率が全体として近い</li>
-        <li><span class='inline-gray'>ECEが大きい</span> → 予測確率と実際の発生率にズレがある</li>
+        <li><strong>ECEが小さい</strong> → 予測確率と実際の発生率が全体として近い</li>
+        <li><strong>ECEが大きい</strong> → 予測確率と実際の発生率にズレがある</li>
       </ul>
 
       <div class="mdc-note-box">
@@ -686,8 +686,8 @@ model.fit(X, y)
       </ul>
       <p>ASMDの目安</p>
       <ul>
-        <li><span class='inline-gray'>ASMD &lt; 0.10</span>: おおむねバランスが取れているとみなす目安。</li>
-        <li><span class='inline-gray'>ASMD ≥ 0.10</span>: 共変量の偏りが残っていないか確認する。</li>
+        <li><strong>ASMD &lt; 0.10</strong>: おおむねバランスが取れているとみなす目安。</li>
+        <li><strong>ASMD ≥ 0.10</strong>: 共変量の偏りが残っていないか確認する。</li>
         <li>0.10は一般的に使われる目安であり、絶対的な基準ではない。</li>
       </ul>
 
@@ -890,8 +890,8 @@ model.fit(X, y)
       </ul>
       <p>信頼区間を用いることで、<span class='inline-mark'>AUUCの推定にどの程度の不確実性があるかを把握</span>する。</p>
       <ul>
-        <li><span class='inline-gray'>CIが狭い</span>: リサンプリングによるAUUCの変動が比較的小さい。</li>
-        <li><span class='inline-gray'>CIが広い</span>: リサンプリングによってAUUCが大きく変動する可能性がある。</li>
+        <li><strong>CIが狭い</strong>: リサンプリングによるAUUCの変動が比較的小さい。</li>
+        <li><strong>CIが広い</strong>: リサンプリングによってAUUCが大きく変動する可能性がある。</li>
       </ul>
       <p>CIはモデルの性能が確実にその範囲に収まることを保証するものではない。またCIが広い場合は、評価データの件数や顧客構成なども踏まえて判断する。</p>
 
@@ -900,8 +900,8 @@ model.fit(X, y)
       <p>各モデルのAUUCだけではランダムに施策対象を選んだ場合と比べて、どの程度の効果が得られるのかはわからない。グラフ上はQini曲線が対角線より上にあるように見えるが偶然の範囲なのでは？</p>
       <p>そこで、ブートストラップの各サンプルで、モデルのAUUCからランダムターゲティングのAUUCを引いた差を計算し、そのCIを確認する。</p>
       <ul>
-        <li><span class='inline-gray'>CIが0より大きい</span>: ランダムターゲティングを上回ることを示す。</li>
-        <li><span class='inline-gray'>CIが0をまたぐ</span>: ランダムターゲティングを上回るとは、十分な根拠をもって判断できない。</li>
+        <li><strong>CIが0より大きい</strong>: ランダムターゲティングを上回ることを示す。</li>
+        <li><strong>CIが0をまたぐ</strong>: ランダムターゲティングを上回るとは、十分な根拠をもって判断できない。</li>
       </ul>
 
 
@@ -909,8 +909,8 @@ model.fit(X, y)
       <p>各モデルのAUUCのCIが重なっているかどうかだけで、モデル間に差があるかを判断するのは適切ではない。<strong>モデル間の差そのもののCI</strong>を確認する。</p>
       <p>サンプル事例では上記をペアードブートストラップしているので、Learner間の差の比較にも使える。</p>
       <ul>
-        <li><span class='inline-gray'>AUUCの差のCIが0をまたがない</span>: 2つのモデルの性能に差があることを示す結果。</li>
-        <li><span class='inline-gray'>AUUCの差のCIが0をまたぐ</span>: どちらが優れているかを明確に判断する根拠が十分ではない。</li>
+        <li><strong>AUUCの差のCIが0をまたがない</strong>: 2つのモデルの性能に差があることを示す結果。</li>
+        <li><strong>AUUCの差のCIが0をまたぐ</strong>: どちらが優れているかを明確に判断する根拠が十分ではない。</li>
       </ul>
       <p>CIが0をまたぐことは、2つのモデルの性能が同じであることを意味しない。また複数のモデルを比較する場合には、多重比較の影響にも注意が必要。</p>
 

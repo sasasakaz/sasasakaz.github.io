@@ -177,28 +177,32 @@
 
 
 
-        <h2 id="result-pair">2群ごとの平均の差の検定</h2>
+        <h2 id="result-pair">各群間の平均の差の検定</h2>
         <div id="omni-skipped" class="mdc-info-box" hidden>
           <p>2群のため、上記の全体の検定結果と同じです。</p>
         </div>
         <ul>
-          <li>全ペアでWelchのt検定を行います。差分は「前の群 − 後の群」です（例: A - B）。</li>
+          <li>全ペアでWelchのt検定をおこないます。</li>
           <li><strong>Bonferroni / Holm</strong>: 1つでも偽陽性を出す確率（FWER）を抑えます。HolmはBonferroniより検出力が高いです。</li>
           <li><strong>Benjamini-Hochberg（BH）</strong>: 有意とされたもののうち偽陽性が占める割合（FDR）を抑えます。FWERほど厳しくありません。</li>
-          <li>有意なp値は黄色で表示します。</li>
         </ul>
 
 
         <h3 id="result-pair-p">t値とp値</h3>
+        <ul>
+          <li>有意なp値は黄色で表示します。</li>
+          <li>diff A - B: A群の平均からB群の平均を差し引いた値です。</li>
+        </ul>
+
+        <div class="table-wrap" id="pair-adj-table"></div>
         <details class="result-details">
           <summary>Welchのt検定の詳細（SE, t, dof）</summary>
           <div class="table-wrap" id="pair-t-table"></div>
         </details>
-        <div class="table-wrap" id="pair-adj-table"></div>
 
 
         <div id="pair-section">
-        <h3 id="result-pair-adj-chart">平均の差の信頼区間の比較（補正なし / Bonferroni / Tukey）</h3>
+        <h3 id="result-pair-adj-chart">平均の差の信頼区間の比較</h3>
         <div id="pair-adj-note">
           <ul>
             <li><strong>Bonferroni</strong>: Welchのt検定の区間を、有意水準α/ペア数で広げたものです。</li>
