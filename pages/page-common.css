@@ -869,7 +869,7 @@ html.right-open .layout-3col .side-backdrop {
     z-index: auto;
     align-self: start;
     width: var(--l3-side-w);
-    max-height: calc(100vh - 2rem);
+    max-height: calc(100vh - var(--l3-topbar-h) - 2rem);
     margin: 1rem 0 0;
     padding: 0;
     background: none;
