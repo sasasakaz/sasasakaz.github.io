@@ -69,6 +69,7 @@
       group: 'Others',
       items: [
         ['⭐ Profile', 'https://github.com/sasasakaz'],
+        ['📘 My Bookshelf', 'pages/bookshelf.html'],
         ['✉️ Contact', 'pages/contact.html']
       ]
     }

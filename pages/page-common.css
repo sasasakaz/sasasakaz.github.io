@@ -265,39 +265,7 @@ img {
 }
 
 
-.book-promo {
-  width: 300px;
-  max-width: 100%;
-}
 
-.book-cover {
-  display: block;
-  width: 300px;
-  max-width: 100%;
-  height: auto;
-}
-
-.affiliate-notice {
-  color: var(--c-text-sub);
-  font-size: 0.9em;
-}
-
-
-.btn-amzn {
-  display: block;
-  width: fit-content;
-  margin: 1em auto 0;
-  padding: 0.6em 1.2em;
-  background: var(--c-accent);
-  color: var(--c-bg);
-  text-decoration: none;
-  font-weight: bold;
-  border-radius: 0.3em;
-}
-
-.btn-amzn:hover {
-  background: var(--c-accent-hover);
-}
 
 /* 引用。mdc-note-box（灰色の面）と区別するため、面ではなく「字下げ＋左線」で引用らしく見せる。
    上下に padding は付けない（中の p や pre の margin が外側に畳まれ、左線は中身の高さになる） */
@@ -308,6 +276,14 @@ blockquote {
   background-color: var(--c-bg);
   color: var(--c-text-sub);
 }
+
+
+/* 注釈用:文字色とフォントサイズだけ */
+.note-text {
+  color: var(--c-text-sub);
+  font-size: 0.9em;
+}
+
 
 
 /* inline-* に共通の設定
@@ -368,7 +344,7 @@ blockquote {
   padding: 0.1em 0.25em;
 }
 
-/* 注釈のインライン版やちょっとしたフレーズ用 */
+/* 注釈用のインライン版 */
 .inline-gray {
   background-color: var(--c-brand2-1);
   /* ほんのり青みのあるうすいグレー */
@@ -416,7 +392,7 @@ blockquote {
   border-left: 5px solid #f44336;
 }
 
-/* 注釈のボックス版。左右に margin を取って、本文より一段引っ込んだ「注釈」に見せる */
+/* 注釈用のボックス版。左右に margin を取って、本文より一段引っ込める */
 .mdc-note-box {
   background-color: var(--c-bg-subtle);
   margin-inline: 1.5em;

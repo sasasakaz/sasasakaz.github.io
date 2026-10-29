@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookshelf</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/bookshelf.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="推薦書籍です。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="My Bookshelf">
+  <meta property="og:description" content="推薦書籍です。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/bookshelf.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page-common.css">
+  <script src="page-layout.js" defer></script>
+
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page-layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
+
+  <style>
+    .bookshelf {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      /* 横幅が足りなくなったら折り返す */
+      gap: 24px 16px;
+      /* 縦 横 */
+      align-items: flex-start;
+    }
+
+    .bookshelf li {
+      margin: 0;
+      /* 既存のliの余白指定を打ち消す */
+      padding: 0;
+    }
+
+    .book {
+      display: flex;
+      flex-direction: column;
+      width: 120px;
+      /* この幅でタイトルが折り返される */
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .book img {
+      width: 100%;
+      height: 170px;
+      /* 表紙の縦横比がバラバラでも高さを揃える */
+      object-fit: contain;
+      object-position: bottom;
+      /* 本の底辺が揃って棚っぽくなる */
+      box-shadow: 2px 3px 6px rgba(0, 0, 0, .25);
+    }
+
+    .book-title {
+      margin-top: 8px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+      /* 長い英単語などもはみ出さない */
+    }
+
+    .book:hover .book-title {
+      text-decoration: underline;
+    }
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
+</head>
+
+<body class="layout-3col">
+  <div class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true">📚
+      ページ一覧</button>
+    <span id="topbar-title" class="topbar-title"></span>
+    <button type="button" id="btn-right" class="topbar-btn" aria-controls="page-toc" aria-expanded="true">📑 目次</button>
+  </div>
+  <div id="side-backdrop" class="side-backdrop"></div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <header id="header">
+        <h1>Bookshelf</h1>
+
+        <!-- 投稿日・更新日メタ情報 -->
+        <div class="entry-meta">
+          <span class="meta-item published">
+            <span class="meta-icon" aria-hidden="true">🕒</span>
+            <span class="meta-label">公開：</span><time datetime="2026-10-29">2026.10.29</time>
+          </span>
+          <span class="meta-divider" aria-hidden="true">/</span>
+          <span class="meta-item updated">
+            <span class="meta-icon" aria-hidden="true">🔄</span>
+            <span class="meta-label">更新：</span><time datetime="2026-10-29">2026.10.29</time>
+          </span>
+        </div>
+
+        <p>おススメの書籍などです。</p>
+        <p class="note-text">※本ページのリンクの一部にはAmazonアソシエイト・プログラムによる広告リンクを含みます</p>
+      </header>
+
+      <!-- <h2 id="book">書籍</h2> -->
+
+      <ul class="bookshelf">
+
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0HGPS8Y4B?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/415hWFVeoSL._SL160_.jpg" alt="">
+            <span class="book-title">AI 70年: 思考する機械からChatGPTへの道のり - sasasakaz</span>
+          </a>
+        </li>
+        <li>
+
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B09SPGL2ZH?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51+dt08QnxL._SL160_.jpg" alt="">
+            <span class="book-title">スモールデータ解析と機械学習 - 藤原幸一</span>
+          </a>
+        </li>
+
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0FPPS9XBJ?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41P1+LrevmL._SL160_.jpg" alt="">
+            <span class="book-title">数理モデルはなぜ現実世界を語れないのか　社会的な視点から科学的予測を考える - エリカ・トンプソン, 塩原通緒</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0D46YVTZM?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51Bvkn1G1rL._SL160_.jpg" alt="">
+            <span class="book-title">Pythonで学ぶ効果検証入門 - 伊藤寛武, 金子雄祐, 安井翔太</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0CY1MJGFL?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/417mhjQ58wL._SL160_.jpg" alt="">
+            <span class="book-title">因果推論 ―基礎から機械学習・時系列解析・因果探索を用いた意思決定のアプローチ― - 金本拓</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0BYS2C1GG?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51z3tR7+iEL._SL160_.jpg" alt="">
+            <span class="book-title">マーケティングオペレーション（MOps）の教科書 専門チームでマーケターの生産性を上げる米国発の新常識 - 丸井 達郎, 廣崎 依久</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B00GHHXPK2?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51qkqP8SKTL._SL160_.jpg" alt="">
+            <span class="book-title">新装版 マックスウェルの悪魔 : 確率から物理学へ (ブルーバックス) - 都筑卓司</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0CP26YYRJ?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51E3-byvsPL._SL160_.jpg" alt="">
+            <span class="book-title">Ｐｙｔｈｏｎでスラスラわかる　ベイズ推論「超」入門 (ＫＳ情報科学専門書) - 赤石雅典, 須山敦志</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0CHRMHM3R?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41e5XLC+TCL._SL160_.jpg" alt="">
+            <span class="book-title">思考の方法学 (講談社現代新書) - 栗田治</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0BVVCGLKS?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51nNzLKJlLL._SL160_.jpg" alt="">
+            <span class="book-title">入門　実践する計量経済学 - 藪 友良</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0BVLM8RR2?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/31kuSxEiAzL._SL160_.jpg" alt="">
+            <span class="book-title">みんなのフィードバック大全 - 三村 真宗</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0834JN23Y?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41ps-+n5VDL._SL160_.jpg" alt="">
+            <span class="book-title">効果検証入門〜正しい比較のための因果推論／計量経済学の基礎 - 安井 翔太, 株式会社ホクソエム</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/4798171948?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51E-7+umDuL._SL160_.jpg" alt="">
+            <span class="book-title">Pythonで学ぶあたらしい統計学の教科書 第2版 (AI &amp;amp; TECHNOLOGY) - 馬場真哉</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B093LM1WRV?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41tskCUqxGS._SL160_.jpg" alt="">
+            <span class="book-title">意思決定分析と予測の活用　基礎理論からＰｙｔｈｏｎ実装まで (ＫＳ情報科学専門書) - 馬場真哉</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/491061219X?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41m0cTzBpgL._SL160_.jpg" alt="">
+            <span class="book-title">改訂版 平均・分散から始める一般化線形モデル入門 ―Rで学ぶデータ解析の理論と実装― - 馬場 真哉</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0B461HHXC?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51H2T3n3I5L._SL160_.jpg" alt="">
+            <span class="book-title">神のいない世界の歩き方　「科学的思考」入門 (ハヤカワ文庫NF) - リチャード ドーキンス, 大田 直子</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/4794223641?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51FAwk6adSL._SL160_.jpg" alt="">
+            <span class="book-title">文庫 異端の統計学 ベイズ (草思社文庫 マ 3-1) - シャロン・バーチュ・マグレイン, 冨永 星</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/4121016904?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/416wKp4J5eL._SL160_.jpg" alt="">
+            <span class="book-title">科学史年表 (中公新書 1690) - 小山 慶太</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B09BBY1LP9?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41MruTA6G1L._SL160_.jpg" alt="">
+            <span class="book-title">機械学習を解釈する技術〜予測力と説明力を両立する実践テクニック - 森下 光之助</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B0CW1H12XX?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51lh8Ut1NZL._SL160_.jpg" alt="">
+            <span class="book-title">Pythonではじめる数理最適化(第2版) ―ケーススタディでモデリングのスキルを身につけよう― - 岩永二郎, 石原響太, 西村直樹, 田中一樹</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/4274219984?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51CziILeS9L._SL160_.jpg" alt="">
+            <span class="book-title">機械学習入門 ボルツマン機械学習から深層学習まで - 大関真之</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B079M1QX66?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51X7Wu1cwuL._SL160_.jpg" alt="">
+            <span class="book-title">ベイズ推定入門 モデル選択からベイズ的最適化まで - 大関真之</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/4296000667?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51pmUPNdN6L._SL160_.jpg" alt="">
+            <span class="book-title">そのビジネス課題、最新の経済学で「すでに解決」しています。 仕事の「直感」「場当たり的」「劣化コピー」「根性論」を終わらせる - 上野 雄史, 星野 崇宏, 安田
+              洋祐, 山口
+              真一, 今井 誠(編著者), 坂井 豊貴(編著者)</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B08Z3TPVZG?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51NOg3KORzL._SL160_.jpg" alt="">
+            <span class="book-title">A/Bテスト実践ガイド　真のデータドリブンへ至る信用できる実験とは (アスキードワンゴ) - Ron Kohavi, Diane Tang, Ya Xu, 大杉
+              直也</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/4627077912?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41PuGGodUyL._SL160_.jpg" alt="">
+            <span class="book-title">Pythonで体験するベイズ推論:PyMCによるMCMC入門 - デビッドソン=ピロン,キャメロン, 徹, 玉木</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/B00HWP6MXA?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/51A9gXhQshL._SL160_.jpg" alt="">
+            <span class="book-title">シグナル&amp;ノイズ 天才データアナリストの「予測学」 - ネイト シルバー, 川添 節子, 西内 啓</span>
+          </a>
+        </li>
+        <li>
+          <a class="book"
+            href="https://www.amazon.co.jp/dp/453219539X?tag=saki0d1-22&amp;linkCode=osi&amp;th=1&amp;psc=1"
+            target="_blank" rel="noopener noreferrer">
+            <img src="https://m.media-amazon.com/images/I/41CZJVfVY0L._SL160_.jpg" alt="">
+            <span class="book-title">統計学を拓いた異才たち(日経ビジネス人文庫) (日経ビジネス人文庫 ブルー さ 12-1) - デイヴィッド サルツブルグ, 竹内 惠行, 熊谷 悦生</span>
+          </a>
+        </li>
+
+
+      </ul>
+
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
+  </div>
+</body>
+
+</html>
