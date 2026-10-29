@@ -5,7 +5,7 @@ MarkdownをHTMLに変換するツール
 Created: 2026-04-25
 Updated: 2026-10-25
 Description: MarkdownをHTMLに変換する。逆も可能。
-Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に編集可能。hilight.js利用時はペースト先のHTMLにhighlight.jsとCSSの追加が必要。
+Notes: 
 -->
 
 <head>
@@ -116,7 +116,7 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       <summary>このページでできること</summary>
       <ul>
         <li>MarkdownをHTMLに変換できます。タイトル横のボタンで逆にもできます。</li>
-        <li>Previewに適用するCSS・JS・styleは自分で設定できます。設定は「設定1」「設定2」の2つまで保存でき、自由に切り替えられます。</li>
+        <li>Previewに適用するcss/js/styleなどはお好みで設定できます。設定は2つまで保存可能です。</li>
         <li>入力内容と設定内容は、使用中のブラウザ内（ローカルストレージ）に保存されます。</li>
       </ul>
     </details>
@@ -493,6 +493,8 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       // 置換文字列中の$&等が特殊解釈されないよう関数で置換する
       const fullHTML = wrapperInput.value.replaceAll('{{content}}', () => markdownHTML);
       const previewWin = window.open('', 'previewWin', 'width=800,height=600');
+      // 別タブで開く場合用
+      // const previewWin = window.open('', 'previewWin');
       if (!previewWin) return;
       previewWin.opener = null;
       // 外枠は固定の最小HTML。ユーザーのHTMLは allow-same-origin なしのsandbox iframeで動かし、
