@@ -342,7 +342,22 @@ button:hover {
   border-radius: 1rem;
   padding: 0.1rem 0.5rem;
   white-space: nowrap;
+  background: var(--c-bg);
+  cursor: pointer;
 }
+
+/* .mode-badge::after {
+  content: ' ⇄';
+} */
+
+/* 切り替えられると分かる目印 */
+.mode-badge:hover {
+  background: var(--c-brand-vivid);
+  color: white;
+  opacity: 1;
+}
+
+
 
 .tools {
   display: flex;

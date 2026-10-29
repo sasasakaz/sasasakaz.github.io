@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>アップリフトモデリング（実践）</title>
+  <title>アップリフトモデリング（実践）（Draft version）</title>
   <link rel="canonical" href="https://sasasakaz.github.io/pages/uplift-advanced.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
   <meta name="description" content="アップリフトモデリングの実践。キャリブレーション、推定値の妥当性、Qini曲線やAUUCなどモデル評価、期待純利益シミュレーションなどについて紹介します。">
@@ -403,8 +403,8 @@ model.fit(X, y)
         </p>
       </div>
 
-      <img src="../images/uplift-advanced-calibration-before-after.jpg" alt="キャリブレーション前後の比較">
-      <img src="../images/uplift-advanced-calibration-metrics.jpg" alt="キャリブレーション前後の指標比較">
+      <img src="../images/uplift-advanced-calibration-before-after.jpg" alt="キャリブレーション前後の比較画像">
+      <img src="../images/uplift-advanced-calibration-metrics.jpg" alt="キャリブレーション前後の指標比較画像">
 
 
       <h4>予測確率の分布</h4>
@@ -572,7 +572,7 @@ model.fit(X, y)
         </ul>
       </ul>
 
-      <img src="../images/uplift-advanced-prob-dist-st.jpg" alt="S,T-Learnerの予測確率分布">
+      <img src="../images/uplift-advanced-prob-dist-st.jpg" alt="S,T-Learnerの予測確率分布画像">
 
 
       <h4>X-Learnerの分布</h4>
@@ -597,7 +597,7 @@ model.fit(X, y)
         <li>差の平均は2つの推定値の系統的なズレ、差の標準偏差は顧客ごとのズレのバラツキを表す。</li>
         <li>ズレが大きい場合は、処置群/対照群のデータ量や特徴量の分布などを確認し、推定が不安定になっていないかを調べる。</li>
       </ul>
-      <img src="../images/uplift-advanced-prob-dist-x.jpg" alt="X-Learnerの予測確率分布">
+      <img src="../images/uplift-advanced-prob-dist-x.jpg" alt="X-Learnerの予測確率分布画像">
 
 
       <h4>S,T,X-Learnerのアップリフト</h4>
@@ -645,7 +645,7 @@ model.fit(X, y)
         </tbody>
       </table>
 
-      <img src="../images/uplift-advanced-prob-dist-uplift.jpg" alt="アップリフトの予測分布">
+      <img src="../images/uplift-advanced-prob-dist-uplift.jpg" alt="アップリフトの予測分布画像">
 
 
 
@@ -655,7 +655,7 @@ model.fit(X, y)
         傾向スコアモデル（<code>g</code>）の<code>predict_proba()</code>から、処置を受ける確率を取り出し、処置群/対照群別に傾向スコア（PS）の分布をプロットする。2群の分布がどの程度重なっているかを確認することで、似たような特徴を持つ顧客について、<strong>処置群と対照群を比較できるだけのデータがあるか</strong>を把握する。X-LearnerやIPWを含む因果効果推定で重要な診断のひとつ。
       </p>
 
-      <img src="../images/uplift-advanced-ps-overlap.jpg" alt="傾向スコアの分布の重なり">
+      <img src="../images/uplift-advanced-ps-overlap.jpg" alt="傾向スコアの分布の重なり画像">
 
 
       <strong>2群の分布が十分に重なっている場合</strong>
@@ -748,7 +748,7 @@ model.fit(X, y)
         <p>※共変量バランスが改善しても、未観測の交絡などが残っている可能性があるため、それだけで因果効果を正しく推定できると保証されるわけではない。</p>
       </div>
 
-      <img src="../images/uplift-advanced-covariate-balance.jpg" alt="共変量バランスの可視化">
+      <img src="../images/uplift-advanced-covariate-balance.jpg" alt="共変量バランスの可視化画像">
 
 
 
@@ -858,7 +858,7 @@ model.fit(X, y)
         <li>各Learnerが対角線（ランダムな対象者選定）を上回るだけでなく、ベースライン（通常の購入予測モデル:
           処置有無を使わずに購入しそうな顧客を予測）よりも累積増分成果が大きければ、<strong>アップリフトモデリングを使って施策対象者を選定する意義</strong>がより明確になる。</li>
       </ul>
-      <img src="../images/uplift-advanced-qini-curve.jpg" alt="Qini曲線とAUUC">
+      <img src="../images/uplift-advanced-qini-curve.jpg" alt="Qini曲線とAUUC画像">
 
 
       <p><strong>Qini曲線の軸を実数にするか割り算値にするか</strong></p>
@@ -961,19 +961,25 @@ model.fit(X, y)
       <p>
         アップリフトモデリングでは、個人ごとの効果という観測しにくい対象を推定するため、通常の予測モデル以上に過学習の影響を受けることがある。そのため、<strong>学習時の性能だけでモデルを評価せず、未使用データで性能が維持されているか</strong>を確認する。
       </p>
+
+
       <h4>Train / Val の比較</h4>
       <p>TrainとValそれぞれでQini曲線を計算し、曲線の形状やAUUCなどの評価指標を比較する。</p>
       <ul>
-        <li><strong>TrainとValの曲線が似ている</strong>：学習データで得られた顧客の順位付けが、検証データでもおおむね再現されている。</li>
-        <li><strong>Trainの曲線がValを大きく上回る</strong>：学習データでは高い順位付け性能が得られていても、検証データでは再現できていない可能性がある。過学習が疑われる。</li>
-        <li><strong>Valの曲線がランダムの基準線に近い</strong>：検証データでは、アップリフトの推定値による順位付けが十分に機能していない可能性がある。</li>
+        <li><strong>TrainとValの曲線が似ている</strong>: 学習データで得られた顧客の順位付けが、検証データでもおおむね再現されている。</li>
+        <li><strong>Trainの曲線がValを大きく上回る</strong>: 学習データでは高い順位付け性能が得られていても、検証データでは再現できていない可能性がある。過学習が疑われる。</li>
+        <li><strong>Valの曲線がランダムの基準線に近い</strong>: 検証データでは、アップリフトの推定値による順位付けが十分に機能していない可能性がある。</li>
       </ul>
       <p>ただし、TrainとValの曲線が似ていることだけで、過学習がないとは断定できない。また、曲線の差にはサンプルサイズや偶然の偏りも影響するため、差の大きさだけで判断せず、ほかの評価結果も踏まえて解釈する。</p>
+
+
       <h4>曲線の形状にも注目する</h4>
       <p>正規化Qini曲線では、曲線が途中で1を超え、最後に1へ戻る形状になることがある。サンプル事例では、Trainにこのような山が見られる一方、Valでは山がほとんど見られない。</p>
       <p>正規化Qini曲線の1は、全顧客を対象にした場合の増分実績を基準とする。曲線が途中で1を超える場合、選択した顧客群の推定増分実績が、全顧客を対象にした場合の推定増分実績を上回っていることを示す。</p>
-      <p>今回のサンプルでは、真の処置効果が全顧客でプラスという前提に照らすと、Trainだけに現れる山は、学習データ固有の偶然のパターンをモデルが捉えている可能性を示唆する。</p>
+      <p>サンプル事例では、真の処置効果が全顧客でプラスという前提に照らすと、Trainだけに現れる山は、学習データ固有の偶然のパターンをモデルが捉えている可能性を示唆する。</p>
       <p>ただし、山があること自体は過学習の確定的な証拠ではない。実データでは、負の処置効果を持つ顧客が存在する可能性もあるため、曲線の形状だけで判断しない。</p>
+
+
       <h4>Valの性能水準を確認する</h4>
       <p>
         TrainとValの差だけでなく、Valでどの程度の順位付け性能が得られているかも重要である。Trainとの差が大きくても、Valで実用的な性能が得られている場合には、そのモデルが有用である可能性はある。一方、Valの曲線がランダムの基準線を上回っていても、それだけで実用性が保証されるわけではない。
@@ -987,8 +993,74 @@ model.fit(X, y)
 
 
       <h3 id="predicted-score-vs-actual">Predicted Score vs Actual</h3>
+      <p>予測したアップリフトと、実際の観測結果から推定したアップリフトが<span class='inline-mark'>どの程度整合しているか</span>を確認する。</p>
+      <p>
+        Qini曲線やAUUCは、顧客の順位付け性能を評価する指標であり、予測したアップリフトの絶対的な大きさを直接評価するものではない。そのため、予測値の大きさが実際の効果と一致していなくても、順位付けが適切であれば、Qini曲線は左上に膨らみ、AUUCの値は高くなる場合がある。
+      </p>
+      <p>「上位20%にクーポンを配ると、購入率が平均でどれだけ増えるか」といった効果の大きさを見積もる場合には、予測値と実測推定値のズレも把握しておく必要がある。</p>
+      <p>個人単位のアップリフトは観測できない（処置された場合と、処置されなかった場合のどちらか一方しか観測できない）ため、アップリフトの予測値で顧客をグループに分け、グループ単位で比較する。</p>
+      <p>
+        例えば、アップリフトが大きいと予測されたグループほど、実測推定値（実際の観測結果での処置群と対照群の平均差分）でも効果が大きい傾向にあり、予測値と実測推定値の水準もおおむね一致していれば、順位付けと効果の大きさ（アップリフト）が整合していると考えられる。
+      </p>
+      <p>
+        モデル全体の評価指標だけでは分かりにくい、<strong>アップリフトが大きいと予測した顧客ほど、実測推定値でも効果が大きい傾向にあるか、また、予測した効果の大きさが実測推定値と整合しているか</strong>を確認するためのチェック。
+      </p>
+      <p>ただし、グループごとの効果は観測結果からの推定値であり、件数や偶然の偏りによっても変動する。グループ間の差を解釈する際は、各グループの件数や推定の不確実性も踏まえて判断する。</p>
+
+
+      <h4>データ加工の手順</h4>
+      <ol>
+        <li>アップリフト予測値（score）、処置有無、購入有無、IPW重みを用意する。</li>
+        <li>アップリフトの大きい順に、人数が等しくなるようグループに分ける。<ul>
+            <li>累積版：上位10%、上位20%、…、100%と、上位から累積する。</li>
+            <li>bin別：5つのbinに分ける（どの範囲でズレが生じているかを確認する）。</li>
+          </ul>
+        </li>
+        <li>グループごとに、予測値と実測推定値を計算する。<ul>
+            <li>予測値 = グループ内のscoreの平均</li>
+            <li>実測推定値 = 処置群の購入率 − 対照群の購入率（IPW重み付き）</li>
+          </ul>
+        </li>
+        <li>実測推定値の不確実性を評価するため、顧客単位で復元抽出し、グループ分けは固定したまま、手順3を1000回繰り返す。<ul>
+            <li>実測推定値の95%ブートストラップ区間</li>
+            <li>予測値と実測推定値の差の95%ブートストラップ区間</li>
+          </ul>
+        </li>
+        <li>予測値と実測推定値の差の区間が0を含む場合（consistent=True）、予測と実測の差が明確に確認できないことを示す。ただし、区間が広い場合は大きな差も含み得るため、区間の幅も合わせて確認する。<ul>
+            <li>consistent=True → 予測と実測の差が、ノイズの範囲に収まっている（この人数では「ズレている」と言い切れない）。</li>
+            <li>consistent=False で、gap が正 → 過大評価、負 → 過小評価。特に、複数の隣り合うbinで同じ向きに外れていれば、本当のズレの可能性が高い。</li>
+          </ul>
+        </li>
+      </ol>
+      <div class="mdc-note-box">
+
+        <p>例:
+          あるグループで、処置群200人のうち30人、対照群200人のうち20人が購入した場合、実測推定値 = 15% − 10% = 5pointsとなる。</p>
+        <p>単純な独立2群の購入率差として計算すると、95%信頼区間はおよそ±6.5pointsとなる。この程度のサンプルサイズでは、予測値が3pointsでも7pointsでも、実測推定値との差が明確にズレているとは言い難い。
+        </p>
+        <p>※説明用の概算であり、実際のIPW重み付き推定やブートストラップによる区間とは異なる。</p>
+      </div>
+
+
+      <h4>見方</h4>
+      <ul>
+        <li>青（予測値）が、赤の帯（実測推定値の95%ブートストラップ区間）の中に収まっていれば、予測値は実測推定値と矛盾しない。ただし、区間が広い場合は大きなズレも許容されるため、区間の幅も合わせて見る。</li>
+        <li>帯が広い（推定の不確実性が大きい）ところでは、差が大きく見えても、偶然の偏りによる可能性がある。</li>
+        <li>複数のグループで同じ向きに外れていれば、過大評価・過小評価の傾向が疑われる。ただし、累積版では各点が入れ子になっており、互いに相関しているため、点ごとの判定だけでなく曲線全体のパターンを見る。</li>
+        <li>どのbinでズレが生じているかを特定したい場合は、bin別で確認する。</li>
+      </ul>
+
+      <img src="../images/uplift-advanced-predicted-vs-actual-cum.jpg" alt="予測値と実測推定値の累積比較画像">
+      <img src="../images/uplift-advanced-predicted-vs-actual-bin.jpg" alt="予測値と実測推定値のbin別比較画像">
+
+
+
 
       <h2 id="profiling">Profiling</h2>
+
+
+
+
       <h3 id="score-quantiles">Score Quantiles</h3>
       <h3 id="between-learner">Between Learner</h3>
       <h3 id="expected-net-profit">Expected Net Profit</h3>

@@ -11,21 +11,25 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Markdown to HTML</title>
+  <title>Markdown Converter</title>
   <link rel="canonical" href="https://sasasakaz.github.io/pages/markdown-converter.html">
   <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
-  <meta name="description" content="MarkdownをHTMLに変換するツールにゃん。">
+  <meta name="description" content="MarkdownをHTMLに変換するツール。逆もできるにゃん。">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Markdown to HTML">
-  <meta property="og:description" content="MarkdownをHTMLに変換するツールにゃん。">
+  <meta property="og:title" content="Markdown Converter">
+  <meta property="og:description" content="MarkdownをHTMLに変換するツール。逆もできるにゃん。">
   <meta property="og:url" content="https://sasasakaz.github.io/pages/markdown-converter.html">
   <meta property="og:site_name" content="sasasakaz">
   <meta property="og:locale" content="ja_JP">
   <link rel="stylesheet" href="page-common.css">
   <link rel="stylesheet" href="markdown-converter.css">
 
-  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js" integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/turndown@7.2.4/dist/turndown.js" integrity="sha384-VRHmZZ8b5mH5yknWcg48OJS6RmXZmlgvsqhOXJqY0rwvwirs1M12xd+49c3NpW6a" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@15.0.12/marked.min.js"
+    integrity="sha384-948ahk4ZmxYVYOc+rxN1H2gM1EJ2Duhp7uHtZ4WSLkV4Vtx5MUqnV+l7u9B+jFv+"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/turndown@7.2.4/dist/turndown.js"
+    integrity="sha384-VRHmZZ8b5mH5yknWcg48OJS6RmXZmlgvsqhOXJqY0rwvwirs1M12xd+49c3NpW6a"
+    crossorigin="anonymous"></script>
   <script src="page-layout.js" defer></script>
 
   <!-- Google tag (gtag.js) -->
@@ -46,25 +50,16 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
   <header class="topbar" id="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
     <h1 id="page-title">MarkdownをHTMLに変換するにゃん</h1>
-    <div class="dd">
-      <button type="button" class="icon-btn" title="変換方向" aria-label="変換方向">⇄</button>
-      <div class="dd-panel">
-        <div class="dd-title">変換方向（切り替えると入力欄は空になります）</div>
-        <button type="button" class="dd-item current" data-mode="md2html" onclick="requestModeChange('md2html')">MD →
-          HTML</button>
-        <button type="button" class="dd-item" data-mode="html2md" onclick="requestModeChange('html2md')">HTML →
-          MD</button>
-      </div>
-    </div>
-    <span class="mode-badge" id="mode-badge">MD→HTML</span>
-    <div class="tools" id="tag-controls">
-      <div class="dd">
-        <button type="button" class="btn-tag btn-md">挿入 ▾</button>
-        <div class="dd-panel" id="insert-panel"></div>
-      </div>
-      <span class="tools" id="pinned-btns"></span>
-    </div>
+    <button type="button" class="mode-badge" id="mode-badge" title="クリックで変換方向を切り替え"
+      onclick="toggleMode()">MD→HTML</button>
     <div class="right-tools">
+      <div class="tools" id="tag-controls">
+        <div class="dd">
+          <button type="button" class="btn-tag btn-md">挿入 ▾</button>
+          <div class="dd-panel" id="insert-panel"></div>
+        </div>
+        <span class="tools" id="pinned-btns"></span>
+      </div>
       <button type="button" class="btn-preview" id="preview-btn" onclick="openPreview()">Preview</button>
       <button type="button" class="btn-copy" id="copy-btn" onclick="copyToClipboard()"><span class="btn-label">Copy
           HTML</span><span class="btn-done" aria-hidden="true">✓ Copied</span></button>
@@ -120,17 +115,19 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
     <details class="settings-help" open>
       <summary>このページでできること</summary>
       <ul>
-        <li>MarkdownをHTMLに変換できます。タイトル横の ⇄ ボタンで、HTML→Markdownの逆向きも可能です。</li>
+        <li>MarkdownをHTMLに変換できます。タイトル横のボタンで逆にもできます。</li>
         <li>Previewに適用するCSS・JS・styleは自分で設定できます。設定は「設定1」「設定2」の2つまで保存でき、自由に切り替えられます。</li>
         <li>入力内容と設定内容は、使用中のブラウザ内（ローカルストレージ）に保存されます。</li>
       </ul>
     </details>
     <div class="settings-area">
       <div class="css-preset-buttons">
-        <button type="button" class="css-preset-btn active" id="slot-1-btn" onclick="selectSlot(1)">設定1（外部ファイル参照）</button>
+        <button type="button" class="css-preset-btn active" id="slot-1-btn"
+          onclick="selectSlot(1)">設定1（外部ファイル参照）</button>
         <button type="button" class="css-preset-btn" id="slot-2-btn" onclick="selectSlot(2)">設定2（style直書き）</button>
       </div>
-      <label for="wrapper-input">Preview画面のHTML全体。外部CSS/JSの&lt;link&gt;・&lt;script&gt;や&lt;style&gt;を自由に記述。{{content}}の部分に変換結果が入ります</label>
+      <label
+        for="wrapper-input">Preview画面のHTML全体。外部CSS/JSの&lt;link&gt;・&lt;script&gt;や&lt;style&gt;を自由に記述。{{content}}の部分に変換結果が入ります</label>
       <textarea id="wrapper-input" spellcheck="false"></textarea>
     </div>
   </aside>
@@ -395,6 +392,11 @@ Notes: プレビュー用のHTMLとCSSは、右上設定ボタンから自由に
       if (mode === currentMode) return;
       if (input.value.trim() === '' || confirm('入力欄の内容は消えます。切り替えますか？')) setMode(mode);
     }
+
+    function toggleMode() {
+      requestModeChange(currentMode === 'md2html' ? 'html2md' : 'md2html');
+    }
+
 
     // リアルタイム更新
     input.addEventListener('input', updateOutput);
