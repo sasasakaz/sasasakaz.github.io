@@ -74,6 +74,8 @@ textarea,
   overflow-y: auto;
   /* 改行できない長いURL等も強制的に折り返す */
   overflow-wrap: anywhere;
+  line-height: 1.25;
+    /* 左右で行間をそろえる */
 }
 
 /* 入力と出力の高さを固定 */
