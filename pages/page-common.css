@@ -436,6 +436,87 @@ td {
 }
 
 
+/* details装飾 */
+details {
+  margin: var(--space-block) 0;
+  padding: 0 1em;
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  font-size: 0.9em;
+}
+
+summary {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  margin: 0 -1em;
+  /* 枠いっぱいに広げる（ホバー用） */
+  padding: 0.6em 1em;
+  list-style: none;
+  cursor: pointer;
+  /* font-weight: bold; */
+  color: var(--c-text-sub);
+  border-radius: 5px;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+summary::before {
+  content: "▶";
+  font-size: 0.85em;
+  transition: transform 0.2s;
+}
+
+summary:hover {
+  background: var(--c-bg-subtle);
+  /* ホバーの時だけうっすら色づく */
+}
+
+summary:focus-visible {
+  outline: 2px solid var(--c-brand-light);
+  outline-offset: 2px;
+}
+
+details[open] {
+  padding-bottom: 1em;
+}
+
+details[open]>summary {
+  margin-bottom: 0.8em;
+  border-bottom: 1px dashed var(--c-border);
+  border-radius: 5px 5px 0 0;
+}
+
+details[open]>summary::before {
+  transform: rotate(90deg);
+}
+
+/* 中身: 先頭と末尾の余白だけ整える */
+details>summary+* {
+  margin-top: 0;
+}
+
+details> :last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  summary::before {
+    transition: none;
+  }
+}
+
+
+
+
+
+
+
+
+
+
 /* 日付エリア全体（控えめな薄いグレー＆小ぶりなフォント） */
 .entry-meta {
   display: flex;
