@@ -179,15 +179,20 @@ def pairwise(ids, n, mean, sd, alpha, level):
                         "tlo": float(diff - q_crit * se_tukey), "thi": float(diff + q_crit * se_tukey)})
         rows.append(row)
 
-    t_rows = [[r["pair"], r["se"], r["t"], r["dof"]] for r in rows]
-    t_table = html_table(["Pair", "SE", "t", "dof"], ["text", "f2", "f2", "f2"], t_rows, alpha)
+    t_rows = [[r["pair"], n[i], mean[i], n[j], mean[j], r["diff"], r["se"], r["t"], r["dof"]]
+              for (i, j), r in zip(pairs, rows)]
+    t_table = html_table(
+        ["Pair", "N (A)", "Mean (A)", "N (B)", "Mean (B)", "diff", "SE", "t", "dof"],
+        ["text", "int", "f2", "int", "f2", "f2", "f2", "f2", "f2"], t_rows, alpha)
 
     adj_ci_table = None
     if k >= 3:
         adj_ci_table = html_table(
-            ["Pair", "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
-            ["text"] + ["f2"] * 4,
-            [[r["pair"], r["blo"], r["bhi"], r["tlo"], r["thi"]] for r in rows])
+            ["Pair", "diff", "CI Lower", "CI Upper",
+             "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
+            ["text"] + ["f2"] * 7,
+            [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"], r["tlo"], r["thi"]]
+             for r in rows])
 
     specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.3),
              ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0),

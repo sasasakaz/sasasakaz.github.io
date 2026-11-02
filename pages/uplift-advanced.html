@@ -1076,10 +1076,20 @@ gのAUC (Test): 0.500
 
       <img src="../images/uplift-advanced-overfitting-check.jpg" alt="過学習チェック用の正規化Qini曲線画像">
 
+<blockquote>
+  <pre>
+Normalized AUUC (area under normalized Qini curve)
+           Train    Val  Random
+S-Learner  0.876  0.650     0.5
+T-Learner  1.020  0.633     0.5
+X-Learner  0.889  0.656     0.5
+</pre>
+</blockquote>
 
 
 
-      <h3 id="predicted-score-vs-actual">Predicted Score vs Actual</h3>
+
+      <h3 id="predicted-score-vs-actual">予測と実際を比較</h3>
       <p>予測したアップリフトと、実際の観測結果から推定したアップリフトが<span class='inline-mark'>どの程度整合しているか</span>を確認する。</p>
       <p>
         Qini曲線やAUUCは、顧客の順位付け性能を評価する指標であり、予測したアップリフトの絶対的な大きさを直接評価するものではない。そのため、予測値の大きさが実際の効果と一致していなくても、順位付けが適切であれば、Qini曲線は左上に膨らみ、AUUCの値は高くなる場合がある。
@@ -1155,18 +1165,16 @@ gのAUC (Test): 0.500
 
 
 
-      <h3 id="score-quantiles">Score Quantiles</h3>
-      <p>bin別に<span class='inline-mark'>クロス集計</span>する</p>
-      <p>アップリフトで顧客をグループに分け、各グループの特徴や購入状況などをクロス集計する。</p>
+      <h3 id="score-quantiles">アップリフト別比較</h3>
+      <p>bin別にクロス集計することで<span class='inline-mark'></span>各グループの特徴や購入状況などを比較</span>する。</p>
       <p>アップリフトが大きいグループにどのような特徴があるかを把握し、施策対象の検討や、モデルの予測がドメイン知識と整合しているかの確認に役立てる。</p>
 
       <img src="../images/uplift-advanced-score-quantiles.jpg" alt="bin別のboxplotの画像">
 
 
 
-      <h3 id="between-learner">Between Learner</h3>
-      <p><span class='inline-mark'>Learner間で比較</span>する</p>
-      <p>S,T,X-Learnerという異なるモデルでのアップリフト推定値を比較する。</p>
+      <h3 id="between-learner">Learner間比較</h3>
+      <p>S,T,X-Learnerという異なる<span class='inline-mark'>Learner間でのアップリフト推定値を比較</span>する。</p>
       <p>推定値の相関や、アップリフト上位の顧客がどの程度重なっているかを確認することで、モデルによる予測の違いを把握する。結果が大きく異なる場合は、モデルの特性や推定の不確実性を踏まえて、施策対象の選定を慎重に検討する。</p>
       <p>もちろんここまでに登場した指標でもLearner間は比較する。</p>
       <ul>
@@ -1177,15 +1185,15 @@ gのAUC (Test): 0.500
         <li>予測したアップリフトと実際の効果との整合性　など</li>
       </ul>
       <p>アップリフトモデリングでは、最も複雑なモデルや最も高いAUUCのモデルを機械的に選べばよいとは限らない。</p>
-      <p><strong>未知のデータでも安定して、施策対象者を適切に選別できるモデルか</strong>という観点で比較することが重要。</p>
+      <p><strong>未知のデータでも安定して施策対象者を適切に選別できるモデルか</strong>という観点で比較することが重要。</p>
 
       <img src="../images/uplift-advanced-between-learner-heatmap.jpg" alt="Learner間のヒートマップ画像">
       <img src="../images/uplift-advanced-between-learner-scatter.jpg" alt="Learner間の散布図画像">
 
 
 
-      <h3 id="expected-net-profit">Expected Net Profit</h3>
-      <p><span class='inline-mark'>期待純利益を試算</span>し、施策の実施規模を検討する</p>
+      <h3 id="expected-net-profit">期待純利益</h3>
+      <p>期待純利益を試算し、<span class='inline-mark'>施策の実施規模を検討</span>する</p>
       <p>最後に、モデルの評価を実際の施策に結びつけて考える。</p>
       <p>例えば、クーポンを配布すると1人あたり一定のコストが発生し、購入によって一定の利益が得られるとする。この場合、単純にアップリフトが大きい顧客を選ぶだけでなく、<span
           class='inline-marker'>施策によって増える購入から得られる利益と、施策にかかるコストの両方を考える必要がある</span>。</p>
@@ -1194,7 +1202,6 @@ gのAUC (Test): 0.500
       <p>期待純利益を試算することで、施策対象の選定だけでなく、何人に施策を実施するのが望ましいかという判断にもモデルを活用しやすくなる。</p>
 
       <img src="../images/uplift-advanced-expected-net-profit.jpg" alt="期待純利益のシミュレーショングラフ画像">
-
 
 
 
