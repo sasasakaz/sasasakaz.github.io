@@ -2,13 +2,14 @@
 // bayesian-props のPythonコード（Pyodide上で実行）を、JS文字列 BAYESIAN_PROPS_PY として保持するファイル。
 //
 // 【仕組み】
-//  - bayesian-props.html が本ファイルを bayesian-props.js より先に <script> で読み込む。
-//  - bayesian-props.js の loadPyodideRuntime() が Pyodide(CDN)と numpy/matplotlib を読み込み、
-//    pyodide.runPython(BAYESIAN_PROPS_PY) で下のコードを評価する。
+//  - bayesian-props.html が tool-common-py.js → 本ファイル → tool-common.js → bayesian-props.js の順に <script> で読み込む。
+//  - tool-common.js の getPyodide() が Pyodide(CDN)と numpy/matplotlib を読み込み、
+//    TOOL_COMMON_PY（共通部分）→ 下のコード の順に pyodide.runPython() で評価する。
 //  - 実行ボタンで bayesian-props.js が Python の run(denoms, numers, num_samples) を呼ぶと、
 //    各グラフのSVG文字列などを含むJSONが返り、JSが下記のidのdivに innerHTML で挿入する。
 //      posterior -> #summary-chart / hdis -> #summary-hdi
 //      forest    -> #diff-hdi      / diffs -> #diff-chart（1枚ずつ .diff-plot で包む）
+//      table     -> #summary-table-container（JSが表にする）
 //    hover はツールチップ用データ（bayesian-props.js の attachPosteriorHover が使用）。
 //  - 図の表示サイズは bayesian-props.css（各idのwidthと svg{width:100%}）で決まり、
 //    ここの figsize(px指定) は縦横比と文字の相対サイズを決める。
@@ -20,26 +21,18 @@
 //  - 純粋なPythonは先頭/末尾のバッククォート行の間だけ。インデントはPythonの文法そのもの。
 // =====================================================================
 const BAYESIAN_PROPS_PY = String.raw`
-"""bayesian-props: ベイズ推定の計算とmatplotlibによる描画（Pyodide上で実行）"""
-import io
+"""bayesian-props: ベイズ推定の計算とmatplotlibによる描画（Pyodide上で実行）。
+共通部分（DPI / COLORS / PLOT_BG / style_axes / new_fig / to_svg）は tool-common-py.js"""
 import json
 
-import matplotlib
-
-matplotlib.use("agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
 PERCENTAGE_FACTOR = 100
 HDI_MAIN = 0.94
 HDI_INNER = 0.5
-DPI = 100
-COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#7f7f7f", "#9467bd"]
 FORECAST_COLOR = "#729fcf"
-PLOT_BG = "white"
 ORANGE = "#ff8c00"
-
-plt.rcParams["svg.fonttype"] = "none"  # 文字をテキストのまま出力（選択可能・軽量）
 
 
 def hdi(samples, level=HDI_MAIN):
@@ -71,32 +64,6 @@ def auto_edges(arrays, min_bins=20, max_bins=150):
         return np.linspace(lo - 0.5, hi + 0.5, min_bins + 1)
     n = int(np.ceil(span / min(widths))) if widths else min_bins
     return np.linspace(lo, hi, int(np.clip(n, min_bins, max_bins)) + 1)
-
-
-def style_axes(ax, grid_y=False, grid_x=False, grid_color="#e5e5e5", grid_width=0.8):
-    ax.set_facecolor(PLOT_BG)
-    for sp in ax.spines.values():
-        sp.set_visible(False)
-    ax.tick_params(length=0)
-    ax.set_axisbelow(True)
-    ax.grid(False)
-    if grid_x:
-        ax.xaxis.grid(True, color=grid_color, linewidth=grid_width)
-    if grid_y:
-        ax.yaxis.grid(True, color=grid_color, linewidth=grid_width)
-
-
-def to_svg(fig):
-    buf = io.StringIO()
-    fig.savefig(buf, format="svg")
-    plt.close(fig)
-    svg = buf.getvalue()
-    svg = svg[svg.index("<svg"):]
-    return svg
-
-
-def new_fig(w_px, h_px):
-    return plt.subplots(figsize=(w_px / DPI, h_px / DPI), dpi=DPI)
 
 
 def plot_posterior(groups):

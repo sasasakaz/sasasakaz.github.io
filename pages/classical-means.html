@@ -18,9 +18,16 @@
   <meta property="og:locale" content="ja_JP">
 
   <link rel="stylesheet" href="page-common.css">
-  <link rel="stylesheet" href="classical-means.css">
+  <style>
+    /* このページだけの見た目 */
+    .result-details {
+      margin: 0.5rem 0;
+    }
+  </style>
   <script src="page-layout.js" defer></script>
+  <script src="tool-common-py.js" defer></script>
   <script src="classical-means-py.js" defer></script>
+  <script src="tool-common.js" defer></script>
   <script src="classical-means.js" defer></script>
 
   <script>
@@ -42,7 +49,7 @@
   <!-- End Google tag (gtag.js) -->
 </head>
 
-<body class="layout-3col">
+<body class="layout-3col tool-page tool-means">
   <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true"></button>
     <div id="topbar-title" class="topbar-title"></div>
@@ -55,18 +62,20 @@
     <main id="content">
       <header id="header">
         <h1>Classical Comparison of Means</h1>
-        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差の検定（Welch ANOVA・Welchのt検定・多重比較・信頼区間）ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差の検定ができます。</p>
         <div class="mdc-note-box">
-          <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
-          <p>各群のデータを数値で入力してください。カンマ、スペース、改行で区切って入力できます。</p>
+          <ul>
+            <li>スペース、改行、タブ、カンマで区切ってください（カンマの後にはスペースを入れてください）。</li>
+            <li>入力データはどこにも送信されません。ブラウザのみで動作します。</li>
+          </ul>
         </div>
       </header>
 
       <div class="input-area">
-        <div id="group-inputs" class="input-fields">
+        <div id="group-inputs" class="input-fields" data-max-values="10000">
           <div class="sample-buttons">
             <button id="sample-button" class="btn-secondary" type="button">⚡️ Sample Data</button>
-            <button id="clear-button" class="btn-secondary" type="button">🗑️ Clear All</button>
+            <button id="clear-button" class="btn-secondary" type="button">🔄 Reset All</button>
           </div>
         </div>
       </div>
@@ -173,12 +182,12 @@
           <li>群ごとに個別に求めた区間なので、群間の差の有無はこの図だけでは判断できません。差の検定は以降のWelchのt検定を参照してください。</li>
         </ul>
         <div class="table-wrap" id="group-table"></div>
-        <div id="group-chart"></div>
+        <div id="group-chart" class="chart-box"></div>
 
 
 
         <h2 id="result-pair">各群間の平均の差の検定</h2>
-        <div id="omni-skipped" class="mdc-info-box" hidden>
+        <div id="pair-skipped" class="mdc-info-box" hidden>
           <p>2群のため、上記の全体の検定結果と同じです。</p>
         </div>
         <ul>
@@ -194,7 +203,7 @@
           <li>diff A - B: A群の平均からB群の平均を差し引いた値です。</li>
         </ul>
 
-        <div class="table-wrap" id="pair-adj-table"></div>
+        <div class="table-wrap" id="pair-p-table"></div>
         <details class="result-details">
           <summary>Welchのt検定の詳細（N, Mean, diff, SE, t, dof）</summary>
           <div class="table-wrap" id="pair-t-table"></div>
@@ -202,15 +211,15 @@
 
 
         <div id="pair-section">
-        <h3 id="result-pair-adj-chart">平均の差の信頼区間の比較</h3>
-        <div id="pair-adj-note">
-          <ul>
-            <li><strong>Bonferroni</strong>: Welchのt検定の区間を、有意水準α/ペア数で広げたものです。</li>
-            <li><strong>Tukey</strong>: 等分散を仮定したTukey-Kramerの同時信頼区間です。群ごとの分散が大きく異なる場合は、近似である点に注意してください。</li>
-          </ul>
-        </div>
-        <div id="pair-adj-chart"></div>
-        <div class="table-wrap" id="pair-adj-ci-table"></div>
+          <h3 id="result-pair-chart">平均の差の信頼区間の比較</h3>
+          <div id="pair-chart-note">
+            <ul>
+              <li><strong>Bonferroni</strong>: Welchのt検定の区間を、有意水準α/ペア数で広げたものです。</li>
+              <li><strong>Tukey</strong>: 等分散を仮定したTukey-Kramerの同時信頼区間です。群ごとの分散が大きく異なる場合は、近似である点に注意してください。</li>
+            </ul>
+          </div>
+          <div id="pair-chart" class="chart-box"></div>
+          <div class="table-wrap" id="pair-ci-table"></div>
         </div>
       </div>
 

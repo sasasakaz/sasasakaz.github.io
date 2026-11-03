@@ -2,15 +2,16 @@
 // classical-means のPythonコード（Pyodide上で実行）を、JS文字列 CLASSICAL_MEANS_PY として保持するファイル。
 //
 // 【仕組み】
-//  - classical-means.html が本ファイルを classical-means.js より先に <script> で読み込む。
-//  - classical-means.js の loadPyodideRuntime() が Pyodide(CDN)と numpy/scipy/matplotlib を読み込み、
-//    pyodide.runPython(CLASSICAL_MEANS_PY) で下のコードを評価する。
+//  - classical-means.html が tool-common-py.js → 本ファイル → tool-common.js → classical-means.js の順に <script> で読み込む。
+//  - tool-common.js の getPyodide() が Pyodide(CDN)と numpy/scipy/matplotlib を読み込み、
+//    TOOL_COMMON_PY（共通部分）→ 下のコード の順に pyodide.runPython() で評価する。
 //  - 実行ボタンで classical-means.js が Python の run(ids, groups, alpha) を呼ぶと、
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
-//      group_table/group_chart -> #group-table/#group-chart
+//      group.table / group.chart  -> #group-table / #group-chart
 //      omni（3群以上のみ。2群は null）-> #omni-summary（JSが文章化）
-//      pair_table/adj_chart    -> #pair-t-table/#pair-adj-chart
-//      adj_table -> #pair-adj-table
+//      pair.t_table  -> #pair-t-table（Welchのt検定の詳細）
+//      pair.p_table  -> #pair-p-table / pair.ci_table -> #pair-ci-table / pair.chart -> #pair-chart
+//      pair.tooltips -> グラフ上のツールチップ用（tool-common.js の attachPairChartTooltips）
 //  - 入力が不正なときは {"error": "..."} を返す。
 //
 // 【編集時の注意】
@@ -20,92 +21,17 @@
 //  - 純粋なPythonは先頭/末尾のバッククォート行の間だけ。インデントはPythonの文法そのもの。
 //  - scipy だけで完結させている（Welch検定・多重比較補正は自前実装。statsmodels/pandas不要）。
 //  - 計算は best_5g.ipynb の「welch t検定」セクションに対応している。
+//  - グラフの要素id（set_gid）は {prefix}-ci-{method}-{行} / {prefix}-mean-{method}-{行}。
+//    classical-props と同じ接頭辞 "pair" にしてあり、tooltips はJS側の PAIR_METHODS の色と対応する。
 // =====================================================================
 const CLASSICAL_MEANS_PY = String.raw`
-"""classical-means: 平均の古典的検定の計算とmatplotlibによる描画（Pyodide上で実行）"""
-import io
+"""classical-means: 平均の古典的検定の計算とmatplotlibによる描画（Pyodide上で実行）。
+共通部分（style_axes / new_fig / to_svg / p値補正 / html_table）は tool-common-py.js"""
 import itertools
 import json
 
-import matplotlib
-
-matplotlib.use("agg")
-import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats as sps
-
-DPI = 100
-COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#7f7f7f", "#9467bd"]
-PLOT_BG = "white"
-SIG_BG = "#fff3a3"
-
-plt.rcParams["svg.fonttype"] = "none"  # 文字をテキストのまま出力（選択可能・軽量）
-
-
-def style_axes(ax, grid_x=False, grid_color="#e5e5e5", grid_width=0.8):
-    ax.set_facecolor(PLOT_BG)
-    for sp in ax.spines.values():
-        sp.set_visible(False)
-    ax.tick_params(length=0)
-    ax.set_axisbelow(True)
-    ax.grid(False)
-    if grid_x:
-        ax.xaxis.grid(True, color=grid_color, linewidth=grid_width)
-
-
-def to_svg(fig):
-    buf = io.StringIO()
-    fig.savefig(buf, format="svg")
-    plt.close(fig)
-    svg = buf.getvalue()
-    return svg[svg.index("<svg"):]
-
-
-def new_fig(w_px, h_px):
-    return plt.subplots(figsize=(w_px / DPI, h_px / DPI), dpi=DPI)
-
-
-def p_bonferroni(p):
-    return np.minimum(p * len(p), 1.0)
-
-
-def p_holm(p):
-    m = len(p)
-    order = np.argsort(p)
-    adj = np.maximum.accumulate((m - np.arange(m)) * p[order])
-    out = np.empty(m)
-    out[order] = np.minimum(adj, 1.0)
-    return out
-
-
-def p_bh(p):
-    m = len(p)
-    order = np.argsort(p)
-    adj = np.minimum.accumulate((m / (np.arange(m) + 1) * p[order])[::-1])[::-1]
-    out = np.empty(m)
-    out[order] = np.minimum(adj, 1.0)
-    return out
-
-
-def html_table(headers, kinds, rows, alpha=0.05):
-    """kinds は列ごとの種別: text / int / f2 / p（p は alpha 未満を黄色にして小数4桁で表示）"""
-    head = "".join(f"<th>{h}</th>" for h in headers)
-    body = []
-    for row in rows:
-        cells = []
-        for kind, v in zip(kinds, row):
-            if kind == "text":
-                cells.append(f"<td>{v}</td>")
-            elif kind == "int":
-                cells.append(f"<td>{int(v):,}</td>")
-            elif kind == "p":
-                style = f' style="background-color: {SIG_BG};"' if v < alpha else ""
-                cells.append(f"<td{style}>{v:.4f}</td>")
-            else:
-                cells.append(f"<td>{v:.2f}</td>")
-        body.append("<tr>" + "".join(cells) + "</tr>")
-    return (f'<table class="summary-table"><thead><tr>{head}</tr></thead>'
-            f'<tbody>{"".join(body)}</tbody></table>')
 
 
 def group_summary(ids, xs, alpha, level):
@@ -228,7 +154,7 @@ def pairwise(ids, n, mean, sd, alpha, level):
     } for row in rows]
 
     # 2群は補正の違いがないので、補正なしの区間だけを描く
-    adj_chart = draw_pair_chart(specs if k >= 3 else specs[:1], "adjpair", f"Pairwise differences: {level}% CI",
+    adj_chart = draw_pair_chart(specs if k >= 3 else specs[:1], "pair", f"Pairwise differences: {level}% CI",
                                 55 * m + 150 if k >= 3 else 50 * m + 120, k >= 3)
 
     p_raw = np.array([r["p"] for r in rows])
@@ -256,13 +182,13 @@ def run(ids, groups, alpha):
 
         n, mean, sd, group_table, group_chart = group_summary(ids, xs, alpha, level)
         omni = welch_anova(n, mean, sd, alpha)
-        pair_table, adj_table, adj_chart, tooltips, adj_ci_table = pairwise(ids, n, mean, sd, alpha, level)
+        t_table, p_table, chart, tooltips, ci_table = pairwise(ids, n, mean, sd, alpha, level)
         return json.dumps({
             "alpha": alpha, "level": level,
-            "group_table": group_table, "group_chart": group_chart,
             "omni": omni,
-            "pair_table": pair_table,
-            "adj_table": adj_table, "adj_chart": adj_chart, "adj_ci_table": adj_ci_table, "chart_tooltips": tooltips,
+            "group": {"table": group_table, "chart": group_chart},
+            "pair": {"level": level, "t_table": t_table, "p_table": p_table,
+                     "ci_table": ci_table, "chart": chart, "tooltips": tooltips},
         })
     except ValueError as e:
         return json.dumps({"error": str(e)})

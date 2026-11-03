@@ -1,3 +1,11 @@
+// =====================================================================
+// bayesian-means.js — Bayesian Comparison of Means（計算は Cloud Run の FastAPI。グラフはPNG画像で返る）
+//
+// 入力欄・確認表・サンプル/Clear・状態メッセージ・実行の流れは tool-common.js（ToolCommon）を使う。
+// このファイルに残すのは、このページだけの部分:
+//   サンプルデータ / Tune・Draws のステッパー / API呼び出し / 結果（表と画像）の描画
+// 読み込み順: page-layout.js → tool-common.js → 本ファイル（すべて defer）
+// =====================================================================
 const GROUPS = ["A", "B", "C", "D", "E"];
 const SAMPLE_DATA = [
   "14.63, 20.18, 19.85, 20.86, 20.01, 16.96, 17.66, 18.46, 16.19, 15.76, 14.84, 20.56, 15.09, 17.18",
@@ -11,18 +19,19 @@ const PLACEHOLDER_DATA = [
   "14.34, 13.09, 14.62"
 ];
 
-// TODO: Replace with the deployed Cloud Run service URL (without a trailing slash).
+// Cloud Run のサービスURL（末尾のスラッシュなし）
 const API_BASE_URL = "https://web-tools-app-697789875302.asia-northeast1.run.app";
-let activeRequestController = null;
-let requestVersion = 0;
-let isEstimating = false;
 
-class EstimateInputError extends Error { }
+const { UserError, Cancelled, execute, setStatus } = ToolCommon;
+const $ = (id) => document.getElementById(id);
 
+// ---------------------------------------------------------------------
+// Tune / Draws のステッパー（1000〜4000、1000刻み）
+// ---------------------------------------------------------------------
 function setupParameterStepper(name) {
-  const valueElement = document.getElementById(`${name}-value`);
-  const decrementButton = document.getElementById(`${name}-decrement`);
-  const incrementButton = document.getElementById(`${name}-increment`);
+  const valueElement = $(`${name}-value`);
+  const decrementButton = $(`${name}-decrement`);
+  const incrementButton = $(`${name}-increment`);
   let value = 1000;
 
   const render = () => {
@@ -48,88 +57,20 @@ function setupParameterStepper(name) {
 const getTune = setupParameterStepper("tune");
 const getDraws = setupParameterStepper("draws");
 
-const groupInputs = document.getElementById("group-inputs");
-GROUPS.forEach(name => {
-  const group = document.createElement("div");
-  group.className = `input-group group-${name.toLowerCase()}`;
-  const header = document.createElement("div");
-  header.className = "input-group-header";
-  const label = document.createElement("label");
-  label.htmlFor = `group-${name}`;
-  label.textContent = `Group ${name}`;
-  const clearButton = document.createElement("button");
-  clearButton.id = `clear-group-${name}`;
-  clearButton.className = "input-clear-button";
-  clearButton.type = "button";
-  clearButton.textContent = "×";
-  clearButton.setAttribute("aria-label", `Group ${name} のデータをクリア`);
-  clearButton.hidden = true;
-  const textarea = document.createElement("textarea");
-  textarea.id = `group-${name}`;
-  textarea.name = `group-${name}`;
-  textarea.placeholder = PLACEHOLDER_DATA[GROUPS.indexOf(name)] ?? "";
-  textarea.setAttribute("aria-label", `Group ${name} のデータ`);
-  textarea.addEventListener("input", () => {
-    updateInputClearButton(name);
-    updateConfirmationTable();
-  });
-  clearButton.addEventListener("click", () => {
-    textarea.value = "";
-    updateInputClearButton(name);
-    updateConfirmationTable();
-    textarea.focus();
-  });
-  header.append(label, clearButton);
-  group.append(header, textarea);
-  groupInputs.appendChild(group);
-});
-groupInputs.appendChild(groupInputs.querySelector(".sample-buttons"));
+// ---------------------------------------------------------------------
+// 結果の描画・クリア
+// ---------------------------------------------------------------------
+const PLOT_IDS = {
+  means: "means-plot",
+  forest: "forest-plot",
+  differences: "differences-plot",
+  trace: "trace-plot"
+};
+const TABLE_IDS = ["means-summary", "diagnostics", "mcse-ratios"];
 
-function updateInputClearButton(name) {
-  const textarea = document.getElementById(`group-${name}`);
-  const clearButton = document.getElementById(`clear-group-${name}`);
-  clearButton.hidden = textarea.value.trim() === "";
-}
-
-document.getElementById("sample-button").addEventListener("click", () => {
-  const hasInput = GROUPS.some(name =>
-    document.getElementById(`group-${name}`).value.trim() !== ""
-  );
-  if (hasInput && !window.confirm("入力データをサンプルデータで置き換えます。よろしいですか？")) {
-    return;
-  }
-
-  GROUPS.forEach((name, index) => {
-    document.getElementById(`group-${name}`).value = SAMPLE_DATA[index];
-    updateInputClearButton(name);
-  });
-  updateConfirmationTable();
-});
-
-document.getElementById("clear-button").addEventListener("click", () => {
-  requestVersion += 1;
-  activeRequestController?.abort();
-  activeRequestController = null;
-  isEstimating = false;
-
-  GROUPS.forEach(name => {
-    document.getElementById(`group-${name}`).value = "";
-    updateInputClearButton(name);
-  });
-  clearResults();
-  document.getElementById("large-values").hidden = true;
-  document.getElementById("running-message").hidden = true;
-  document.getElementById("running-message-text").textContent = "";
-  document.getElementById("completion-message").hidden = true;
-  document.getElementById("error-message").hidden = true;
-  document.getElementById("error-message-text").textContent = "";
-  delete document.getElementById("error-message").dataset.inputError;
-  document.getElementById("initial-message").hidden = false;
-  updateConfirmationTable();
-});
-
+/** 表を作る。1列目（Group / パラメータ名）は他ページと同じく class="col-label"（中央揃え） */
 function renderTable(tableId, rows, columns, digits = 2) {
-  const table = document.getElementById(tableId);
+  const table = $(tableId);
   table.replaceChildren();
   if (!rows.length) return;
 
@@ -147,8 +88,9 @@ function renderTable(tableId, rows, columns, digits = 2) {
   const body = document.createElement("tbody");
   rows.forEach(row => {
     const tableRow = document.createElement("tr");
-    columns.forEach(([key]) => {
+    columns.forEach(([key], index) => {
       const cell = document.createElement("td");
+      if (index === 0) cell.className = "col-label";
       const value = row[key];
       cell.textContent = typeof value === "number"
         ? (Number.isFinite(value) ? value.toFixed(digits) : "—")
@@ -160,184 +102,142 @@ function renderTable(tableId, rows, columns, digits = 2) {
   table.appendChild(body);
 }
 
-function getParsedGroups() {
-  return GROUPS.map(name => {
-    const raw = document.getElementById(`group-${name}`).value;
-    const cleaned = raw.replace(/(?<=\d),(?=\d)/g, "");
-    const tokens = cleaned.split(/[^0-9.-]+/).filter(token => token.trim());
-    const values = tokens.map(token => Number(token));
-    if (values.some(value => !Number.isFinite(value))) {
-      throw new Error(`Group ${name} の入力に数値として解釈できない部分があります。`);
-    }
-    return [name, values];
-  }).filter(([, values]) => values.length > 0);
-}
-
-function getConfirmationRows(parsedGroups) {
-  return parsedGroups.map(([name, values]) => {
-    const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
-    const variance = values.reduce((sum, value) => sum + (value - mean) ** 2, 0) / values.length;
-    return {
-      Group: name,
-      N: values.length.toLocaleString(),
-      Mean: mean.toFixed(2),
-      Std: Math.sqrt(variance).toFixed(2),
-      Min: Math.min(...values).toFixed(2),
-      Max: Math.max(...values).toFixed(2)
-    };
-  });
-}
-
-function updateConfirmationTable() {
-  const errorMessage = document.getElementById("error-message");
-  const errorMessageText = document.getElementById("error-message-text");
-  try {
-    const parsedGroups = getParsedGroups();
-    const rows = getConfirmationRows(parsedGroups);
-    const rowsByGroup = new Map(rows.map(row => [row.Group, row]));
-    document.querySelectorAll("#confirmation-table tbody tr").forEach(tableRow => {
-      const row = rowsByGroup.get(tableRow.dataset.group);
-      const cells = tableRow.querySelectorAll("td");
-      cells[0].textContent = row?.N ?? "";
-      cells[1].textContent = row?.Mean ?? "";
-      cells[2].textContent = row?.Std ?? "";
-      cells[3].textContent = row?.Min ?? "";
-      cells[4].textContent = row?.Max ?? "";
-    });
-    document.getElementById("run-button").disabled = isEstimating || parsedGroups.length === 0;
-    if (errorMessage.dataset.inputError) {
-      errorMessage.hidden = true;
-      errorMessageText.textContent = "";
-      delete errorMessage.dataset.inputError;
-    }
-  } catch (error) {
-    document.querySelectorAll("#confirmation-table tbody td").forEach(cell => {
-      cell.textContent = "";
-    });
-    document.getElementById("run-button").disabled = true;
-    errorMessageText.textContent = error.message;
-    errorMessage.dataset.inputError = "true";
-    errorMessage.hidden = false;
-  }
-}
-
 function showPlots(plots) {
-  const plotIds = {
-    means: "means-plot",
-    forest: "forest-plot",
-    differences: "differences-plot",
-    trace: "trace-plot"
-  };
-  Object.entries(plotIds).forEach(([key, elementId]) => {
-    document.getElementById(elementId).src = `data:image/png;base64,${plots[key]}`;
+  Object.entries(PLOT_IDS).forEach(([key, elementId]) => {
+    $(elementId).src = `data:image/png;base64,${plots[key]}`;
   });
 }
 
-function clearResults() {
-  document.getElementById("means-summary").replaceChildren();
-  document.getElementById("diagnostics").replaceChildren();
-  document.getElementById("mcse-ratios").replaceChildren();
-  document.querySelectorAll(".plot").forEach(plot => plot.removeAttribute("src"));
+/** 結果の表・画像・警告を空にする。見出しと解説は残す（Clear と、実行を始めるときに使う） */
+function resetResults() {
+  $("large-values").hidden = true;
+  TABLE_IDS.forEach(id => $(id).replaceChildren());
+  Object.values(PLOT_IDS).forEach(id => $(id).removeAttribute("src"));
 }
 
-document.getElementById("run-button").addEventListener("click", async () => {
-  const version = ++requestVersion;
+// ---------------------------------------------------------------------
+// 実行中の通信の中止（Clear で使う）
+// ---------------------------------------------------------------------
+let activeController = null;
+let runId = 0;
+
+function cancelRunning() {
+  runId += 1;
+  activeController?.abort();
+  activeController = null;
+}
+
+// ---------------------------------------------------------------------
+// 入力欄（ToolCommon）
+// ---------------------------------------------------------------------
+const input = ToolCommon.createMeansInput({
+  groups: GROUPS,
+  sampleData: SAMPLE_DATA,
+  placeholders: PLACEHOLDER_DATA,
+  onClear: () => {
+    cancelRunning();
+    resetResults();
+  }
+});
+
+// ---------------------------------------------------------------------
+// 実行
+// ---------------------------------------------------------------------
+
+/** サーバー(bayesian_means.py)は文字列を自前でパースするので、ブラウザで読み取った数値を空白区切りで渡す。
+ *  （全角数字・セミコロン区切りなど、サーバー側のパースが対応していない入力も、ここで正規化される） */
+function toRequestGroups(parsedGroups) {
+  const groups = Object.fromEntries(GROUPS.map(name => [name, ""]));
+  parsedGroups.forEach(([name, values]) => {
+    const tokens = values.map(String);
+    if (tokens.some(token => /e/i.test(token))) {
+      throw new UserError(`Group ${name} に極端に大きい（小さい）値が含まれています。桁を下げるなどして入力してください。`);
+    }
+    groups[name] = tokens.join(" ");
+  });
+  return groups;
+}
+
+async function fetchEstimate(parsedGroups) {
+  const myRun = ++runId;
   const controller = new AbortController();
-  activeRequestController = controller;
-  const button = document.getElementById("run-button");
-  const largeValues = document.getElementById("large-values");
-  const runningMessage = document.getElementById("running-message");
-  const runningMessageText = document.getElementById("running-message-text");
-  const completionMessage = document.getElementById("completion-message");
-  const initialMessage = document.getElementById("initial-message");
-  const errorMessage = document.getElementById("error-message");
-  const errorMessageText = document.getElementById("error-message-text");
+  activeController = controller;
 
-  isEstimating = true;
-  button.disabled = true;
-  largeValues.hidden = true;
-  initialMessage.hidden = true;
-  completionMessage.hidden = true;
-  errorMessage.hidden = true;
-  delete errorMessage.dataset.inputError;
-  runningMessage.hidden = true;
-
+  let response;
+  let data;
   try {
-    if (API_BASE_URL.includes("YOUR_CLOUD_RUN_SERVICE")) {
-      throw new Error("JavaScript内のAPI_BASE_URLをCloud RunのURLに変更してください。");
-    }
-
-    const groups = Object.fromEntries(GROUPS.map(name => [
-      name,
-      document.getElementById(`group-${name}`).value
-    ]));
-    const parsedGroups = getParsedGroups();
-
-    if (parsedGroups.length < 2) {
-      throw new EstimateInputError("推定には少なくとも2つの群にデータ入力が必要です。");
-    }
-    updateConfirmationTable();
-    runningMessageText.textContent = `${parsedGroups.length}群でベイズ推定の実行中... MCMCサンプリングが終わるまで待ってにゃん`;
-    runningMessage.hidden = false;
-
-    const response = await fetch(`${API_BASE_URL}/api/estimate`, {
+    response = await fetch(`${API_BASE_URL}/api/estimate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        groups,
+        groups: toRequestGroups(parsedGroups),
         tune: getTune(),
         draws: getDraws()
       }),
       signal: controller.signal
     });
-    const data = await response.json();
-    if (!response.ok) {
-      const detail = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
-      throw new Error(detail || `HTTP ${response.status}`);
-    }
-
-    if (version !== requestVersion) return;
-
-    renderTable("means-summary", data.means_summary, [
-      ["parameter", "Group"],
-      ["mean", "mean"],
-      ["hdi_3%", "hdi_3%"],
-      ["hdi_97%", "hdi_97%"]
-    ]);
-    renderTable("diagnostics", data.diagnostics, [
-      ["parameter", "パラメータ"],
-      ["mean", "mean"],
-      ["sd", "sd"],
-      ["mcse_mean", "mcse_mean"],
-      ["ess_bulk", "ess_bulk"],
-      ["ess_tail", "ess_tail"],
-      ["r_hat", "r_hat"]
-    ]);
-    renderTable("mcse-ratios", data.mcse_ratios, [
-      ["parameter", "パラメータ"],
-      ["sd", "sd"],
-      ["mcse_mean", "mcse_mean"],
-      ["mcse_mean / sd", "mcse_mean / sd"],
-      ["mcse_mean / sd (%)", "mcse_mean / sd (%)"]
-    ], 4);
-    showPlots(data.plots);
-    largeValues.hidden = !data.large_values;
-    runningMessage.hidden = true;
-    completionMessage.hidden = false;
+    // タイムアウト(504など)のときはJSONではなくHTMLが返るので、読めなかったら null にする
+    data = await response.json().catch(() => null);
   } catch (error) {
-    if (error.name === "AbortError" || version !== requestVersion) return;
-    runningMessage.hidden = true;
-    errorMessageText.textContent = error instanceof EstimateInputError
-      ? error.message
-      : `推定に失敗しました: ${error.message}`;
-    errorMessage.hidden = false;
-  } finally {
-    if (version === requestVersion) {
-      isEstimating = false;
-      updateConfirmationTable();
-      activeRequestController = null;
-    }
+    if (error.name === "AbortError") throw new Cancelled();
+    throw error;
   }
-});
+  if (myRun !== runId) throw new Cancelled();   // Clear などで、この実行はもう不要になった
 
-updateConfirmationTable();
+  if (!response.ok) {
+    if (!data) {
+      throw new Error(response.status === 504 || response.status === 503
+        ? "サーバーの処理が時間内に終わりませんでした。件数を減らして、もう一度お試しください。"
+        : `サーバーからエラーが返されました（HTTP ${response.status}）`);
+    }
+    const detail = typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail);
+    throw new Error(detail || `HTTP ${response.status}`);
+  }
+  if (!data) throw new Error("サーバーからの応答を読み取れませんでした。");
+  return data;
+}
+
+function renderResults(data) {
+  renderTable("means-summary", data.means_summary, [
+    ["parameter", "Group"],
+    ["mean", "mean"],
+    ["hdi_3%", "hdi_3%"],
+    ["hdi_97%", "hdi_97%"]
+  ]);
+  renderTable("diagnostics", data.diagnostics, [
+    ["parameter", "パラメータ"],
+    ["mean", "mean"],
+    ["sd", "sd"],
+    ["mcse_mean", "mcse_mean"],
+    ["ess_bulk", "ess_bulk"],
+    ["ess_tail", "ess_tail"],
+    ["r_hat", "r_hat"]
+  ]);
+  renderTable("mcse-ratios", data.mcse_ratios, [
+    ["parameter", "パラメータ"],
+    ["sd", "sd"],
+    ["mcse_mean", "mcse_mean"],
+    ["mcse_mean / sd", "mcse_mean / sd"],
+    ["mcse_mean / sd (%)", "mcse_mean / sd (%)"]
+  ], 4);
+  showPlots(data.plots);
+  $("large-values").hidden = !data.large_values;
+}
+
+$("run-button").addEventListener("click", () => {
+  const { groups: parsedGroups, groupCount } = input.getData();
+  if (groupCount < 2) {
+    setStatus("error", "推定には少なくとも2つの群にデータ入力が必要です。");
+    return;
+  }
+
+  resetResults();   // 前回の結果は、実行を始めるときに消す
+  execute({
+    input,
+    runningText: `${groupCount}群でベイズ推定の実行中... MCMCサンプリングが終わるまで待ってにゃん`,
+    errorPrefix: "推定に失敗しました",
+    work: async () => {
+      renderResults(await fetchEstimate(parsedGroups));
+    }
+  });
+});

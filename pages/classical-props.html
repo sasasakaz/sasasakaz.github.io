@@ -16,10 +16,11 @@
   <meta property="og:locale" content="ja_JP">
 
   <link rel="stylesheet" href="page-common.css">
-  <link rel="stylesheet" href="classical-props.css">
 
   <script src="page-layout.js" defer></script>
+  <script src="tool-common-py.js" defer></script>
   <script src="classical-props-py.js" defer></script>
+  <script src="tool-common.js" defer></script>
   <script src="classical-props.js" defer></script>
 
   <script>
@@ -38,7 +39,7 @@
   <!-- End Google tag (gtag.js) -->
 </head>
 
-<body class="layout-3col">
+<body class="layout-3col tool-page tool-props">
   <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true"></button>
     <div id="topbar-title" class="topbar-title"></div>
@@ -51,12 +52,12 @@
     <main id="content">
       <header id="header">
         <h1>Classical Comparison of Proportions</h1>
-        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。比率の差の検定（カイ二乗検定・多重比較・信頼区間）ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。比率の差の検定ができます。</p>
         <div class="mdc-note-box">
-          <p>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
           <ul>
-            <li>Sample Size: ユーザー数や送信者数などの分母</li>
-            <li>Events: コンバージョン数や購入者数などの分子</li>
+            <li>Sample Size: ユーザー数や送信者数などの分母。Events: コンバージョン数や購入者数などの分子。</li>
+            <li>スペース、改行、タブ、カンマで区切ってください（カンマの後にはスペースを入れてください）。</li>
+            <li>入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</li>
           </ul>
         </div>
       </header>
@@ -65,24 +66,24 @@
       <div class="input-area">
         <div class="input-fields">
           <div class="input-group">
-            <label for="denoms">Sample Size</label>
+            <div class="input-group-header"><label for="denoms">Sample Size</label></div>
             <textarea id="denoms" rows="5" autocomplete="off" placeholder="1000 2000 1500 ..."></textarea>
           </div>
           <div class="input-group">
-            <label for="numers">Events</label>
+            <div class="input-group-header"><label for="numers">Events</label></div>
             <textarea id="numers" rows="5" autocomplete="off" placeholder="70 120 95 ..."></textarea>
           </div>
         </div>
 
         <div class="sample-buttons">
           <button type="button" id="sample-button" class="btn-secondary">⚡️ Sample Data</button>
-          <button type="button" id="clear-button" class="btn-secondary">🗑️ Clear All</button>
+          <button type="button" id="clear-button" class="btn-secondary">🔄 Reset All</button>
         </div>
       </div>
 
       <div class="confirm-run">
         <div class="confirm-table-wrap">
-          <table id="confirmation-table">
+          <table id="confirmation-table" class="summary-table">
             <thead>
               <tr>
                 <th>Group</th>
@@ -92,31 +93,31 @@
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr data-group="A">
                 <th scope="row">Group A</th>
                 <td></td>
                 <td></td>
                 <td></td>
               </tr>
-              <tr>
+              <tr data-group="B">
                 <th scope="row">Group B</th>
                 <td></td>
                 <td></td>
                 <td></td>
               </tr>
-              <tr>
+              <tr data-group="C">
                 <th scope="row">Group C</th>
                 <td></td>
                 <td></td>
                 <td></td>
               </tr>
-              <tr>
+              <tr data-group="D">
                 <th scope="row">Group D</th>
                 <td></td>
                 <td></td>
                 <td></td>
               </tr>
-              <tr>
+              <tr data-group="E">
                 <th scope="row">Group E</th>
                 <td></td>
                 <td></td>
@@ -127,8 +128,7 @@
         </div>
 
         <div class="run-box">
-          <button type="button" onclick="runClassicalTest();" class="btn-primary" id="run-button" title="検定実行"
-            disabled>🚀 Run</button>
+          <button type="button" class="btn-primary" id="run-button" title="検定実行" disabled>🚀 Run</button>
           <div class="parameter-select">
             <label for="alpha-select">有意水準 α</label>
             <select id="alpha-select">
@@ -152,7 +152,7 @@
         <p>検定を実行すると、以下に結果が表示されます</p>
       </div>
       <div id="error-message" class="mdc-alert-box" role="alert" hidden>
-        <p>検定失敗: ネットワーク環境などを確認してもう一度試してみてにゃん</p>
+        <p id="error-message-text"></p>
       </div>
 
 
@@ -169,9 +169,9 @@
         <div id="omni-summary"></div>
 
 
-        <h3 id="result-omni-ci">各群の比率と信頼区間</h3>
-        <div id="omni-table"></div>
-        <div id="omni-chart"></div>
+        <h3 id="result-group">各群の比率と信頼区間</h3>
+        <div id="group-table" class="table-wrap"></div>
+        <div id="group-chart" class="chart-box"></div>
 
 
 
@@ -181,9 +181,11 @@
         </div>
 
         <ul>
-          <li><strong>補正なし</strong>: 各ペアをPearsonカイ二乗検定（連続性補正なし）。比率の差のCIはWald区間。<span class='inline-mark'>多重比較を考慮していない</span>ので、群数が増えるほど「偽陽性」が出やすくなります（あえて比較用に掲載）。</li>
+          <li><strong>補正なし</strong>: 各ペアをPearsonカイ二乗検定（連続性補正なし）。比率の差のCIはWald区間。<span
+              class='inline-mark'>多重比較を考慮していない</span>ので、群数が増えるほど「偽陽性」が出やすくなります（あえて比較用に掲載）。</li>
           <li><strong>Bonferroni / Holm / Benjamini-Hochberg(BH)</strong>: 上記のp値を補正したものです（BHはFDR制御）。</li>
-          <li><strong>Tukey-Kramer</strong>: 本来は平均の比較手法です。ここでは0/1データとして、要約値（群の比率と分母）から等分散を仮定したTukey-Kramerを計算しています。近似である点に注意してください。</li>
+          <li><strong>Tukey-Kramer</strong>:
+            本来は平均の比較手法です。ここでは0/1データとして、要約値（群の比率と分母）から等分散を仮定したTukey-Kramerを計算しています。近似である点に注意してください。</li>
           <li>同時信頼区間: Bonferroni（α/ペア数）とTukeyの同時CIも併記します。</li>
         </ul>
 
@@ -193,12 +195,12 @@
           <li>有意なp値は黄色で表示します。</li>
           <li>diff A - B: A群の比率からB群の比率を差し引いた値です。</li>
         </ul>
-        <div id="pair-p-table"></div>
+        <div id="pair-p-table" class="table-wrap"></div>
 
         <div id="pair-section">
           <h3 id="result-pair-chart">比率の差の信頼区間の比較</h3>
-          <div id="pair-chart"></div>
-          <div id="pair-ci-table"></div>
+          <div id="pair-chart" class="chart-box"></div>
+          <div id="pair-ci-table" class="table-wrap"></div>
         </div>
       </div>
 
