@@ -180,7 +180,7 @@ def run(ids, groups, alpha):
             "alpha": alpha, "level": level,
             "omni": omni,
             "group": {"table": group_table, "chart": group_chart},
-            "pair": {"level": level, "t_table": t_table, "p_table": p_table,
+            "pair": {"pairs": k * (k - 1) // 2, "level": level, "t_table": t_table, "p_table": p_table,
                      "ci_table": ci_table, "chart": chart, "tooltips": tooltips},
         })
     except ValueError as e:

@@ -39,6 +39,7 @@ const RESULT_IDS = ['group-table', 'group-chart', 'omni-summary', 'pair-t-table'
 
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
+  document.getElementById('pair-count').textContent = '';
 }
 
 const input = ToolCommon.createMeansInput({
@@ -67,6 +68,7 @@ function renderResults(result, alpha) {
   document.getElementById('group-chart').innerHTML = result.group.chart;
   document.getElementById('omni-summary').innerHTML = renderOmniSummary(result.omni, alpha);
 
+  document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
   document.getElementById('pair-t-table').innerHTML = result.pair.t_table;
   document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
   const pairChart = document.getElementById('pair-chart');
