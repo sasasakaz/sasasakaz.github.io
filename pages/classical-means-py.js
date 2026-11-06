@@ -81,12 +81,11 @@ def pairwise(ids, n, mean, sd, alpha, level):
     pairs = list(itertools.combinations(range(k), 2))
     m = len(pairs)
     rows = []
-    if k >= 3:
-        # Bonferroni は Welch t のまま α/ペア数、Tukey-Kramer は等分散を仮定したプールMSEで計算する
-        n_all = int(np.sum(n))
-        df_err = n_all - k
-        mse = float(np.sum((n - 1) * var) / df_err)
-        q_crit = float(sps.studentized_range.ppf(1 - alpha, k, df_err))
+    # Bonferroni は Welch t のまま α/ペア数、Tukey-Kramer は等分散を仮定したプールMSEで計算する
+    n_all = int(np.sum(n))
+    df_err = n_all - k
+    mse = float(np.sum((n - 1) * var) / df_err)
+    q_crit = float(sps.studentized_range.ppf(1 - alpha, k, df_err))
     for i, j in pairs:
         diff = mean[i] - mean[j]  # 差分は「前の群 − 後の群」
         se_i = var[i] / n[i]
@@ -98,11 +97,10 @@ def pairwise(ids, n, mean, sd, alpha, level):
         t_crit = sps.t.ppf(1 - alpha / 2, dof)
         row = {"pair": f"{ids[i]} - {ids[j]}", "diff": float(diff), "se": float(se), "t": float(t_stat),
                "dof": float(dof), "p": p_val, "lo": float(diff - t_crit * se), "hi": float(diff + t_crit * se)}
-        if k >= 3:
-            t_bonf = sps.t.ppf(1 - alpha / (2 * m), dof)
-            se_tukey = np.sqrt(mse / 2 * (1 / n[i] + 1 / n[j]))
-            row.update({"blo": float(diff - t_bonf * se), "bhi": float(diff + t_bonf * se),
-                        "tlo": float(diff - q_crit * se_tukey), "thi": float(diff + q_crit * se_tukey)})
+        t_bonf = sps.t.ppf(1 - alpha / (2 * m), dof)
+        se_tukey = np.sqrt(mse / 2 * (1 / n[i] + 1 / n[j]))
+        row.update({"blo": float(diff - t_bonf * se), "bhi": float(diff + t_bonf * se),
+                    "tlo": float(diff - q_crit * se_tukey), "thi": float(diff + q_crit * se_tukey)})
         rows.append(row)
 
     t_rows = [[r["pair"], n[i], mean[i], n[j], mean[j], r["diff"], r["se"], r["t"], r["dof"]]
@@ -111,14 +109,12 @@ def pairwise(ids, n, mean, sd, alpha, level):
         ["Pair", "N (A)", "Mean (A)", "N (B)", "Mean (B)", "diff", "SE", "t", "dof"],
         ["text", "int", "f2", "int", "f2", "f2", "f2", "f2", "f2"], t_rows, alpha)
 
-    adj_ci_table = None
-    if k >= 3:
-        adj_ci_table = html_table(
-            ["Pair", "diff", "CI Lower", "CI Upper",
-             "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
-            ["text"] + ["f2"] * 7,
-            [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"], r["tlo"], r["thi"]]
-             for r in rows])
+    adj_ci_table = html_table(
+        ["Pair", "diff", "CI Lower", "CI Upper",
+         "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
+        ["text"] + ["f2"] * 7,
+        [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"], r["tlo"], r["thi"]]
+         for r in rows])
 
     specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.3),
              ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0),
@@ -149,13 +145,11 @@ def pairwise(ids, n, mean, sd, alpha, level):
 
     tooltips = [{
         "pair": row["pair"], "diff": row["diff"],
-        "intervals": {"unadjusted": [row["lo"], row["hi"]]}
-                     | ({"bonferroni": [row["blo"], row["bhi"]], "tukey": [row["tlo"], row["thi"]]} if k >= 3 else {}),
+        "intervals": {"unadjusted": [row["lo"], row["hi"]],
+                      "bonferroni": [row["blo"], row["bhi"]], "tukey": [row["tlo"], row["thi"]]},
     } for row in rows]
 
-    # 2群は補正の違いがないので、補正なしの区間だけを描く
-    adj_chart = draw_pair_chart(specs if k >= 3 else specs[:1], "pair", f"Pairwise differences: {level}% CI",
-                                55 * m + 150 if k >= 3 else 50 * m + 120, k >= 3)
+    adj_chart = draw_pair_chart(specs, "pair", f"Pairwise differences: {level}% CI", 55 * m + 150, True)
 
     p_raw = np.array([r["p"] for r in rows])
     p_bonf, p_hol, p_bhh = p_bonferroni(p_raw), p_holm(p_raw), p_bh(p_raw)

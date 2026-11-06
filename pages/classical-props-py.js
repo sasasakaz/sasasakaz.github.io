@@ -9,7 +9,7 @@
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
 //      omni(統計量) -> #omni-summary（JSが文章化）
 //      group.table / group.chart -> #group-table / #group-chart（各群の比率とWilson区間）
-//      pair.p_table  -> #pair-p-table / pair.ci_table -> #pair-ci-table / pair.chart -> #pair-chart（後2つは3群以上のみ表示）
+//      pair.p_table  -> #pair-p-table / pair.ci_table -> #pair-ci-table / pair.chart -> #pair-chart
 //      pair.tooltips -> グラフ上のツールチップ用（tool-common.js の attachPairChartTooltips）
 //  - 図の表示サイズは classical-props.css（各idのwidthと svg{width:100%}）で決まり、
 //    ここの figsize(px指定) は縦横比と文字の相対サイズを決める。

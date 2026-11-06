@@ -7,7 +7,7 @@
 //    Pythonの run() は表(HTML)とグラフ(SVG)をJSONで返し、ここで下記idのdivに挿入する。
 //      #omni-summary                       （全体の検定。omni から文章を作る）
 //      #group-table / #group-chart         （各群の比率とWilson区間）
-//      #pair-p-table / #pair-ci-table / #pair-chart  （2群ごとの検定。#pair-p-table は常に表示、他は3群以上のみ）
+//      #pair-p-table / #pair-ci-table / #pair-chart  （各群間の検定結果と信頼区間）
 //  - これらのidは classical-props.html と classical-props.css に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
@@ -30,8 +30,6 @@ const RESULT_IDS = ['omni-summary', 'group-table', 'group-chart', 'pair-p-table'
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
   document.getElementById('pair-count').textContent = '';
-  document.getElementById('pair-section').hidden = false;
-  document.getElementById('pair-skipped').hidden = true;
 }
 
 const input = ToolCommon.createPropsInput({ sample: SAMPLE, onClear: clearResults });
@@ -56,25 +54,19 @@ function renderOmniSummary(omni, alpha) {
 /**
  * Pythonの結果を画面に入れる
  */
-function renderResults(result, alpha, groupCount) {
+function renderResults(result, alpha) {
   document.getElementById('omni-summary').innerHTML = renderOmniSummary(result.omni, alpha);
   document.getElementById('group-table').innerHTML = result.group.table;
   document.getElementById('group-chart').innerHTML = result.group.chart;
 
-  // 2群のときは、説明とp値だけを表示し、区間の表・グラフは隠す
-  const multi = groupCount >= 3;
-  document.getElementById('pair-section').hidden = !multi;
-  document.getElementById('pair-skipped').hidden = multi;
   document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
   document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
-  if (multi) {
-    document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
-    const pairChart = document.getElementById('pair-chart');
-    pairChart.innerHTML = result.pair.chart;
-    ToolCommon.attachPairChartTooltips(pairChart, {
-      prefix: 'pair', items: result.pair.tooltips, level: result.pair.level, unit: ' points',
-    });
-  }
+  document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
+  const pairChart = document.getElementById('pair-chart');
+  pairChart.innerHTML = result.pair.chart;
+  ToolCommon.attachPairChartTooltips(pairChart, {
+    prefix: 'pair', items: result.pair.tooltips, level: result.pair.level, unit: ' points',
+  });
 }
 
 /**
@@ -96,7 +88,7 @@ async function runTest() {
     work: async () => {
       const result = await ToolCommon.callPython('run',
         denoms.slice(0, groupCount), numers.slice(0, groupCount), alpha);
-      renderResults(result, alpha, groupCount);
+      renderResults(result, alpha);
     },
   });
 }

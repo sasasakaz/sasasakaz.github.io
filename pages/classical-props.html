@@ -176,10 +176,6 @@
 
 
         <h2 id="result-pair">各群間の比率の差の検定</h2>
-        <div id="pair-skipped" class="mdc-info-box" hidden>
-          <p>2群のため、上記の全体の検定と同じです。参考として、2群の比較をp値で示します。</p>
-        </div>
-
         <ul>
           <li><strong>補正なし</strong>: 各ペアをPearsonカイ二乗検定（連続性補正なし）。比率の差のCIはWald区間。<span
               class='inline-mark'>多重比較を考慮していない</span>ので、群数が増えるほど「偽陽性」が出やすくなります（あえて比較用に掲載）。</li>
@@ -189,7 +185,7 @@
           <li>同時信頼区間: Bonferroni（α/ペア数）とTukeyの同時CIも併記します。</li>
         </ul>
 
-        <h3 id="result-pair-p">p値</h3>
+        <h3 id="result-pair-p">検定結果</h3>
         <p id="pair-count"></p>
         <ul>
           <li>有意なp値は黄色で表示します。</li>
@@ -198,7 +194,7 @@
         <div id="pair-p-table" class="table-wrap"></div>
 
         <div id="pair-section">
-          <h3 id="result-pair-chart">比率の差の信頼区間の比較</h3>
+          <h3 id="result-pair-chart">信頼区間の比較</h3>
           <div id="pair-chart" class="chart-box"></div>
           <div id="pair-ci-table" class="table-wrap"></div>
         </div>

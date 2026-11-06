@@ -8,7 +8,7 @@
 //      #omni-summary                       （Welch ANOVA。omni から文章を作る。2群のときは null）
 //      #group-table / #group-chart         （各群の平均と信頼区間）
 //      #pair-t-table                       （Welchのt検定の詳細）
-//      #pair-p-table / #pair-ci-table / #pair-chart  （#pair-ci-table と #pair-chart は #pair-section の中。3群以上のみ表示）
+//      #pair-p-table / #pair-ci-table / #pair-chart  （各群間の検定結果と信頼区間）
 //  - これらのidは classical-means.html と classical-means.css に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 群ごとの入力欄は、ToolCommon.createMeansInput() が #group-inputs の中に作る（HTMLには書いていない）。
@@ -39,8 +39,6 @@ const RESULT_IDS = ['group-table', 'group-chart', 'omni-summary', 'pair-t-table'
 
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
-  document.getElementById('pair-section').hidden = false;
-  document.getElementById('pair-skipped').hidden = true;
 }
 
 const input = ToolCommon.createMeansInput({
@@ -64,24 +62,18 @@ function renderOmniSummary(omni, alpha) {
 /**
  * Pythonの結果を画面に入れる
  */
-function renderResults(result, alpha, groupCount) {
+function renderResults(result, alpha) {
   document.getElementById('group-table').innerHTML = result.group.table;
   document.getElementById('group-chart').innerHTML = result.group.chart;
   document.getElementById('omni-summary').innerHTML = renderOmniSummary(result.omni, alpha);
 
-  // 2群のときは、全体の検定と同じなので、区間の表・グラフは隠す
-  const multi = groupCount >= 3;
-  document.getElementById('pair-skipped').hidden = multi;
-  document.getElementById('pair-section').hidden = !multi;
   document.getElementById('pair-t-table').innerHTML = result.pair.t_table;
-  document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table ?? '';
+  document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
   const pairChart = document.getElementById('pair-chart');
-  pairChart.innerHTML = result.pair.chart ?? '';
-  if (result.pair.chart) {
-    ToolCommon.attachPairChartTooltips(pairChart, {
-      prefix: 'pair', items: result.pair.tooltips, level: result.pair.level,
-    });
-  }
+  pairChart.innerHTML = result.pair.chart;
+  ToolCommon.attachPairChartTooltips(pairChart, {
+    prefix: 'pair', items: result.pair.tooltips, level: result.pair.level,
+  });
   document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
 }
 
@@ -107,7 +99,7 @@ async function runTest() {
       const result = await ToolCommon.callPython('run',
         groups.map(([name]) => name), groups.map(([, values]) => values), alpha);
       if (result.error) throw new ToolCommon.UserError(result.error);
-      renderResults(result, alpha, groupCount);
+      renderResults(result, alpha);
     },
   });
 }
