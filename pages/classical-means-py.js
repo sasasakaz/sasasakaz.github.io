@@ -111,14 +111,13 @@ def pairwise(ids, n, mean, sd, alpha, level):
 
     adj_ci_table = html_table(
         ["Pair", "diff", "CI Lower", "CI Upper",
-         "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
-        ["text"] + ["f2"] * 7,
-        [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"], r["tlo"], r["thi"]]
+         "Bonf CI Lower", "Bonf CI Upper"],
+        ["text"] + ["f2"] * 5,
+        [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"]]
          for r in rows])
 
-    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.3),
-             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0),
-             ("tlo", "thi", "Tukey", "tukey", "#ff7f0e", 0.3)]
+    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.15),
+             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)]
 
     def draw_pair_chart(chart_specs, prefix, title, height, legend):
         fig, ax = new_fig(640, height)
@@ -146,17 +145,17 @@ def pairwise(ids, n, mean, sd, alpha, level):
     tooltips = [{
         "pair": row["pair"], "diff": row["diff"],
         "intervals": {"unadjusted": [row["lo"], row["hi"]],
-                      "bonferroni": [row["blo"], row["bhi"]], "tukey": [row["tlo"], row["thi"]]},
+                      "bonferroni": [row["blo"], row["bhi"]]},
     } for row in rows]
 
     adj_chart = draw_pair_chart(specs, "pair", f"Pairwise differences: {level}% CI", 55 * m + 150, True)
 
     p_raw = np.array([r["p"] for r in rows])
     p_bonf, p_hol, p_bhh = p_bonferroni(p_raw), p_holm(p_raw), p_bh(p_raw)
-    adj_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["p"], p_bonf[x], p_hol[x], p_bhh[x]] for x, r in enumerate(rows)]
+    adj_rows = [[r["pair"], r["diff"], r["p"], p_bonf[x], p_hol[x], p_bhh[x]] for x, r in enumerate(rows)]
     adj_table = html_table(
-        ["Pair", "diff", "CI Lower", "CI Upper", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
-        ["text", "f2", "f2", "f2", "p", "p", "p", "p"], adj_rows, alpha)
+        ["Pair", "diff", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["text", "f2", "p", "p", "p", "p"], adj_rows, alpha)
     return t_table, adj_table, adj_chart, tooltips, adj_ci_table
 
 

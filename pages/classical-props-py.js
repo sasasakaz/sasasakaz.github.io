@@ -112,22 +112,21 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat, n_total):
     p_raw_all = np.array([r["p_raw"] for r in rows])
     p_bonf, p_hol, p_bhh = p_bonferroni(p_raw_all), p_holm(p_raw_all), p_bh(p_raw_all)
 
-    p_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["p_raw"], p_bonf[n], p_hol[n], p_bhh[n], r["p_tukey"]]
+    p_rows = [[r["pair"], r["diff"], r["p_raw"], p_bonf[n], p_hol[n], p_bhh[n]]
               for n, r in enumerate(rows)]
     p_table = html_table(
-        ["Pair", "diff (points)", "CI Lower", "CI Upper", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)", "p (Tukey)"],
-        ["text", "f2", "f2", "f2", "p", "p", "p", "p", "p"], p_rows, alpha)
-    ci_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"], r["tlo"], r["thi"]] for r in rows]
+        ["Pair", "diff (points)", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["text", "f2", "p", "p", "p", "p"], p_rows, alpha)
+    ci_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"]] for r in rows]
     ci_table = html_table(
-        ["Pair", "diff (points)", "CI Lower", "CI Upper", "Bonf CI Lower", "Bonf CI Upper", "Tukey CI Lower", "Tukey CI Upper"],
-        ["text"] + ["f2"] * 7, ci_rows)
+        ["Pair", "diff (points)", "CI Lower", "CI Upper", "Bonf CI Lower", "Bonf CI Upper"],
+        ["text"] + ["f2"] * 5, ci_rows)
 
     # 差のCI比較（補正なし vs Bonferroni vs Tukey）
     fig, ax = new_fig(640, 55 * m + 150)
     style_axes(ax)
-    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.3),
-             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0),
-             ("tlo", "thi", "Tukey", "tukey", "#ff7f0e", 0.3)]
+    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.15),
+             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)]
     for lo_c, hi_c, label, method, c, off in specs:
         for r, row in enumerate(rows):
             interval = ax.hlines(r + off, row[lo_c], row[hi_c], color=c, linewidth=3.5,
@@ -152,7 +151,6 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat, n_total):
         "intervals": {
             "unadjusted": [row["lo"], row["hi"]],
             "bonferroni": [row["blo"], row["bhi"]],
-            "tukey": [row["tlo"], row["thi"]],
         },
     } for row in rows]
     return {

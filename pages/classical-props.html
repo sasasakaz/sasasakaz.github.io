@@ -149,7 +149,7 @@
       </div>
 
       <div id="initial-message" class="mdc-info-box initial-message" role="status">
-        <p>検定を実行すると、以下に結果が表示されます</p>
+        <p>検定が完了すると、以下に結果が表示されます。</p>
       </div>
       <div id="error-message" class="mdc-alert-box" role="alert" hidden>
         <p id="error-message-text"></p>
@@ -160,41 +160,61 @@
       <div id="results">
         <h2 id="result-omni">全体の検定</h2>
         <ul>
+          <li>Peasonのカイ二乗検定（独立性の検定）をおこないます（平均の検定には3群以上ではANOVAが必要ですがカイ二乗検定は3群以上も対応可能）。</li>
           <li>帰無仮説: 全群の比率が等しい。</li>
-          <li>信頼区間は各群の比率に対するWilson区間です。</li>
         </ul>
 
 
-        <h3 id="result-omni-test">Pearsonのカイ二乗検定結果</h3>
+        <h3 id="result-omni-test">Pearsonのカイ二乗検定の結果</h3>
         <div id="omni-summary"></div>
 
 
-        <h3 id="result-group">各群の比率と信頼区間</h3>
+        <h3 id="result-group">各群の信頼区間</h3>
+        <ul>
+          <li>各群の比率と信頼区間（Wilson区間）です。</li>
+          <li>群間の差については、群間の検定結果を参照してください。</li>
+        </ul>
         <div id="group-table" class="table-wrap"></div>
         <div id="group-chart" class="chart-box"></div>
 
 
 
-        <h2 id="result-pair">各群間の比率の差の検定</h2>
-        <ul>
-          <li><strong>補正なし</strong>: 各ペアをPearsonカイ二乗検定（連続性補正なし）。比率の差のCIはWald区間。<span
-              class='inline-mark'>多重比較を考慮していない</span>ので、群数が増えるほど「偽陽性」が出やすくなります（あえて比較用に掲載）。</li>
-          <li><strong>Bonferroni / Holm / Benjamini-Hochberg(BH)</strong>: 上記のp値を補正したものです（BHはFDR制御）。</li>
-          <li><strong>Tukey-Kramer</strong>:
-            本来は平均の比較手法です。ここでは0/1データとして、要約値（群の比率と分母）から等分散を仮定したTukey-Kramerを計算しています。近似である点に注意してください。</li>
-          <li>同時信頼区間: Bonferroni（α/ペア数）とTukeyの同時CIも併記します。</li>
-        </ul>
+        <h2 id="result-pair">群間の比率の差の検定</h2>
+        <p>全ペアでPearsonのカイ二乗検定をおこないます（2群の場合は上記の全体結果と同じです）。</p>
+        <p>diff A - B: A群の比率からB群の比率を差し引いた値です。</p>
 
-        <h3 id="result-pair-p">検定結果</h3>
-        <p id="pair-count"></p>
+
+        <h3 id="result-pair-p">群間の検定結果</h3>
         <ul>
-          <li>有意なp値は黄色で表示します。</li>
-          <li>diff A - B: A群の比率からB群の比率を差し引いた値です。</li>
+          <li>複数のペアを比較するため、ここでは<span class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします。</li>
+          <li>他の補正方法は比較用の参考値です。分析目的に応じてあらかじめ採用する方法を決めておいてください。</li>
         </ul>
-        <div id="pair-p-table" class="table-wrap"></div>
+        <div class="mdc-note-box">
+          <ul>
+            <li><strong>補正なし</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
+              少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
+            <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。</li>
+            <li><strong>Holm</strong>: p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般により高い検出力を得やすい方法です。
+            </li>
+            <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
+              有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
+          </ul>
+        </div>
+
+        <p id="pair-count"></p>
+        <div class="table-wrap" id="pair-p-table"></div>
+
 
         <div id="pair-section">
           <h3 id="result-pair-chart">信頼区間の比較</h3>
+          <p>全ペアについて95%CIを算出します。</p>
+          <div class="mdc-note-box">
+            <ul>
+              <li><strong>補正なし（個別CI）</strong>: 各ペアの比率の差について、Wald法で個別に算出したCI（標本比率から標準誤差を推定し、正規分布に基づいて区間を算出）。</li>
+              <li><strong>Bonferroni（同時CI）</strong>:
+                全ペアをまとめて少なくとも95%の信頼水準でカバーするCI（Wald法の臨界値を、比較するペア数に応じてBonferroni補正して算出）。</li>
+            </ul>
+          </div>
           <div id="pair-chart" class="chart-box"></div>
           <div id="pair-ci-table" class="table-wrap"></div>
         </div>

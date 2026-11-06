@@ -158,7 +158,7 @@
         <p>検定完了！ 以下の結果を確認してください。</p>
       </div>
       <div id="initial-message" class="mdc-info-box initial-message" role="status">
-        <p>検定を実行すると、以下に結果が表示されます</p>
+        <p>検定が完了すると、以下に結果が表示されます。</p>
       </div>
       <div id="error-message" class="mdc-alert-box" role="alert" hidden>
         <p id="error-message-text"></p>
@@ -169,38 +169,49 @@
       <div id="results">
         <h2 id="result-omni">全体の検定</h2>
         <ul>
-          <li>帰無仮説: 全群の平均が等しい。等分散を仮定しない検定です。</li>
+          <li>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance 分散分析）をおこないます。等分散を仮定しないWelchの一元配置分散分析。</li>
+          <li>帰無仮説: 全群の平均が等しい。</li>
         </ul>
 
 
-        <h3 id="result-omni-test">Welch ANOVA 検定結果</h3>
+        <h3 id="result-omni-test">Welch ANOVAの結果</h3>
         <div id="omni-summary"></div>
 
-        <h3 id="result-group">各群の平均と信頼区間</h3>
+        <h3 id="result-group">各群の信頼区間</h3>
         <ul>
-          <li>各群の平均値と、平均に対する信頼区間（t分布を用いた区間）です。</li>
-          <li>群ごとに個別に求めた区間なので、群間の差の有無はこの図だけでは判断できません。差の検定は以降のWelchのt検定を参照してください。</li>
+          <li>各群の平均と信頼区間（t分布を用いた区間）です。</li>
+          <li>群間の差については、Welchのt検定結果を参照してください。</li>
         </ul>
         <div class="table-wrap" id="group-table"></div>
         <div id="group-chart" class="chart-box"></div>
 
 
 
-        <h2 id="result-pair">各群間の平均の差の検定</h2>
-        <ul>
-          <li>全ペアでWelchのt検定をおこないます。</li>
-          <li><strong>Bonferroni / Holm</strong>: 1つでも偽陽性を出す確率（FWER）を抑えます。HolmはBonferroniより検出力が高いです。</li>
-          <li><strong>Benjamini-Hochberg（BH）</strong>: 有意とされたもののうち偽陽性が占める割合（FDR）を抑えます。FWERほど厳しくありません。</li>
-        </ul>
+        <h2 id="result-pair">群間の平均の差の検定</h2>
+        <p>全ペアでWelchのt検定をおこないます（2群の場合は上記の全体結果と同じです。検定統計量 <em>F=t^2</em>）。</p>
+        <p>diff A - B: A群の平均からB群の平均を差し引いた値です。</p>
 
 
-        <h3 id="result-pair-p">検定結果</h3>
+        <h3 id="result-pair-p">群間の検定結果</h3>
         <ul>
-          <li>有意なp値は黄色で表示します。</li>
-          <li>diff A - B: A群の平均からB群の平均を差し引いた値です。</li>
+          <li>複数のペアを比較するため、ここでは<span class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします。</li>
+          <li>他の補正方法は比較用の参考値です。分析目的に応じてあらかじめ採用する方法を決めておいてください。</li>
         </ul>
+        <div class="mdc-note-box">
+          <ul>
+            <li><strong>補正なし</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
+              少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
+            <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。</li>
+            <li><strong>Holm</strong>: p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般により高い検出力を得やすい方法です。
+            </li>
+            <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
+              有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
+          </ul>
+        </div>
 
         <div class="table-wrap" id="pair-p-table"></div>
+
+
         <details class="result-details">
           <summary>Welchのt検定の詳細（N, Mean, diff, SE, t, dof）</summary>
           <div class="table-wrap" id="pair-t-table"></div>
@@ -209,14 +220,15 @@
 
         <div id="pair-section">
           <h3 id="result-pair-chart">信頼区間の比較</h3>
-          <div id="pair-chart-note">
+          <p>全ペアについて95%CIを算出します。</p>
+          <div class="mdc-note-box">
             <ul>
-              <li><strong>Bonferroni</strong>: Welchのt検定の区間を、有意水準α/ペア数で広げたものです。</li>
-              <li><strong>Tukey</strong>: 等分散を仮定したTukey-Kramerの同時信頼区間です。群ごとの分散が大きく異なる場合は、近似である点に注意してください。</li>
+              <li><strong>補正なし（個別CI）</strong>: 各ペアについてWelchの方法で個別に算出したCI</li>
+              <li><strong>Bonferroni（同時CI）</strong>: 全ペアをまとめて95%の信頼水準でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）</li>
             </ul>
           </div>
           <div id="pair-chart" class="chart-box"></div>
-          <div class="table-wrap" id="pair-ci-table"></div>
+          <div id="pair-ci-table" class="table-wrap"></div>
         </div>
       </div>
 
