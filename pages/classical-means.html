@@ -169,7 +169,7 @@
       <div id="results">
         <h2 id="result-omni">全体動向</h2>
         <ul>
-          <li>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance 分散分析）をおこないます。等分散を仮定しないWelchの一元配置分散分析。</li>
+          <li>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance 分散分析）を使用します。ここでは等分散を仮定しないWelchの一元配置分散分析をおこないます。</li>
           <li>帰無仮説: 全群の平均が等しい。</li>
         </ul>
 
@@ -180,7 +180,7 @@
         <h3 id="result-group">各群の信頼区間</h3>
         <ul>
           <li>各群の平均と信頼区間（t分布に基づく区間）です。</li>
-          <li>群間の平均の差については、Welchのt検定結果を参照してください。</li>
+          <li>群間の平均の差については、Welch t検定の結果を参照してください。</li>
         </ul>
         <div class="table-wrap" id="group-table"></div>
         <div id="group-chart" class="chart-box"></div>
@@ -188,11 +188,11 @@
 
 
         <h2 id="result-pair">群間の平均の差</h2>
-        <p>全ペアでWelchのt検定をおこないます（2群の場合は上記の全体結果と同じです。検定統計量 <em>F=t^2</em>）。</p>
+        <p>全ペアでWelch t検定をおこないます（2群の場合は上記の全体結果と同じです。検定統計量 <em>F=t^2</em>）。</p>
         <p class="note-text">※diff A - B: A群の平均からB群の平均を差し引いた値です。</p>
 
 
-        <h3 id="result-pair-p">Welchのt検定結果</h3>
+        <h3 id="result-pair-p">Welch t検定の結果</h3>
         <ul>
           <li>3群以上を比較する場合、ここでは<span class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします（偽陽性を抑えることと、必要以上に検出力を落とさないことのバランスのよさを考慮）。</li>
           <li>他の補正方法や補正なしのp値は比較用の参考値です。探索的な分析など、分析目的に応じて採用する方法をあらかじめ決めておいてください。</li>
@@ -214,7 +214,7 @@
 
 
         <details class="result-details">
-          <summary>Welchのt検定の詳細（N, Mean, diff, SE, t, dof）</summary>
+          <summary>Welch t検定の詳細（N, Mean, diff, SE, t, dof）</summary>
           <div class="table-wrap" id="pair-t-table"></div>
         </details>
 
