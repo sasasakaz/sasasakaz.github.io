@@ -110,8 +110,8 @@ h1 {
   font-size: 1.05em;
   color: var(--sec-dark);
   background: var(--sec-bg);
-  border: 2px solid var(--sec);
-  border-radius: 999px;
+  /* border: 2px solid var(--sec); */
+  border-radius: 0.5rem;
   padding: 0.1em 1em;
   margin: 0 0 0.9rem;
 }
@@ -139,7 +139,7 @@ h1 {
   display: block;
   padding: 0.6rem 0.9rem;
   background: var(--c-bg);
-  border: 1px solid var(--sec-line);
+  /* border: 1px solid var(--sec-line); */
   border-radius: 0.75rem;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
@@ -170,7 +170,7 @@ h1 {
 .section.sec-others {
   margin-top: 2.5rem;
   padding-top: 1.5rem;
-  border-top: 1px solid var(--sec-line);
+  /* border-top: 1px solid var(--sec-line); */
 }
 
 .chip-list {
@@ -185,8 +185,8 @@ h1 {
   font-size: 0.95em;
   color: var(--sec-dark);
   background: var(--c-bg);
-  border: 1px solid var(--sec-line);
-  border-radius: 999px;
+  /* border: 1px solid var(--sec-line); */
+  border-radius: 0.5rem;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
