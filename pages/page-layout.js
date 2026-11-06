@@ -60,6 +60,7 @@
         ['🐶 Markdown Converter', 'pages/markdown-converter.html'],
         ['🐯 Diff Viewer', 'pages/diff-viewer.html'],
         ['🦄 Color Comparison', 'pages/color-comparison.html'],
+        ['🐿️ List Formatter', 'pages/list-formatter.html'],
         ['💬 Dify', 'pages/dify.html'],
         ['🐹 Amazon Clean', 'pages/amazon-clean.html'],
         ['🐼 QR Code Creator', 'pages/qr-code-creator.html']

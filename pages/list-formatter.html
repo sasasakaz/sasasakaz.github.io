@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ja">
+<!-- 
+List Formatter
+Created: 2026-11-06
+Updated: 2026-11-06
+Description: カンマ区切り・縦並び・SQL IN句などのリストを整形・相互変換するにゃん。
+Note: 処理件数の上限は MAX_ITEMS（script内）で変更できる。
+-->
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List Formatter</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/list-formatter.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="カンマ区切り・縦並び・SQL IN句などのリストを整形・相互変換するにゃん。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="List Formatter">
+  <meta property="og:description" content="カンマ区切り・縦並び・SQL IN句などのリストを整形・相互変換するにゃん。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/list-formatter.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page-common.css">
+  <script src="page-layout.js" defer></script>
+
+  <style>
+    h1 {
+      margin-top: 0;
+      font-size: 1.75em;
+    }
+
+    [hidden] {
+      display: none !important;
+    }
+
+    /* ---------- 入力・出力 ---------- */
+    .input-area {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .field {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field-label {
+      font-weight: bold;
+      margin: 0 0 0.5rem;
+    }
+
+    .textwrap {
+      position: relative;
+      display: flex;
+    }
+
+    textarea {
+      width: 100%;
+      height: 240px;
+      padding: 1rem;
+      border: 1px solid var(--c-border);
+      border-radius: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.5;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--c-brand-vivid);
+      background: var(--c-brand2-1);
+    }
+
+    #dst {
+      background: var(--c-bg-subtle);
+    }
+
+    @media (max-width: 640px) {
+      .input-area {
+        flex-direction: column;
+      }
+
+      textarea {
+        height: 180px;
+      }
+    }
+
+    /* ---------- ボタン ---------- */
+    .btn {
+      min-height: 3rem;
+      padding: 0.5rem 1.25rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: bold;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-copy {
+      background: var(--c-accent);
+    }
+
+    .btn-copy:hover {
+      background: var(--c-accent-hover);
+    }
+
+    .btn-sub {
+      background: var(--c-bg-subtle);
+      color: var(--c-text-sub);
+      border: 1px solid var(--c-border);
+      font-weight: normal;
+    }
+
+    .btn-sub:hover {
+      background: var(--c-border);
+    }
+
+    /* 入力・出力それぞれの下の行。件数表示（左）とボタン（右）を同じ高さに並べる */
+    .field-foot {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+      min-height: 3rem;
+      margin-top: 0.5rem;
+    }
+
+    button.clear-btn {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      min-height: 0;
+      padding: 0.15rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: normal;
+    }
+
+    /* ---------- 状態表示 ---------- */
+    #status {
+      margin: 0;
+    }
+
+    /* ---------- オプション ---------- */
+    .options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+      gap: 0.5rem 1.5rem;
+      margin-bottom: 1rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--c-border);
+      border-radius: 0.5rem;
+      background: var(--c-bg);
+      line-height: 1.5;
+    }
+
+    .opt-title {
+      margin-bottom: 0.25rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid var(--c-brand2-3);
+      font-weight: bold;
+      color: var(--c-brand);
+    }
+
+    .opt {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+      font-size: 0.9rem;
+    }
+
+    .opt select {
+      min-height: 2.5rem;
+      padding: 0.4rem 0.5rem;
+      border: 1px solid var(--c-border);
+      border-radius: 0.5rem;
+      background: var(--c-bg);
+      font: inherit;
+    }
+
+    .opt:has(:disabled) {
+      opacity: 0.45;
+    }
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
+</head>
+
+<body class="layout-3col l3-drawer">
+  <div class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+  </div>
+  <div id="side-backdrop" class="side-backdrop"></div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <header id="header">
+        <h1>List Formatter</h1>
+        <p class="note-text">カンマ区切り・縦並び・SQL IN句などのリストを整形・相互変換するにゃん。貼り付けるだけで自動で変換されるよ（最大1,000件）。</p>
+      </header>
+
+      <div class="input-area">
+        <div class="field">
+          <p class="field-label">Input</p>
+          <div class="textwrap">
+            <textarea id="src" spellcheck="false" aria-label="Input"
+              placeholder="465.0, 458.6, 466.5, ...&#10;または 1行1件で貼り付け（Excelの列・行、IN ('a', 'b') もOK）"></textarea>
+            <button type="button" id="clearSrc" class="btn btn-sub clear-btn" hidden>Clear</button>
+          </div>
+          <div class="field-foot">
+            <p id="status" class="note-text" aria-live="polite">—</p>
+          </div>
+        </div>
+        <div class="field">
+          <p class="field-label">Output</p>
+          <div class="textwrap">
+            <textarea id="dst" spellcheck="false" aria-label="Output" readonly></textarea>
+          </div>
+          <div class="field-foot">
+            <button type="button" id="copyDst" class="btn btn-copy">Copy</button>
+            <button type="button" id="swapBtn" class="btn btn-sub">⇄ Output を Input に戻す</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="limitWarn" class="mdc-warn-box" hidden></div>
+
+      <div class="options">
+        <div>
+          <div class="opt-title">入力</div>
+          <label class="opt">区切り
+            <select id="inSep">
+              <option value="auto">自動（カンマ・タブ・改行）</option>
+              <option value="newline">改行のみ</option>
+              <option value="comma">カンマ</option>
+              <option value="tab">タブ</option>
+              <option value="semicolon">セミコロン</option>
+              <option value="space">スペース</option>
+            </select>
+          </label>
+          <label class="opt"><input type="checkbox" id="stripWrap" checked> 引用符・IN句・[ ] を外して読む</label>
+          <p class="note-text">改行は常に区切りとして扱います。</p>
+        </div>
+
+        <div>
+          <div class="opt-title">整形</div>
+          <label class="opt"><input type="checkbox" id="dropEmpty" checked> 空要素を除く</label>
+          <label class="opt"><input type="checkbox" id="dedupe"> 重複を除く</label>
+          <label class="opt">並べ替え
+            <select id="sortSel">
+              <option value="none">なし</option>
+              <option value="asc">昇順</option>
+              <option value="desc">降順</option>
+            </select>
+          </label>
+          <p class="note-text">すべて数値なら数値順、それ以外は自然順（file2 &lt; file10）で並べます。</p>
+        </div>
+
+        <div>
+          <div class="opt-title">出力</div>
+          <label class="opt">形式
+            <select id="format">
+              <option value="plain">プレーン</option>
+              <option value="in">SQL IN句</option>
+              <option value="notin">SQL NOT IN句</option>
+              <option value="values">SQL VALUES</option>
+              <option value="python">Python リスト</option>
+              <option value="r">R ベクトル</option>
+              <option value="json">JSON 配列</option>
+            </select>
+          </label>
+          <label class="opt">区切り
+            <select id="outSep">
+              <option value="newline">改行</option>
+              <option value="comma">カンマ ,</option>
+              <option value="commaSpace">カンマ + スペース</option>
+              <option value="tab">タブ</option>
+              <option value="semicolon">セミコロン ;</option>
+              <option value="space">スペース</option>
+            </select>
+          </label>
+          <label class="opt">囲み
+            <select id="quote">
+              <option value="">なし</option>
+              <option value="'">シングル '</option>
+              <option value="&quot;">ダブル "</option>
+              <option value="`">バッククォート `</option>
+            </select>
+          </label>
+          <label class="opt"><input type="checkbox" id="numNoQuote" checked> 数値は囲まない</label>
+          <label class="opt"><input type="checkbox" id="breakLines"> 項目ごとに改行（プレーン以外）</label>
+        </div>
+      </div>
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    'use strict';
+
+    /* ===================== 設定 ===================== */
+
+    const MAX_ITEMS = 1000; // 処理する件数の上限（空要素を除いたあと）
+
+    // 数値判定。先頭ゼロ（007 など）は ID の可能性が高いので数値として扱わない
+    const NUM_RE = /^-?(0|[1-9]\d*)(\.\d+)?([eE][+-]?\d+)?$/;
+
+    // 改行コードは事前に \n へ統一するので、区切りには \n だけを含める
+    const IN_SEPS = {
+      auto: '\n,\t',
+      newline: '\n',
+      comma: '\n,',
+      tab: '\n\t',
+      semicolon: '\n;',
+      space: '\n '
+    };
+
+    const OUT_SEPS = {
+      newline: '\n',
+      comma: ',',
+      commaSpace: ', ',
+      tab: '\t',
+      semicolon: ';',
+      space: ' '
+    };
+
+    // 形式を切り替えたときの「囲み」の初期値
+    const PRESET_QUOTE = { plain: '', in: "'", notin: "'", values: "'", python: "'", r: '"', json: '"' };
+
+    /* ===================== 変換ロジック（DOMに依存しない） ===================== */
+
+    // IN (...) / NOT IN (...) / VALUES (...), (...) / c(...) / [...] / (...) の外側を外す。
+    // backslash は、中身を「\ でエスケープする書き方」（Python・R・JSON）として読むかどうか。
+    // SQL の 'C:\dir' のように \ をそのまま使う書き方と区別するため、囲みで判定する
+    function unwrap(text) {
+      const t = text.trim();
+      let m = t.match(/^VALUES\s*(\([\s\S]*\))\s*;?$/i);
+      if (m) return { text: m[1].slice(1, -1).replace(/\)\s*,\s*\(/g, ','), backslash: false };
+      m = t.match(/^(?:NOT\s+)?IN\s*\(([\s\S]*)\)\s*;?$/i);
+      if (m) return { text: m[1], backslash: false };
+      m = t.match(/^c\(([\s\S]*)\)$/);
+      if (m) return { text: m[1], backslash: true };
+      m = t.match(/^\[([\s\S]*)\]$/);
+      if (m) return { text: m[1], backslash: true };
+      m = t.match(/^\(([\s\S]*)\)$/);
+      if (m) return { text: m[1], backslash: false };
+      return { text: text, backslash: false };
+    }
+
+    // 区切り文字で分割する。quoteAware のときは 'a,b' のような引用符内の区切りを無視し、
+    // 引用符を外す（'' や "" は1文字の引用符として扱う）。閉じていない引用符があれば null を返す
+    function tokenize(text, seps, quoteAware, backslash) {
+      const items = [];
+      let cur = '';
+      let q = null;
+      let afterComma = false; // 直前の区切りがカンマ（そのあとの改行は区切りとして数えない）
+      for (let i = 0; i < text.length; i++) {
+        const ch = text[i];
+        if (q) {
+          if (backslash && ch === '\\' && i + 1 < text.length) {
+            const n = text[i + 1];
+            if (n === 'u' && /^[0-9a-fA-F]{4}$/.test(text.substr(i + 2, 4))) {
+              cur += String.fromCharCode(parseInt(text.substr(i + 2, 4), 16));
+              i += 5;
+            } else {
+              cur += n === 'n' ? '\n' : n === 'r' ? '\r' : n === 't' ? '\t' : n;
+              i++;
+            }
+          } else if (ch === q) {
+            if (text[i + 1] === q) { cur += q; i++; } else { q = null; }
+          } else {
+            cur += ch;
+          }
+        } else if (quoteAware && (ch === "'" || ch === '"' || ch === '`') && cur.trim() === '') {
+          q = ch;
+          cur = '';
+          afterComma = false;
+        } else if (seps.indexOf(ch) >= 0) {
+          if (ch === '\n' && afterComma && cur.trim() === '') {
+            afterComma = false;
+            cur = '';
+          } else {
+            items.push(cur);
+            cur = '';
+            afterComma = (ch === ',');
+          }
+        } else {
+          cur += ch;
+          if (ch.trim() !== '') afterComma = false;
+        }
+      }
+      if (q) return null;
+      items.push(cur);
+      return items;
+    }
+
+    function quoteItem(v, fmt, o) {
+      if (o.numNoQuote && NUM_RE.test(v)) return v;
+      if (fmt === 'json') return JSON.stringify(v);
+      const qc = o.quote;
+      if (!qc) return v;
+      if (fmt === 'python' || fmt === 'r') {
+        const esc = v.replace(/\\/g, '\\\\').replace(/\n/g, '\\n').replace(/\r/g, '\\r').split(qc).join('\\' + qc);
+        return qc + esc + qc;
+      }
+      // SQL・プレーン: 引用符を2つ重ねてエスケープ
+      return qc + v.split(qc).join(qc + qc) + qc;
+    }
+
+    function build(items, fmt, o) {
+      if (items.length === 0) return '';
+      const parts = items.map(v => quoteItem(v, fmt, o));
+      if (fmt === 'plain') return parts.join(OUT_SEPS[o.sep]);
+
+      const nl = o.breakLines;
+      const joiner = nl ? ',\n  ' : ', ';
+      const body = parts.join(joiner);
+      const wrap = (open, close) => nl ? open + '\n  ' + body + '\n' + close : open + body + close;
+
+      switch (fmt) {
+        case 'in': return wrap('IN (', ')');
+        case 'notin': return wrap('NOT IN (', ')');
+        case 'python':
+        case 'json': return wrap('[', ']');
+        case 'r': return wrap('c(', ')');
+        case 'values': {
+          const rows = parts.map(p => '(' + p + ')');
+          return nl ? 'VALUES\n  ' + rows.join(',\n  ') : 'VALUES ' + rows.join(', ');
+        }
+      }
+      return parts.join(', ');
+    }
+
+    function processList(text, o) {
+      const normalized = text.replace(/\r\n?/g, '\n');
+      const u = o.stripWrap ? unwrap(normalized) : { text: normalized, backslash: false };
+      const source = u.text.trim();
+      const seps = IN_SEPS[o.inSep];
+      let items = o.stripWrap ? tokenize(source, seps, true, u.backslash) : null;
+      if (items === null) items = tokenize(source, seps, false, false);
+      items = items.map(s => s.trim());
+
+      const rawCount = items.length;
+      let emptyRemoved = 0;
+      if (o.dropEmpty) {
+        items = items.filter(s => s !== '');
+        emptyRemoved = rawCount - items.length;
+      }
+
+      let truncated = 0;
+      if (items.length > MAX_ITEMS) {
+        truncated = items.length - MAX_ITEMS;
+        items = items.slice(0, MAX_ITEMS);
+      }
+
+      let dup = 0;
+      if (o.dedupe) {
+        const seen = new Set();
+        items = items.filter(s => {
+          if (seen.has(s)) { dup++; return false; }
+          seen.add(s);
+          return true;
+        });
+      }
+
+      if (o.sort !== 'none') {
+        const dir = o.sort === 'asc' ? 1 : -1;
+        if (items.every(s => NUM_RE.test(s))) {
+          items.sort((a, b) => (Number(a) - Number(b)) * dir);
+        } else {
+          const col = new Intl.Collator('ja', { numeric: true, sensitivity: 'base' });
+          items.sort((a, b) => col.compare(a, b) * dir);
+        }
+      }
+
+      return {
+        output: build(items, o.format, o),
+        rawCount, emptyRemoved, truncated, dup,
+        count: items.length
+      };
+    }
+
+    /* ===================== 画面まわり ===================== */
+
+    const srcEl = document.getElementById('src');
+    const dstEl = document.getElementById('dst');
+    const clearBtn = document.getElementById('clearSrc');
+    const copyBtn = document.getElementById('copyDst');
+    const swapBtn = document.getElementById('swapBtn');
+    const statusEl = document.getElementById('status');
+    const limitWarn = document.getElementById('limitWarn');
+
+    const inSepSel = document.getElementById('inSep');
+    const stripWrapChk = document.getElementById('stripWrap');
+    const dropEmptyChk = document.getElementById('dropEmpty');
+    const dedupeChk = document.getElementById('dedupe');
+    const sortSel = document.getElementById('sortSel');
+    const formatSel = document.getElementById('format');
+    const outSepSel = document.getElementById('outSep');
+    const quoteSel = document.getElementById('quote');
+    const numNoQuoteChk = document.getElementById('numNoQuote');
+    const breakLinesChk = document.getElementById('breakLines');
+
+    function readOptions() {
+      return {
+        inSep: inSepSel.value,
+        stripWrap: stripWrapChk.checked,
+        dropEmpty: dropEmptyChk.checked,
+        dedupe: dedupeChk.checked,
+        sort: sortSel.value,
+        format: formatSel.value,
+        sep: outSepSel.value,
+        quote: quoteSel.value,
+        numNoQuote: numNoQuoteChk.checked,
+        breakLines: breakLinesChk.checked
+      };
+    }
+
+    // 形式によって使えない設定をグレーアウトする
+    function syncControls() {
+      const f = formatSel.value;
+      outSepSel.disabled = f !== 'plain';
+      breakLinesChk.disabled = f === 'plain';
+      quoteSel.disabled = f === 'json';
+    }
+
+    function run() {
+      clearBtn.hidden = srcEl.value === '';
+
+      if (!srcEl.value.trim()) {
+        dstEl.value = '';
+        statusEl.textContent = '—';
+        limitWarn.hidden = true;
+        return;
+      }
+
+      const r = processList(srcEl.value, readOptions());
+      dstEl.value = r.output;
+
+      const notes = [];
+      if (r.emptyRemoved) notes.push('空要素 ' + r.emptyRemoved + ' 件');
+      if (r.dup) notes.push('重複 ' + r.dup + ' 件');
+      if (r.truncated) notes.push('上限超過 ' + r.truncated + ' 件');
+      statusEl.textContent = '入力 ' + r.rawCount.toLocaleString() + ' 件 → 出力 ' + r.count.toLocaleString() + ' 件'
+        + (notes.length ? '（' + notes.join('・') + ' を除外）' : '');
+
+      limitWarn.hidden = r.truncated === 0;
+      if (r.truncated) {
+        limitWarn.textContent = '件数が上限（' + MAX_ITEMS.toLocaleString() + ' 件）を超えているため、先頭 '
+          + MAX_ITEMS.toLocaleString() + ' 件のみ処理したよ（' + r.truncated.toLocaleString() + ' 件は除外）。';
+      }
+    }
+
+    srcEl.addEventListener('input', run);
+
+    document.querySelectorAll('.options select, .options input').forEach(el => {
+      if (el !== formatSel) el.addEventListener('change', run);
+    });
+
+    formatSel.addEventListener('change', () => {
+      quoteSel.value = PRESET_QUOTE[formatSel.value];
+      syncControls();
+      run();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      srcEl.value = '';
+      run();
+      srcEl.focus();
+    });
+
+    swapBtn.addEventListener('click', () => {
+      if (!dstEl.value) return;
+      srcEl.value = dstEl.value;
+      run();
+    });
+
+    let copyTimer;
+    copyBtn.addEventListener('click', async () => {
+      if (!dstEl.value) return;
+      clearTimeout(copyTimer);
+      try {
+        await navigator.clipboard.writeText(dstEl.value);
+        copyBtn.textContent = 'Copied!';
+      } catch (e) {
+        copyBtn.textContent = 'Failed';
+      }
+      copyTimer = setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
+    });
+
+    syncControls();
+    run();
+  </script>
+</body>
+
+</html>
