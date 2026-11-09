@@ -115,17 +115,17 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat, n_total):
     p_rows = [[r["pair"], r["diff"], r["p_raw"], p_bonf[n], p_hol[n], p_bhh[n]]
               for n, r in enumerate(rows)]
     p_table = html_table(
-        ["Pair", "diff (points)", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["Pair", "diff (points)", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
         ["text", "f2", "p", "p", "p", "p"], p_rows, alpha)
     ci_rows = [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"]] for r in rows]
     ci_table = html_table(
         ["Pair", "diff (points)", "CI Lower", "CI Upper", "Bonf CI Lower", "Bonf CI Upper"],
         ["text"] + ["f2"] * 5, ci_rows)
 
-    # 差のCI比較（補正なし vs Bonferroni vs Tukey）
+    # 差のCI比較（Unadjusted vs Bonferroni vs Tukey）
     fig, ax = new_fig(640, 55 * m + 150)
     style_axes(ax)
-    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.15),
+    specs = [("lo", "hi", "Unadjusted", "unadjusted", "#1f77b4", -0.15),
              ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)]
     for lo_c, hi_c, label, method, c, off in specs:
         for r, row in enumerate(rows):

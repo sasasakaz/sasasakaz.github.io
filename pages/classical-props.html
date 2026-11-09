@@ -187,11 +187,11 @@
         <h3 id="result-pair-p">カイ二乗検定（ペア）の結果</h3>
         <ul>
           <li>3群以上を比較する場合、ここでは<span class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします（偽陽性を抑えることと、必要以上に検出力を落とさないことのバランスのよさを考慮）。</li>
-          <li>他の補正方法や補正なしのp値は比較用の参考値です。探索的な分析など、分析目的に応じて採用する方法をあらかじめ決めておいてください。</li>
+          <li>他の補正方法やUnadjusted（補正なし）のp値は比較用の参考値です。探索的な分析など、分析目的に応じて採用する方法をあらかじめ決めておいてください。</li>
         </ul>
         <div class="mdc-note-box">
           <ul>
-            <li><strong>補正なし</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
+            <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
               少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
             <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。</li>
             <li><strong>Holm</strong>: p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般により高い検出力を得やすい方法です。
@@ -210,7 +210,7 @@
           <p>全ペアについて95%CIを算出します。</p>
           <div class="mdc-note-box">
             <ul>
-              <li><strong>補正なし（個別CI）</strong>: 各ペアの比率の差について、Wald法で個別に算出したCI（標本比率から標準誤差を推定し、正規分布に基づいて区間を算出）。</li>
+          <li><strong>Unadjusted（個別CI）</strong>: 各ペアの比率の差について、Wald法で個別に算出したCI（標本比率から標準誤差を推定し、正規分布に基づいて区間を算出）。</li>
               <li><strong>Bonferroni（同時CI）</strong>:
                 全ペアをまとめて少なくとも95%の信頼水準でカバーするCI（Wald法の臨界値を、比較するペア数に応じてBonferroni補正して算出）。</li>
             </ul>

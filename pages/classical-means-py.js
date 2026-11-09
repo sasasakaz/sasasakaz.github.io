@@ -117,7 +117,7 @@ def pairwise(ids, n, mean, sd, alpha, level):
         [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"]]
          for r in rows])
 
-    specs = [("lo", "hi", "補正なし", "unadjusted", "#1f77b4", -0.15),
+    specs = [("lo", "hi", "Unadjusted", "unadjusted", "#1f77b4", -0.15),
              ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)]
 
     def draw_pair_chart(chart_specs, prefix, title, height, legend):
@@ -155,7 +155,7 @@ def pairwise(ids, n, mean, sd, alpha, level):
     p_bonf, p_hol, p_bhh = p_bonferroni(p_raw), p_holm(p_raw), p_bh(p_raw)
     adj_rows = [[r["pair"], r["diff"], r["p"], p_bonf[x], p_hol[x], p_bhh[x]] for x, r in enumerate(rows)]
     adj_table = html_table(
-        ["Pair", "diff", "p (補正なし)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["Pair", "diff", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
         ["text", "f2", "p", "p", "p", "p"], adj_rows, alpha)
     return t_table, adj_table, adj_chart, tooltips, adj_ci_table
 
