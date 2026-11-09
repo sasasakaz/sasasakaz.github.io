@@ -87,7 +87,7 @@ def pairwise(ids, n, mean, sd, alpha, level):
     mse = float(np.sum((n - 1) * var) / df_err)
     q_crit = float(sps.studentized_range.ppf(1 - alpha, k, df_err))
     for i, j in pairs:
-        diff = mean[i] - mean[j]  # 差分は「前の群 − 後の群」
+        diff = mean[j] - mean[i]  # 差分は「後ろの群(j) − 前の群(i)」（A基点なら B−A, C−A, …）
         se_i = var[i] / n[i]
         se_j = var[j] / n[j]
         se = np.sqrt(se_i + se_j)
@@ -95,7 +95,7 @@ def pairwise(ids, n, mean, sd, alpha, level):
         dof = (se_i + se_j) ** 2 / (se_i ** 2 / (n[i] - 1) + se_j ** 2 / (n[j] - 1))  # Welch-Satterthwaite
         p_val = float(sps.t.sf(abs(t_stat), dof) * 2)
         t_crit = sps.t.ppf(1 - alpha / 2, dof)
-        row = {"pair": f"{ids[i]} - {ids[j]}", "diff": float(diff), "se": float(se), "t": float(t_stat),
+        row = {"pair": f"{ids[j]} - {ids[i]}", "diff": float(diff), "se": float(se), "t": float(t_stat),
                "dof": float(dof), "p": p_val, "lo": float(diff - t_crit * se), "hi": float(diff + t_crit * se)}
         t_bonf = sps.t.ppf(1 - alpha / (2 * m), dof)
         se_tukey = np.sqrt(mse / 2 * (1 / n[i] + 1 / n[j]))
@@ -103,10 +103,11 @@ def pairwise(ids, n, mean, sd, alpha, level):
                     "tlo": float(diff - q_crit * se_tukey), "thi": float(diff + q_crit * se_tukey)})
         rows.append(row)
 
-    t_rows = [[r["pair"], n[i], mean[i], n[j], mean[j], r["diff"], r["se"], r["t"], r["dof"]]
+    # 左の列 = ペア名の左側（後ろの群 j）、右の列 = ペア名の右側（前の群 i）
+    t_rows = [[r["pair"], n[j], mean[j], n[i], mean[i], r["diff"], r["se"], r["t"], r["dof"]]
               for (i, j), r in zip(pairs, rows)]
     t_table = html_table(
-        ["Pair", "N (A)", "Mean (A)", "N (B)", "Mean (B)", "diff", "SE", "t", "dof"],
+        ["Pair", "N (左)", "Mean (左)", "N (右)", "Mean (右)", "diff", "SE", "t", "dof"],
         ["text", "int", "f2", "int", "f2", "f2", "f2", "f2", "f2"], t_rows, alpha)
 
     adj_ci_table = html_table(

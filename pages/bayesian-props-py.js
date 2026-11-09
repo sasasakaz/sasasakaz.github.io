@@ -124,7 +124,8 @@ def plot_individual_hdis(groups):
 def pair_diffs(groups):
     for i in range(len(groups)):
         for j in range(i + 1, len(groups)):
-            yield groups[i]["id"], groups[j]["id"], groups[i]["samples"] - groups[j]["samples"]
+            # 差は「後ろの群(j) − 前の群(i)」（A基点なら B−A, C−A, …）。戻り値は (左の群id, 右の群id, 差)
+            yield groups[j]["id"], groups[i]["id"], groups[j]["samples"] - groups[i]["samples"]
 
 
 def plot_forest(groups):

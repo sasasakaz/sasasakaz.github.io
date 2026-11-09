@@ -93,7 +93,7 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat, n_total):
 
     rows = []
     for i, j in pairs:
-        d = p_hat[i] - p_hat[j]
+        d = p_hat[j] - p_hat[i]  # 差は「後ろの群(j) − 前の群(i)」（A基点なら B−A, C−A, …）
         se = np.sqrt(p_hat[i] * (1 - p_hat[i]) / dens[i] + p_hat[j] * (1 - p_hat[j]) / dens[j])
         tbl = [[numers[i], denoms[i] - numers[i]], [numers[j], denoms[j] - numers[j]]]
         try:
@@ -102,7 +102,7 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat, n_total):
             p_raw = 1.0
         se_t = np.sqrt(mse / 2 * (1 / dens[i] + 1 / dens[j]))
         rows.append({
-            "pair": f"{ids[i]} - {ids[j]}", "diff": 100 * d,
+            "pair": f"{ids[j]} - {ids[i]}", "diff": 100 * d,
             "lo": 100 * (d - z_unadj * se), "hi": 100 * (d + z_unadj * se),
             "blo": 100 * (d - z_bonf * se), "bhi": 100 * (d + z_bonf * se),
             "tlo": 100 * (d - q_crit * se_t), "thi": 100 * (d + q_crit * se_t),
