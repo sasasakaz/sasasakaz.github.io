@@ -494,7 +494,7 @@ const ToolCommon = (() => {
 
   /** 差の信頼区間グラフの手法ごとの名前と色（色は classical-*-py.js の specs と同じにしておく） */
   const PAIR_METHODS = {
-    unadjusted: { label: '補正なし', color: '#1f77b4' },
+    unadjusted: { label: 'Unadjusted', color: '#1f77b4' },
     bonferroni: { label: 'Bonferroni', color: '#2ca02c' },
     tukey: { label: 'Tukey', color: '#ff7f0e' },
   };

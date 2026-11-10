@@ -6,7 +6,7 @@
 //  - 計算とグラフ描画は bayesian-props-py.js 内のPythonコード（BAYESIAN_PROPS_PY）がPyodide上で行う。
 //    Pythonの run() は各グラフのSVG文字列をJSONで返し、ここで下記idのdivに挿入する。
 //      #summary-chart / #summary-hdi / #diff-hdi / #diff-chart / #summary-table-container
-//  - これらのidは bayesian-props.html と bayesian-props.css に対応する。
+//  - これらのidは bayesian-props.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
 //    ToolCommon が各セルの文字だけを更新する（行数が変わらないので、下のパーツがずれない）。

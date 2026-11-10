@@ -9,7 +9,7 @@
 //      #group-table / #group-chart         （各群の平均と信頼区間）
 //      #pair-t-table                       （Welchのt検定の詳細）
 //      #pair-p-table / #pair-ci-table / #pair-chart  （各群間の検定結果と信頼区間）
-//  - これらのidは classical-means.html と classical-means.css に対応する。
+//  - これらのidは classical-means.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 群ごとの入力欄は、ToolCommon.createMeansInput() が #group-inputs の中に作る（HTMLには書いていない）。
 //  - 確認表(#confirmation-table)は、HTML側に5行(data-group="A〜E")を固定で書いてあり、

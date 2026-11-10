@@ -11,7 +11,7 @@
 //      forest    -> #diff-hdi      / diffs -> #diff-chart（1枚ずつ .diff-plot で包む）
 //      table     -> #summary-table-container（JSが表にする）
 //    hover はツールチップ用データ（bayesian-props.js の attachPosteriorHover が使用）。
-//  - 図の表示サイズは bayesian-props.css（各idのwidthと svg{width:100%}）で決まり、
+//  - 図の表示サイズは page-common.css とHTMLの <style>（各idのwidthと svg{width:100%}）で決まり、
 //    ここの figsize(px指定) は縦横比と文字の相対サイズを決める。
 //
 // 【編集時の注意】

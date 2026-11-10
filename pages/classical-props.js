@@ -8,7 +8,7 @@
 //      #omni-summary                       （全体の検定。omni から文章を作る）
 //      #group-table / #group-chart         （各群の比率とWilson区間）
 //      #pair-p-table / #pair-ci-table / #pair-chart  （各群間の検定結果と信頼区間）
-//  - これらのidは classical-props.html と classical-props.css に対応する。
+//  - これらのidは classical-props.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
 //    ToolCommon が各セルの文字だけを更新する（行数が変わらないので、下のパーツがずれない）。
