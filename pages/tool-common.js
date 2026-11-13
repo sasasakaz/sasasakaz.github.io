@@ -313,7 +313,7 @@ const ToolCommon = (() => {
 
   /**
    * means型の入力欄: 群ごとのテキストエリア（#group-A〜）を #group-inputs の中に作る。
-   * 確認表は、各 tr の data-group に対応する行に N / Mean / Std / Min / Max を表示する。
+   * 確認表は、各 tr の data-group に対応する行に N / Mean / Std / Min / Max を表示する（Std は n で割る標準偏差）。
    * 数値として読めない部分があるときは、入力エラーで知らせ、実行ボタンを無効にする。
    * 1群あたりの件数の上限は、HTML側の #group-inputs の data-max-values で指定する（省略時は上限なし）。
    * 超えた群は確認表の行を赤くし、入力エラーで知らせて、実行ボタンを無効にする。
@@ -406,7 +406,8 @@ const ToolCommon = (() => {
       const mean = sum / count;
       let sumSq = 0;
       for (const v of values) sumSq += (v - mean) ** 2;
-      return { count, mean, std: count > 1 ? Math.sqrt(sumSq / (count - 1)) : NaN, min, max };
+      // Std は標本標準偏差（n で割る・biased）。1件のときは 0 になる。
+      return { count, mean, stdBiased: Math.sqrt(sumSq / count), min, max };
     }
 
     function refresh() {
@@ -415,7 +416,7 @@ const ToolCommon = (() => {
       rows.forEach((tr) => {
         const s = statsByGroup.get(tr.dataset.group);
         const texts = s
-          ? [s.count.toLocaleString(), s.mean.toFixed(2), Number.isFinite(s.std) ? s.std.toFixed(2) : '', s.min.toFixed(2), s.max.toFixed(2)]
+          ? [s.count.toLocaleString(), s.mean.toFixed(2), s.stdBiased.toFixed(2), s.min.toFixed(2), s.max.toFixed(2)]
           : ['', '', '', '', ''];
         const cells = tr.querySelectorAll('td');
         cells.forEach((cell, i) => { cell.textContent = texts[i]; });

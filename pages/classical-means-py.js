@@ -13,6 +13,9 @@
 //      pair.p_table  -> #pair-p-table / pair.ci_table -> #pair-ci-table / pair.chart -> #pair-chart
 //      pair.tooltips -> グラフ上のツールチップ用（tool-common.js の attachPairChartTooltips）
 //  - 入力が不正なときは {"error": "..."} を返す。
+//  - 変数名の方針: std_biased = 標準偏差（n で割る）、std_unbiased = 不偏標準偏差（n-1 で割る）、
+//    var_unbiased = 不偏分散（n-1 で割る）。検定・信頼区間の計算はすべて不偏の値を使う。
+//    各群の表の列は Group, N, Mean, Std(biased), Unbiased Std, Unbiased Var, CI Lower, CI Upper。
 //
 // 【編集時の注意】
 //  - file:// でも動くよう fetch せず文字列で埋め込んでいる。バッククォート(\`)と
@@ -38,13 +41,16 @@ def group_summary(ids, xs, alpha, level):
     k = len(xs)
     n = np.array([len(x) for x in xs])
     mean = np.array([np.mean(x) for x in xs])
-    sd = np.array([np.std(x, ddof=1) for x in xs])
-    half = sps.t.ppf(1 - alpha / 2, n - 1) * sd / np.sqrt(n)
+    std_biased = np.array([np.std(x, ddof=0) for x in xs])  # 標準偏差（n で割る）
+    std_unbiased = np.array([np.std(x, ddof=1) for x in xs])  # 不偏標準偏差（n-1 で割る）
+    var_unbiased = std_unbiased ** 2  # 不偏分散（n-1 で割る）
+    half = sps.t.ppf(1 - alpha / 2, n - 1) * std_unbiased / np.sqrt(n)
 
-    rows = [[f"Group {ids[i]}", n[i], mean[i], sd[i], mean[i] - half[i], mean[i] + half[i]] for i in range(k)]
+    rows = [[f"Group {ids[i]}", n[i], mean[i], std_biased[i], std_unbiased[i], var_unbiased[i],
+             mean[i] - half[i], mean[i] + half[i]] for i in range(k)]
     table = html_table(
-        ["Group", "N", "Mean", "SD", f"{level}%CI Lower", f"{level}%CI Upper"],
-        ["text", "int", "f2", "f2", "f2", "f2"], rows)
+        ["Group", "N", "Mean", "Std", "Unbiased Std", "Unbiased Var", f"{level}%CI Lower", f"{level}%CI Upper"],
+        ["text", "int", "f2", "f2", "f2", "f2", "f2", "f2"], rows)
 
     fig, ax = new_fig(640, 50 * k + 120)
     style_axes(ax, grid_x=True)
@@ -58,13 +64,13 @@ def group_summary(ids, xs, alpha, level):
     ax.set_xlabel("Average")
     ax.set_title(f"Average with {level}% CI")
     fig.tight_layout()
-    return n, mean, sd, table, to_svg(fig)
+    return n, mean, std_unbiased, table, to_svg(fig)
 
 
-def welch_anova(n, mean, sd, alpha):
+def welch_anova(n, mean, std_unbiased, alpha):
     k = len(n)
-    var = sd ** 2
-    w = n / var
+    var_unbiased = std_unbiased ** 2
+    w = n / var_unbiased
     mean_w = np.sum(w * mean) / np.sum(w)
     numer = np.sum(w * (mean - mean_w) ** 2) / (k - 1)
     lam = np.sum((1 - w / np.sum(w)) ** 2 / (n - 1))
@@ -75,21 +81,21 @@ def welch_anova(n, mean, sd, alpha):
     return {"f": float(f_welch), "df1": int(df1), "df2": float(df2), "p": p, "significant": bool(p < alpha)}
 
 
-def pairwise(ids, n, mean, sd, alpha, level):
+def pairwise(ids, n, mean, std_unbiased, alpha, level):
     k = len(n)
-    var = sd ** 2
+    var_unbiased = std_unbiased ** 2
     pairs = list(itertools.combinations(range(k), 2))
     m = len(pairs)
     rows = []
     # Bonferroni は Welch t のまま α/ペア数、Tukey-Kramer は等分散を仮定したプールMSEで計算する
     n_all = int(np.sum(n))
     df_err = n_all - k
-    mse = float(np.sum((n - 1) * var) / df_err)
+    mse = float(np.sum((n - 1) * var_unbiased) / df_err)
     q_crit = float(sps.studentized_range.ppf(1 - alpha, k, df_err))
     for i, j in pairs:
         diff = mean[j] - mean[i]  # 差分は「後ろの群(j) − 前の群(i)」（A基点なら B−A, C−A, …）
-        se_i = var[i] / n[i]
-        se_j = var[j] / n[j]
+        se_i = var_unbiased[i] / n[i]
+        se_j = var_unbiased[j] / n[j]
         se = np.sqrt(se_i + se_j)
         t_stat = diff / se
         dof = (se_i + se_j) ** 2 / (se_i ** 2 / (n[i] - 1) + se_j ** 2 / (n[j] - 1))  # Welch-Satterthwaite
@@ -170,13 +176,13 @@ def run(ids, groups, alpha):
             raise ValueError("2〜5群のデータを入力してください")
         if any(len(x) < 2 for x in xs):
             raise ValueError("各群2件以上のデータが必要です")
-        if any(np.std(x, ddof=1) == 0 for x in xs):
+        if any(np.std(x, ddof=1) == 0 for x in xs):  # 不偏標準偏差が0 = 全て同じ値
             raise ValueError("標準偏差が0の群があるため検定できません（全て同じ値の群があります）")
         level = int(round((1 - alpha) * 100))
 
-        n, mean, sd, group_table, group_chart = group_summary(ids, xs, alpha, level)
-        omni = welch_anova(n, mean, sd, alpha)
-        t_table, p_table, chart, tooltips, ci_table = pairwise(ids, n, mean, sd, alpha, level)
+        n, mean, std_unbiased, group_table, group_chart = group_summary(ids, xs, alpha, level)
+        omni = welch_anova(n, mean, std_unbiased, alpha)
+        t_table, p_table, chart, tooltips, ci_table = pairwise(ids, n, mean, std_unbiased, alpha, level)
         return json.dumps({
             "alpha": alpha, "level": level,
             "omni": omni,
