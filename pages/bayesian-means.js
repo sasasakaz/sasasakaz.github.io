@@ -68,7 +68,8 @@ const PLOT_IDS = {
   differences: "differences-plot",
   trace: "trace-plot"
 };
-const TABLE_IDS = ["means-summary", "diagnostics", "mcse-ratios"];
+// const TABLE_IDS = ["means-summary", "diagnostics", "mcse-ratios"];
+const TABLE_IDS = ["means-summary", "mcse-ratios"];
 
 /** 表を作る。1列目（Group / パラメータ名）は他ページと同じく class="col-label"（中央揃え） */
 function renderTable(tableId, rows, columns, digits = 2) {
@@ -225,6 +226,8 @@ function renderResults(data) {
     ["parameter", "パラメータ"],
     ["mean", "mean"],
     ["sd", "sd"],
+    ["hdi_3%", "hdi_3%"],
+    ["hdi_97%", "hdi_97%"],
     ["mcse_mean", "mcse_mean"],
     ["ess_bulk", "ess_bulk"],
     ["ess_tail", "ess_tail"],
