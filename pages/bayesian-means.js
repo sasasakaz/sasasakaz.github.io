@@ -223,11 +223,14 @@ function renderResults(data) {
   ]);
   renderTable("mcse-ratios", data.mcse_ratios, [
     ["parameter", "パラメータ"],
+    ["mean", "mean"],
     ["sd", "sd"],
     ["mcse_mean", "mcse_mean"],
-    ["mcse_mean / sd", "mcse_mean / sd"],
+    ["ess_bulk", "ess_bulk"],
+    ["ess_tail", "ess_tail"],
+    ["r_hat", "r_hat"]
     ["mcse_mean / sd (%)", "mcse_mean / sd (%)"]
-  ], 4);
+  ], 2);
   showPlots(data.plots);
   $("large-values").hidden = !data.large_values;
 }

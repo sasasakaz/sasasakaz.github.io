@@ -77,7 +77,7 @@
             <button type="button" id="clear-button" class="btn-secondary">🔄 Reset All</button>
           </div>
           <div class="input-notes">
-            <p class="note-text">※Sample Size: ユーザー数や送信者数などの分母。Events: コンバージョン数や購入者数などの分子。</p>
+            <p class="note-text">※Sample Size: 比率の分母（ユーザー数や送信者数など）。Events: 比率の分子（コンバージョン数や購入者数など）。</p>
             <p class="note-text">※スペース、改行、タブ、カンマで区切ってください（カンマの後にはスペースを入れてください）。</p>
             <p class="note-text">※入力データはどこにも送信されません。ブラウザのみで動作します。5群まで対応可能。</p>
           </div>
@@ -170,21 +170,16 @@
 
             <div id="panel-omni" class="result-panel" role="tabpanel" aria-labelledby="tab-omni">
               <h2 id="result-omni">全体動向</h2>
-              <ul>
-                <li>Pearsonのカイ二乗検定（独立性の検定）をおこないます（3群以上の平均の検定にはANOVAを使用しますがカイ二乗検定は3群以上も対応可能）。</li>
-                <li>帰無仮説: 全群の比率が等しい。</li>
-              </ul>
+              <p>Pearsonのカイ二乗検定（独立性の検定）をおこないます（3群以上の平均の検定にはANOVAを使用しますがカイ二乗検定は3群以上も対応可能）。</p>
 
 
               <h3 id="result-omni-test">カイ二乗検定（全体）の結果</h3>
+              <p>帰無仮説: 全群の比率が等しい。</p>
               <div id="omni-summary"></div>
 
 
               <h3 id="result-group">各群の信頼区間</h3>
-              <ul>
-                <li>各群の比率と信頼区間（Wilson区間）です。</li>
-                <li>群間の比率の差については、カイ二乗検定（ペア）の結果を参照してください。</li>
-              </ul>
+              <p>各群の比率と信頼区間（Wilson区間）です。</p>
               <div id="group-table" class="table-wrap"></div>
               <div id="group-chart" class="chart-box"></div>
             </div>

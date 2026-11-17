@@ -173,21 +173,16 @@
 
             <div id="panel-omni" class="result-panel" role="tabpanel" aria-labelledby="tab-omni">
               <h2 id="result-omni">全体動向</h2>
-              <ul>
-                <li>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance
-                  分散分析）を使用します。ここでは等分散を仮定しないWelchの一元配置分散分析をおこないます。</li>
-                <li>帰無仮説: 全群の平均が等しい。</li>
-              </ul>
+              <p>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance
+                分散分析）を使用します。ここでは等分散を仮定しないWelchの一元配置分散分析をおこないます。</p>
 
 
               <h3 id="result-omni-test">Welch ANOVAの結果</h3>
+              <p>帰無仮説: 全群の平均が等しい。</p>
               <div id="omni-summary"></div>
 
               <h3 id="result-group">各群の信頼区間</h3>
-              <ul>
-                <li>各群の平均と信頼区間（t分布に基づく区間）です。</li>
-                <li>群間の平均の差については、Welch t検定の結果を参照してください。</li>
-              </ul>
+              <p>各群の平均と信頼区間（t分布に基づく区間）です。</p>
               <div class="table-wrap" id="group-table"></div>
               <div id="group-chart" class="chart-box"></div>
             </div>
