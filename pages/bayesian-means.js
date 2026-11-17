@@ -228,7 +228,7 @@ function renderResults(data) {
     ["mcse_mean", "mcse_mean"],
     ["ess_bulk", "ess_bulk"],
     ["ess_tail", "ess_tail"],
-    ["r_hat", "r_hat"]
+    ["r_hat", "r_hat"],
     ["mcse_mean / sd (%)", "mcse_mean / sd (%)"]
   ], 2);
   showPlots(data.plots);
