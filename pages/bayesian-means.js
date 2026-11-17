@@ -5,6 +5,8 @@
 // このファイルに残すのは、このページだけの部分:
 //   サンプルデータ / Tune・Draws のステッパー / API呼び出し / 結果（表と画像）の描画
 // 読み込み順: page-layout.js → tool-common.js → 本ファイル（すべて defer）
+// 結果欄は「全体結果」「群間の差」「収束診断」の3タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
+// Clear のときは既定のタブ（全体結果）に戻す。
 // =====================================================================
 const GROUPS = ["A", "B", "C", "D", "E"];
 const SAMPLE_DATA = [
@@ -128,6 +130,11 @@ function cancelRunning() {
 }
 
 // ---------------------------------------------------------------------
+// 結果タブ（ToolCommon）。Clear のときは既定のタブに戻す
+// ---------------------------------------------------------------------
+const resultTabs = ToolCommon.createResultTabs();
+
+// ---------------------------------------------------------------------
 // 入力欄（ToolCommon）
 // ---------------------------------------------------------------------
 const input = ToolCommon.createMeansInput({
@@ -137,6 +144,7 @@ const input = ToolCommon.createMeansInput({
   onClear: () => {
     cancelRunning();
     resetResults();
+    resultTabs?.reset();
   }
 });
 

@@ -15,6 +15,8 @@
 //  - 確認表(#confirmation-table)は、HTML側に5行(data-group="A〜E")を固定で書いてあり、
 //    ToolCommon が各セルの文字だけを更新する。
 //  - Pyodideはページ表示時に裏で読み込み開始（初回のみ数秒〜）。
+//  - 結果欄は「全体動向」「群間の差」の2タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
+//    Clear のときは既定のタブ（全体動向）に戻す。
 // =====================================================================
 const GROUPS = ["A", "B", "C", "D", "E"];
 const SAMPLE_DATA = [
@@ -37,9 +39,13 @@ ToolCommon.configurePyodide({
 // 結果を入れるdivのid（Clear で空にする）
 const RESULT_IDS = ['group-table', 'group-chart', 'omni-summary', 'pair-t-table', 'pair-p-table', 'pair-chart', 'pair-ci-table'];
 
+// 結果タブ（「全体動向」「群間の差」）。Clear のときは既定のタブに戻す
+const resultTabs = ToolCommon.createResultTabs();
+
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
   document.getElementById('pair-count').textContent = '';
+  if (resultTabs) resultTabs.reset();
 }
 
 const input = ToolCommon.createMeansInput({

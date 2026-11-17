@@ -1510,6 +1510,53 @@ html.right-open .layout-3col .side-backdrop {
 }
 
 
+/* ---------- 結果タブ（tool-common.js の createResultTabs） ---------- */
+
+/* 全体の見た目は、ブランドの青系に合わせた下線タブ。選択中のタブは文字を濃くして太字にし、下線を太くする */
+:where(.tool-page) .result-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 1.5rem 0 0;
+  border-bottom: 1px solid var(--c-brand2-3);
+}
+
+/* #content 内の button 共通指定（min-height: 3rem など）より優先させるため、クラスで指定する */
+:where(.tool-page) .result-tab {
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  margin-bottom: -1px;
+  padding: 0.5rem 1.25rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: transparent;
+  color: var(--c-text-sub);
+  font-size: 1.25rem;
+}
+
+:where(.tool-page) .result-tab:hover {
+  background: var(--c-brand2-1);
+  color: var(--c-brand-dark);
+}
+
+:where(.tool-page) .result-tab[aria-selected="true"] {
+  border-bottom-color: var(--c-brand-light);
+  color: var(--c-brand-dark);
+  font-weight: bold;
+}
+
+:where(.tool-page) .result-tab:focus-visible {
+  outline: 2px solid var(--c-brand-light);
+  outline-offset: -2px;
+}
+
+/* パネルの先頭の h2 は、タブバーのすぐ下に来るので、上の余白を詰める */
+:where(.tool-page) .result-panel>h2:first-child {
+  margin-top: 1.25rem;
+}
+
+
 /* ---------- means系（<body class="... tool-means">）: 群ごとの入力欄 ---------- */
 
 /* 5群ぶんの入力欄 + ボタンを、3列（広い）→ 2列 → 1列 のグリッドに並べる（JSが #group-inputs の中に作る） */
@@ -1592,6 +1639,38 @@ html.right-open .layout-3col .side-backdrop {
 }
 
 
+/* ---------- 入力欄を左、確認表・結果を右に置く2カラム（<div class="tool-split">） ----------
+   HTML: <div class="tool-split"> <div class="input-area"> … </div> <div class="tool-main"> 確認表・結果 … </div> </div>
+   ・広い画面（960px以上）: 左に入力欄（幅は --tool-input-w、既定 330px）、右に残りの幅いっぱいのメイン。
+   ・それ未満: 2カラムにせず、今まで通り入力欄の下にメインを縦に並べる（.tool-split は何も変えない）。
+   ・.tool-split を使うページだけに効く。ブレークポイント(960px)は @media に直接書いてある（変数は使えないため）。
+   ・左の入力欄は <body> の左サイドバー（#site-nav）とは別物。 */
+
+@media (min-width: 960px) {
+  :where(.tool-page) .tool-split {
+    display: grid;
+    grid-template-columns: var(--tool-input-w, 330px) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* 縦に並べるときの下余白は、2カラムでは不要（上端をそろえる） */
+  :where(.tool-page) .tool-split>.input-area {
+    margin-bottom: 0;
+  }
+
+  /* 入力欄の幅が狭いので、群の入力欄は2列に固定する（A B / C D / E ボタン）。
+     .input-area の container query（30rem 以下で1列）に負けないよう、詳細度を上げて上書きする */
+  :where(.tool-means) .tool-split .input-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "group-a group-b"
+      "group-c group-d"
+      "group-e sample-buttons";
+  }
+}
+
+
 /* ---------- props系（<body class="... tool-props">）: [分母][分子] の2欄 ---------- */
 
 /* 入力エリア全体（[分母][分子] + ボタン2つ）。
@@ -1643,3 +1722,25 @@ html.right-open .layout-3col .side-backdrop {
 :where(.tool-props) .setting-group {
   margin-top: 0.5rem;
 }
+
+
+
+/* 入力欄の下の注釈（<div class="input-notes"> の中に <p class="note-text"> を並べる）。
+   ・props系の .input-area は flex（gap あり）なので、p を直接並べると p ごとに余白が付いて間延びする
+     → div で包んで1つのまとまりにする
+   ・flex: 0 0 100% で、ボタンの下の1行を使う（means系は block なので影響なし）
+   ・※ の2行目以降は、字下げしてそろえる */
+:where(.tool-page) .input-notes {
+  flex: 0 0 100%;
+}
+
+:where(.tool-page) .input-notes>p {
+  margin: 1em 0 0.25em;
+  padding-left: 0.5em;
+  text-indent: -0.5em;
+  line-height: 1.5;
+}
+
+
+
+

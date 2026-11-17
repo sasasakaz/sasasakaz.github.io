@@ -20,6 +20,11 @@
   <link rel="stylesheet" href="page-common.css">
   <style>
     /* このページだけの見た目 */
+    /* 本文を画面幅いっぱいに使う（ドロワー型の既定は 960px） */
+    .layout-3col {
+      --l3-content-max: min(94%, 2200px);
+    }
+
     .result-details {
       margin: 0.5rem 0;
     }
@@ -29,14 +34,6 @@
   <script src="classical-means-py.js" defer></script>
   <script src="tool-common.js" defer></script>
   <script src="classical-means.js" defer></script>
-
-  <script>
-    try {
-      var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}');
-      if (s.left) document.documentElement.classList.add('left-closed');
-      if (s.right) document.documentElement.classList.add('right-closed');
-    } catch (e) { }
-  </script>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
@@ -49,7 +46,7 @@
   <!-- End Google tag (gtag.js) -->
 </head>
 
-<body class="layout-3col tool-page tool-means">
+<body class="layout-3col l3-drawer tool-page tool-means">
   <div class="topbar">
     <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true"></button>
     <div id="topbar-title" class="topbar-title"></div>
@@ -63,173 +60,189 @@
       <header id="header">
         <h1>Classical Comparison of Means</h1>
         <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差の検定ができます。</p>
-        <div class="mdc-note-box">
-          <ul>
-            <li>スペース、改行、タブ、カンマで区切ってください（カンマの後にはスペースを入れてください）。</li>
-            <li>入力データはどこにも送信されません。ブラウザのみで動作します。</li>
-          </ul>
-        </div>
       </header>
 
-      <div class="input-area">
-        <div id="group-inputs" class="input-fields" data-max-values="10000">
-          <div class="sample-buttons">
-            <button id="sample-button" class="btn-secondary" type="button">⚡️ Sample Data</button>
-            <button id="clear-button" class="btn-secondary" type="button">🔄 Reset All</button>
+      <div class="tool-split">
+        <div class="input-area">
+          <div id="group-inputs" class="input-fields" data-max-values="10000">
+            <div class="sample-buttons">
+              <button id="sample-button" class="btn-secondary" type="button">⚡️ Sample</button>
+              <button id="clear-button" class="btn-secondary" type="button">🔄 Reset All</button>
+            </div>
+          </div>
+          <div class="input-notes">
+            <p class="note-text">※スペース、改行、タブ、カンマで区切ってください（カンマの後にはスペースを入れてください）。</p>
+            <p class="note-text">※入力データはどこにも送信されません。ブラウザのみで動作します。</p>
           </div>
         </div>
-      </div>
 
-      <div class="confirm-run">
-        <div class="confirm-table-wrap">
-          <table id="confirmation-table" class="summary-table">
-            <thead>
-              <tr>
-                <th>Group</th>
-                <th>N</th>
-                <th>Mean</th>
-                <th>Std</th>
-                <th>Min</th>
-                <th>Max</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr data-group="A">
-                <th scope="row">Group A</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr data-group="B">
-                <th scope="row">Group B</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr data-group="C">
-                <th scope="row">Group C</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr data-group="D">
-                <th scope="row">Group D</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-              <tr data-group="E">
-                <th scope="row">Group E</th>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="run-box">
-          <button id="run-button" class="btn-primary" type="button" title="検定実行" disabled>🚀 Run</button>
-          <div class="parameter-select">
-            <label for="alpha-select">有意水準 α</label>
-            <select id="alpha-select">
-              <option value="0.05" selected>0.05（95%CI）</option>
-              <option value="0.01">0.01（99%CI）</option>
-              <option value="0.1">0.10（90%CI）</option>
-            </select>
+        <div class="tool-main">
+          <div class="confirm-run">
+            <div class="confirm-table-wrap">
+              <table id="confirmation-table" class="summary-table">
+                <thead>
+                  <tr>
+                    <th>Group</th>
+                    <th>N</th>
+                    <th>Mean</th>
+                    <th>Std</th>
+                    <th>Min</th>
+                    <th>Max</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr data-group="A">
+                    <th scope="row">Group A</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-group="B">
+                    <th scope="row">Group B</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-group="C">
+                    <th scope="row">Group C</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-group="D">
+                    <th scope="row">Group D</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr data-group="E">
+                    <th scope="row">Group E</th>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="run-box">
+              <button id="run-button" class="btn-primary" type="button" title="検定実行" disabled>🚀 Run</button>
+              <div class="parameter-select">
+                <label for="alpha-select">有意水準 α</label>
+                <select id="alpha-select">
+                  <option value="0.05" selected>0.05（95%CI）</option>
+                  <option value="0.01">0.01（99%CI）</option>
+                  <option value="0.1">0.10（90%CI）</option>
+                </select>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div id="running-message" class="mdc-warn-box running-message" role="status" aria-live="polite" hidden>
-        <span class="spinner" aria-hidden="true"></span>
-        <p id="running-message-text"></p>
-      </div>
-      <div id="completion-message" class="mdc-info-box" role="status" aria-live="polite" hidden>
-        <p>検定完了！ 以下の結果を確認してください。</p>
-      </div>
-      <div id="initial-message" class="mdc-info-box initial-message" role="status">
-        <p>検定が完了すると、以下に結果が表示されます。</p>
-      </div>
-      <div id="error-message" class="mdc-alert-box" role="alert" hidden>
-        <p id="error-message-text"></p>
-      </div>
-
-
-
-      <div id="results">
-        <h2 id="result-omni">全体動向</h2>
-        <ul>
-          <li>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance 分散分析）を使用します。ここでは等分散を仮定しないWelchの一元配置分散分析をおこないます。</li>
-          <li>帰無仮説: 全群の平均が等しい。</li>
-        </ul>
-
-
-        <h3 id="result-omni-test">Welch ANOVAの結果</h3>
-        <div id="omni-summary"></div>
-
-        <h3 id="result-group">各群の信頼区間</h3>
-        <ul>
-          <li>各群の平均と信頼区間（t分布に基づく区間）です。</li>
-          <li>群間の平均の差については、Welch t検定の結果を参照してください。</li>
-        </ul>
-        <div class="table-wrap" id="group-table"></div>
-        <div id="group-chart" class="chart-box"></div>
-
-
-
-        <h2 id="result-pair">群間の平均の差</h2>
-        <p>全ペアでWelch t検定をおこないます（2群の場合は上記の全体結果と同じです。検定統計量 <em>F=t^2</em>）。</p>
-        <p class="note-text">※diff B - A: B群の平均からA群の平均を差し引いた値です。</p>
-
-
-        <h3 id="result-pair-p">Welch t検定の結果</h3>
-        <ul>
-          <li>3群以上を比較する場合、ここでは<span class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします（偽陽性を抑えることと、必要以上に検出力を落とさないことのバランスのよさを考慮）。</li>
-          <li>他の補正方法やUnadjusted（補正なし）のp値は比較用の参考値です。探索的な分析など、分析目的に応じて採用する方法をあらかじめ決めておいてください。</li>
-        </ul>
-        <div class="mdc-note-box">
-          <ul>
-            <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
-              少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
-            <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。</li>
-            <li><strong>Holm</strong>: p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般により高い検出力を得やすい方法です。
-            </li>
-            <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
-              有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
-          </ul>
-        </div>
-
-        <p id="pair-count"></p>
-        <div class="table-wrap" id="pair-p-table"></div>
-
-
-        <details class="result-details">
-          <summary>Welch t検定の詳細（N, Mean, diff, SE, t, dof）</summary>
-          <div class="table-wrap" id="pair-t-table"></div>
-        </details>
-
-
-        <div id="pair-section">
-          <h3 id="result-pair-chart">各ペアの信頼区間</h3>
-          <p>全ペアについて95%CIを算出します。</p>
-          <div class="mdc-note-box">
-            <ul>
-              <li><strong>Unadjusted（個別CI）</strong>: 各ペアについてWelchの方法で個別に算出したCI</li>
-              <li><strong>Bonferroni（同時CI）</strong>: 全ペアをまとめて95%の信頼水準でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）</li>
-            </ul>
+          <div id="running-message" class="mdc-warn-box running-message" role="status" aria-live="polite" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <p id="running-message-text"></p>
           </div>
-          <div id="pair-chart" class="chart-box"></div>
-          <div id="pair-ci-table" class="table-wrap"></div>
+          <div id="completion-message" class="mdc-info-box" role="status" aria-live="polite" hidden>
+            <p>検定完了！ 以下の結果を確認してください。</p>
+          </div>
+          <div id="initial-message" class="mdc-info-box initial-message" role="status">
+            <p>検定が完了すると、以下に結果が表示されます。</p>
+          </div>
+          <div id="error-message" class="mdc-alert-box" role="alert" hidden>
+            <p id="error-message-text"></p>
+          </div>
+
+
+
+          <div id="results">
+            <div class="result-tabs" role="tablist" aria-label="結果の切り替え">
+              <button type="button" role="tab" id="tab-omni" class="result-tab" aria-controls="panel-omni"
+                aria-selected="true">📈 全体動向</button>
+              <button type="button" role="tab" id="tab-pair" class="result-tab" aria-controls="panel-pair"
+                aria-selected="false" tabindex="-1">🔍 群間の差</button>
+            </div>
+
+            <div id="panel-omni" class="result-panel" role="tabpanel" aria-labelledby="tab-omni">
+              <h2 id="result-omni">全体動向</h2>
+              <ul>
+                <li>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance
+                  分散分析）を使用します。ここでは等分散を仮定しないWelchの一元配置分散分析をおこないます。</li>
+                <li>帰無仮説: 全群の平均が等しい。</li>
+              </ul>
+
+
+              <h3 id="result-omni-test">Welch ANOVAの結果</h3>
+              <div id="omni-summary"></div>
+
+              <h3 id="result-group">各群の信頼区間</h3>
+              <ul>
+                <li>各群の平均と信頼区間（t分布に基づく区間）です。</li>
+                <li>群間の平均の差については、Welch t検定の結果を参照してください。</li>
+              </ul>
+              <div class="table-wrap" id="group-table"></div>
+              <div id="group-chart" class="chart-box"></div>
+            </div>
+
+            <div id="panel-pair" class="result-panel" role="tabpanel" aria-labelledby="tab-pair" hidden>
+              <h2 id="result-pair">群間の平均の差</h2>
+              <p>全ペアでWelch t検定をおこないます（2群の場合は全体動向と同じ結果です。検定統計量 <em>F=t^2</em>）。</p>
+              <p class="note-text">※diff B - A: B群の平均からA群の平均を差し引いた値です。</p>
+
+
+              <h3 id="result-pair-p">Welch t検定の結果</h3>
+              <ul>
+                <li>3群以上を比較する場合、ここでは<span
+                    class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします（偽陽性を抑えることと、必要以上に検出力を落とさないことのバランスのよさを考慮）。</li>
+                <li>他の補正方法やUnadjusted（補正なし）のp値は比較用の参考値です。探索的な分析など、分析目的に応じて採用する方法をあらかじめ決めておいてください。</li>
+              </ul>
+              <div class="mdc-note-box">
+                <ul>
+                  <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
+                    少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
+                  <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。
+                  </li>
+                  <li><strong>Holm</strong>:
+                    p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般により高い検出力を得やすい方法です。
+                  </li>
+                  <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
+                    有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
+                </ul>
+              </div>
+
+              <p id="pair-count"></p>
+              <div class="table-wrap" id="pair-p-table"></div>
+
+
+              <details class="result-details">
+                <summary>Welch t検定の詳細（N, Mean, diff, SE, t, dof）</summary>
+                <div class="table-wrap" id="pair-t-table"></div>
+              </details>
+
+
+              <div id="pair-section">
+                <h3 id="result-pair-chart">各ペアの信頼区間</h3>
+                <p>全ペアについて95%CIを算出します。</p>
+                <div class="mdc-note-box">
+                  <ul>
+                    <li><strong>Unadjusted（個別CI）</strong>: 各ペアについてWelchの方法で個別に算出したCI</li>
+                    <li><strong>Bonferroni（同時CI）</strong>: 全ペアをまとめて95%の信頼水準でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）
+                    </li>
+                  </ul>
+                </div>
+                <div id="pair-chart" class="chart-box"></div>
+                <div id="pair-ci-table" class="table-wrap"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

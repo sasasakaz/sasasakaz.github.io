@@ -8,6 +8,7 @@
 //   3. 数値入力のパース（parseNumbers）
 //   4. 入力欄: props型（分母・分子の2欄）と means型（群ごとの入力欄）、確認表の更新、サンプル / Clear
 //   5. グラフのツールチップ（showTooltip / hideTooltip / attachPairChartTooltips）
+//   6. 結果タブ（createResultTabs: 結果欄をタブで切り替える。目次・URLの #〜 からも該当タブを開く）
 //
 // 【使い方】 各ページのJSは、先頭で configurePyodide() を呼び、createPropsInput() か createMeansInput() で
 //         入力欄をつくり、実行ボタンの処理で execute() に「結果を取って画面に入れる処理」を渡す。
@@ -20,6 +21,9 @@
 //   #initial-message / #running-message(+#running-message-text) / #completion-message / #error-message(+#error-message-text)
 //   #run-button / #sample-button / #clear-button / #confirmation-table（tbody に5行）
 //   props型: #denoms / #numers    means型: #group-inputs（中に .sample-buttons）、確認表の各 tr に data-group="A〜E"
+//   結果タブ（使うページだけ）: .result-tabs[role=tablist] の中に、タブ用の button[role=tab]（aria-controls=パネルのid）。
+//     パネルは [role=tabpanel]。最初に隠しておくパネルには hidden を付ける（最初に開くタブは aria-selected="true"）。
+//     Clear で戻す先は、data-default を付けたタブ（なければ先頭のタブ）。タブは2つでも3つ以上でも動く。
 // =====================================================================
 const ToolCommon = (() => {
   'use strict';
@@ -531,6 +535,94 @@ const ToolCommon = (() => {
     });
   }
 
+  // ===================================================================
+  // 6. 結果タブ（見た目は page-common.css の .result-tabs / .result-tab / .result-panel）
+  // ===================================================================
+
+  /**
+   * 結果欄のタブを動かす（HTML側の前提は、冒頭の【HTML側の前提】を参照）。
+   *  ・タブのクリックと、矢印キー・Home・End で切り替える。切り替えてもスクロール位置は変えない。
+   *  ・ページ内リンク（目次など）をクリックしたとき、飛び先の見出しが隠れているタブの中なら、そのタブを先に開く。
+   *    （タブを開いたあとに、ブラウザ標準のスクロールが働く）
+   *  ・URLの #〜 で開いたとき、戻る/進むで #〜 が変わったときも、同じように該当タブを開いてそこへスクロールする。
+   *  ・タブを切り替えると、見出しの位置が変わるので、目次の現在地の更新を促す（page-layout.js が受け取るイベント）。
+   * @returns {{show: function(string), reset: function()}|null}  show: タブのidで開く / reset: 既定のタブに戻す。タブのないページでは null
+   */
+  function createResultTabs() {
+    const tablist = document.querySelector('.result-tabs');
+    if (!tablist) return null;
+    const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+    if (tabs.length === 0) return null;
+    const panelOf = (tab) => $(tab.getAttribute('aria-controls'));
+    const defaultTab = tabs.find((tab) => tab.hasAttribute('data-default')) || tabs[0];
+
+    /** tab だけを選択状態にして、そのパネルだけを見せる */
+    function select(tab) {
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = panelOf(t);
+        if (panel) panel.hidden = !on;
+      });
+    }
+
+    /** tab を開く。すでに開いているときは何もしない。切り替えたときだけ true を返す */
+    function activate(tab, { focus = false } = {}) {
+      if (focus) tab.focus();
+      if (tab.getAttribute('aria-selected') === 'true') return false;
+      select(tab);
+      document.dispatchEvent(new CustomEvent('l3-content-change'));
+      return true;
+    }
+
+    /** id の要素が入っているパネルのタブを開く。切り替えたときだけ true を返す */
+    function revealId(id) {
+      const target = id ? document.getElementById(id) : null;
+      if (!target) return false;
+      const tab = tabs.find((t) => { const p = panelOf(t); return p && p.contains(target); });
+      return tab ? activate(tab) : false;
+    }
+
+    const idOf = (hash) => {
+      const raw = hash.replace(/^#/, '');
+      try { return decodeURIComponent(raw); } catch (e) { return raw; }
+    };
+
+    // タブのクリックとキー操作
+    tabs.forEach((tab) => tab.addEventListener('click', () => activate(tab)));
+    tablist.addEventListener('keydown', (e) => {
+      const i = tabs.indexOf(document.activeElement);
+      if (i < 0) return;
+      const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      activate(tabs[(next + tabs.length) % tabs.length], { focus: true });
+    });
+
+    // ページ内リンク（目次など）のクリック: 先にタブを開く（このあとブラウザが見出しまでスクロールする）
+    document.addEventListener('click', (e) => {
+      const a = e.target instanceof Element ? e.target.closest('a[href^="#"]') : null;
+      if (a) revealId(idOf(a.getAttribute('href')));
+    }, true);
+
+    // URLの #〜 が変わったとき（戻る/進む、アドレスバーでの変更）と、#〜 付きで開いたとき。
+    // 隠れたタブの中だった場合は、ブラウザが見出しの位置を取れずスクロールしていないので、自分でスクロールする。
+    function revealHash() {
+      const id = idOf(location.hash);
+      if (revealId(id)) document.getElementById(id).scrollIntoView({ behavior: 'instant' });
+    }
+    window.addEventListener('hashchange', revealHash);
+
+    select(tabs.find((t) => t.getAttribute('aria-selected') === 'true') || defaultTab);
+    revealHash();
+
+    return {
+      show: (tabId) => { const tab = tabs.find((t) => t.id === tabId); if (tab) activate(tab); },
+      reset: () => { activate(defaultTab); },
+    };
+  }
+
   return {
     UserError, Cancelled,
     configurePyodide, getPyodide, preloadPyodide, callPython, nextPaint,
@@ -538,5 +630,6 @@ const ToolCommon = (() => {
     parseNumbers,
     createPropsInput, createMeansInput,
     showTooltip, moveTooltip, hideTooltip, attachPairChartTooltips,
+    createResultTabs,
   };
 })();

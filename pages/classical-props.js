@@ -14,6 +14,8 @@
 //    ToolCommon が各セルの文字だけを更新する（行数が変わらないので、下のパーツがずれない）。
 //  - 状態メッセージは ToolCommon.setStatus() が #initial-message / #running-message / #completion-message / #error-message を切り替える。
 //  - Pyodideはページ表示時に裏で読み込み開始（初回のみ数秒〜）。
+//  - 結果欄は「全体動向」「群間の差」の2タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
+//    Clear のときは既定のタブ（全体動向）に戻す。
 // =====================================================================
 
 // 「サンプルデータ」ボタンで入るデータ
@@ -27,9 +29,13 @@ ToolCommon.configurePyodide({
 // 結果を入れるdivのid（Clear で空にする）
 const RESULT_IDS = ['omni-summary', 'group-table', 'group-chart', 'pair-p-table', 'pair-ci-table', 'pair-chart'];
 
+// 結果タブ。Clear のときは既定のタブに戻す
+const resultTabs = ToolCommon.createResultTabs();
+
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
   document.getElementById('pair-count').textContent = '';
+  if (resultTabs) resultTabs.reset();
 }
 
 const input = ToolCommon.createPropsInput({ sample: SAMPLE, onClear: clearResults });

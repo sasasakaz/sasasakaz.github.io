@@ -13,6 +13,8 @@
 //  - 事後分布のホバー表示は、Pythonが返す hover データ（軸位置・ビン・密度）を使い、
 //    ToolCommon のツールチップ（背景は群の色）をSVG上に出している。図の余白を変えるとズレるので注意。
 //  - Pyodideはページ表示時に裏で読み込み開始（初回のみ数秒〜）。
+//  - 結果欄は「全体結果」「群間の差」の2タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
+//    Clear のときは既定のタブ（全体結果）に戻す。
 // =====================================================================
 
 // 「サンプルデータ」ボタンで入るデータ
@@ -26,8 +28,12 @@ ToolCommon.configurePyodide({
 // 結果を入れるdivのid（Clear で空にする）
 const RESULT_IDS = ['summary-chart', 'summary-hdi', 'diff-hdi', 'diff-chart', 'summary-table-container'];
 
+// 結果タブ。Clear のときは既定のタブに戻す
+const resultTabs = ToolCommon.createResultTabs();
+
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
+  if (resultTabs) resultTabs.reset();
 }
 
 const input = ToolCommon.createPropsInput({ sample: SAMPLE, onClear: clearResults });

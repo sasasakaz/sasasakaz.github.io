@@ -225,15 +225,21 @@
     var current = -2;
     var ticking = false;
 
+    // 非表示（タブで隠れているなど）の見出しは、位置が取れず top が 0 になるので、現在地の判定から外す
+    function isShown(h) { return h.getClientRects().length > 0; }
+
     function update() {
       ticking = false;
       var idx = -1;
       for (var i = 0; i < items.length; i++) {
+        if (!isShown(items[i].heading)) continue;
         if (items[i].heading.getBoundingClientRect().top <= ACTIVE_OFFSET) idx = i;
         else break;
       }
       if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2) {
-        idx = items.length - 1;
+        for (var k = items.length - 1; k >= 0; k--) {
+          if (isShown(items[k].heading)) { idx = k; break; }
+        }
       }
       if (idx === current) return;
       current = idx;
@@ -248,7 +254,7 @@
       // 上部バーには、いま読んでいる章（h2）の名前を出す
       var h2 = '';
       for (var j = idx; j >= 0; j--) {
-        if (items[j].heading.tagName === 'H2') { h2 = items[j].heading.textContent.trim(); break; }
+        if (items[j].heading.tagName === 'H2' && isShown(items[j].heading)) { h2 = items[j].heading.textContent.trim(); break; }
       }
       if (title) title.textContent = h2;
 
@@ -261,6 +267,8 @@
 
     window.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);
+    // 本文の表示が切り替わったとき（結果タブなど）。スクロールしなくても見出しの位置が変わるので、現在地を取り直す
+    document.addEventListener('l3-content-change', onScroll);
     update();
   }
 
