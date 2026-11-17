@@ -5,8 +5,9 @@
 // このファイルに残すのは、このページだけの部分:
 //   サンプルデータ / Tune・Draws のステッパー / API呼び出し / 結果（表と画像）の描画
 // 読み込み順: page-layout.js → tool-common.js → 本ファイル（すべて defer）
-// 結果欄は「全体結果」「群間の差」「収束診断」の3タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
-// Clear のときは既定のタブ（全体結果）に戻す。
+// 結果欄は「収束診断」「全体動向」「群間の差」の3タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
+// Clear のときは既定のタブ（data-default を付けたタブ。なければ先頭の収束診断）に戻す。
+// 収束診断の表（#mcse-ratios）は、目安（DIAGNOSTIC_LIMITS）を外れたセルに is-warn を付けて着色する。
 // =====================================================================
 const GROUPS = ["A", "B", "C", "D", "E"];
 const SAMPLE_DATA = [
@@ -71,7 +72,22 @@ const PLOT_IDS = {
 // const TABLE_IDS = ["means-summary", "diagnostics", "mcse-ratios"];
 const TABLE_IDS = ["means-summary", "mcse-ratios"];
 
-/** 表を作る。1列目（Group / パラメータ名）は他ページと同じく class="col-label"（中央揃え） */
+/** 収束診断の目安（HTMLの本文「基本パラメータの要約統計量」の記載と揃える）。外れたセルは is-warn で着色する */
+const DIAGNOSTIC_LIMITS = {
+  essMin: 400,        // ess_bulk / ess_tail は 400 以上
+  rHatMax: 1.01,      // r_hat は 1.01 未満
+  mcseRatioMax: 5     // mcse_mean / sd (%) は 5 以下
+};
+
+/** 基準を満たさないときに true を返す判定を作る。
+ *  数値でない・有限でない値（NaN・null で「—」と表示されるもの）は、推定がうまくいっていないとみなして警告にする */
+const warnUnless = (isOk) => (value) =>
+  !(typeof value === "number" && Number.isFinite(value) && isOk(value));
+
+/** 表を作る。1列目（Group / パラメータ名）は他ページと同じく class="col-label"（中央揃え）。
+ *  columns は [key, label, options] の配列。options（省略可）:
+ *    digits … この列だけの小数点以下の桁数（省略時は引数 digits）
+ *    warn   … 値を受け取り、true なら is-warn を付ける関数（warnUnless で作る） */
 function renderTable(tableId, rows, columns, digits = 2) {
   const table = $(tableId);
   table.replaceChildren();
@@ -91,13 +107,15 @@ function renderTable(tableId, rows, columns, digits = 2) {
   const body = document.createElement("tbody");
   rows.forEach(row => {
     const tableRow = document.createElement("tr");
-    columns.forEach(([key], index) => {
+    columns.forEach(([key, , options = {}], index) => {
       const cell = document.createElement("td");
       if (index === 0) cell.className = "col-label";
       const value = row[key];
+      const columnDigits = options.digits ?? digits;
       cell.textContent = typeof value === "number"
-        ? (Number.isFinite(value) ? value.toFixed(digits) : "—")
+        ? (Number.isFinite(value) ? value.toFixed(columnDigits) : "—")
         : String(value ?? "—");
+      if (options.warn?.(value)) cell.classList.add("is-warn");
       tableRow.appendChild(cell);
     });
     body.appendChild(tableRow);
@@ -229,10 +247,10 @@ function renderResults(data) {
     ["hdi_3%", "hdi_3%"],
     ["hdi_97%", "hdi_97%"],
     ["mcse_mean", "mcse_mean"],
-    ["ess_bulk", "ess_bulk"],
-    ["ess_tail", "ess_tail"],
-    ["r_hat", "r_hat"],
-    ["mcse_mean / sd (%)", "mcse_mean / sd (%)"]
+    ["ess_bulk", "ess_bulk", { warn: warnUnless(v => v >= DIAGNOSTIC_LIMITS.essMin) }],
+    ["ess_tail", "ess_tail", { warn: warnUnless(v => v >= DIAGNOSTIC_LIMITS.essMin) }],
+    ["r_hat", "r_hat", { digits: 4, warn: warnUnless(v => v < DIAGNOSTIC_LIMITS.rHatMax) }],
+    ["mcse_mean / sd (%)", "mcse_mean / sd (%)", { warn: warnUnless(v => v <= DIAGNOSTIC_LIMITS.mcseRatioMax) }]
   ], 2);
   showPlots(data.plots);
   $("large-values").hidden = !data.large_values;

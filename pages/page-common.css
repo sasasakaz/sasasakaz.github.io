@@ -1129,6 +1129,12 @@ html.right-open .layout-3col .side-backdrop {
   background-color: #fff3a3;
 }
 
+/* 基準を外れたセル（赤〜ピンク系。bayesian-means の収束診断の表など）。
+   NaN（推定がうまくいっていない）のセルにも付ける */
+:where(.tool-page) .summary-table td.is-warn {
+  background-color: #ffcdd2;
+}
+
 /* グラフ上のツールチップ（tool-common.js が <body> の直下に1つだけ作り、背景色は手法・群の色を style で指定する） */
 :where(.tool-page) .chart-tooltip {
   position: fixed;
