@@ -213,6 +213,15 @@ function renderResults(data) {
     ["hdi_3%", "hdi_3%"],
     ["hdi_97%", "hdi_97%"]
   ]);
+  // renderTable("diagnostics", data.diagnostics, [
+  //   ["parameter", "パラメータ"],
+  //   ["mean", "mean"],
+  //   ["sd", "sd"],
+  //   ["mcse_mean", "mcse_mean"],
+  //   ["ess_bulk", "ess_bulk"],
+  //   ["ess_tail", "ess_tail"],
+  //   ["r_hat", "r_hat"]
+  // ]);
   renderTable("mcse-ratios", data.mcse_ratios, [
     ["parameter", "パラメータ"],
     ["mean", "mean"],
