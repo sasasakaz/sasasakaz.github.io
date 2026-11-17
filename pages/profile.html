@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/profile.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="ProfileとAbout this site そして生成AIによるプロファイル推定です。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Profile">
+  <meta property="og:description" content="ProfileとAbout this site そして生成AIによるプロファイル推定です。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/profile.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+
+  <link rel="stylesheet" href="page-common.css">
+  <script src="page-layout.js" defer></script>
+  <script>
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
+
+  <style>
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
+</head>
+
+<body class="layout-3col">
+  <div class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="false"></button>
+    <div id="topbar-title" class="topbar-title"></div>
+  </div>
+  <div id="side-backdrop" class="side-backdrop"></div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <header id="header">
+        <h1>Profile</h1>
+        <!-- 投稿日・更新日メタ情報 -->
+        <div class="entry-meta">
+          <span class="meta-item published">
+            <span class="meta-icon" aria-hidden="true">🕒</span>
+            <span class="meta-label">公開：</span><time datetime="2026-11-17">2026.11.17</time>
+          </span>
+          <span class="meta-divider" aria-hidden="true">/</span>
+          <span class="meta-item updated">
+            <span class="meta-icon" aria-hidden="true">🔄</span>
+            <span class="meta-label">更新：</span><time datetime="2026-11-17">2026.11.17</time>
+          </span>
+        </div>
+
+
+      </header>
+
+      <h2>About this site</h2>
+      <p>Think of this site as my digital garden—part knowledge archive and part portfolio. Like many others, I owe a
+        lot to
+        the free info people generously share online. This is my small way of paying it forward. Hope you find something
+        useful here!</p>
+      <p>
+        このサイトは、知識のストックとポートフォリオを兼ねた小さな庭です。これまでネット上の無償の情報に何度も救われてきたので、自分なりの「恩送り」として公開しています。何かひとつでも役に立つものが見つかれば嬉しいです😊
+      </p>
+
+      <ul>
+        <li><strong>名前:</strong> sasasakaz</li>
+        <li><strong>拠点:</strong> Japan</li>
+        <li><strong>使用言語:</strong> Japanese(Native)</li>
+        <li><strong>GitHub:</strong> <a href="https://github.com/sasasakaz?tab=repositories">Repository</a></li>
+        <li><strong>本棚:</strong> <a href="https://sasasakaz.github.io/pages/bookshelf.html">お勧めの書籍です</a></li>
+        <li><strong>連絡先:</strong> <a href="https://sasasakaz.github.io/pages/contact.html">お問い合わせやご相談など</a></li>
+      </ul>
+
+
+
+      <h2>プロファイル推定</h2>
+      <p>ふだん使用している生成AIに推定してもらいました。</p>
+      <details>
+        <summary>指示内容</summary>
+        Webサイトにプロフィールの掲載を検討している。そこであなたに推測してもらった情報を載せようと考えてる。
+        これまでの記憶にある全てのやりとりをもとにして、こちらの人物像を自由に推理・想像して、指定の質問項目に回答してください。
+
+        <p>【回答のルール】</p>
+        <ul>
+          <li>あくまでジョークなので「個人情報のため推測できません」といった堅苦しい前置きは不要。過去のやりとりから、あなたなりの根拠に基づいて推理してください。</li>
+          <li>回答は各項目につき「結論（一言）」＋「その理由（40〜60文字程度）」のコンパクトな表現にしてください。</li>
+        </ul>
+        <p>【質問項目】</p>
+        <ol>
+          <li>専門領域は？</li>
+          <li>職種は？</li>
+          <li>開発環境は？</li>
+          <li>ふだんの興味関心事は？</li>
+          <li>MBTI（16タイプ）は？</li>
+          <li>好きな食べもの、よく飲むドリンクは？</li>
+          <li>休日の過ごし方は？</li>
+          <li>動物に例えるなら？</li>
+          <li>質問したらどんなふうに教えてくれそう？</li>
+        </ol>
+        <p>出力は「項目」「結論」「推理の理由」がわかる箇条書きか表形式でお願いします。</p>
+      </details>
+
+      <table>
+        <thead>
+          <tr>
+            <th align="left">項目</th>
+            <th align="left">Chat GPT</th>
+            <th align="left">Gemini</th>
+            <th align="left">Claude</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td align="left">専門領域は？</td>
+            <td align="left">データ分析・統計・機械学習・マーケティング</td>
+            <td align="left">マーケティング×統計データ分析</td>
+            <td align="left">ベイズ統計×機械学習</td>
+          </tr>
+          <tr>
+            <td align="left">職種は？</td>
+            <td align="left">データアナリスト兼テクニカルライター</td>
+            <td align="left">データアナリスト（元・凄腕店長）</td>
+            <td align="left">データサイエンティスト</td>
+          </tr>
+          <tr>
+            <td align="left">開発環境は？</td>
+            <td align="left">MacBook Air ＋ Python ＋ GitHub</td>
+            <td align="left">VS Code ＋ Python（相棒はAI）</td>
+            <td align="left">Python＋Jupyter＋HTML/CSS/JS</td>
+          </tr>
+          <tr>
+            <td align="left">ふだんの興味関心事は？</td>
+            <td align="left">AI・データサイエンス・統計・Web技術</td>
+            <td align="left">意思決定の科学と技術史、あと本！</td>
+            <td align="left">統計・因果推論・ツール作り・読書</td>
+          </tr>
+          <tr>
+            <td align="left">MBTI（16タイプ）は？</td>
+            <td align="left">INTP（論理学者）予想！</td>
+            <td align="left">INTP（論理学者）か INTJ（建築家）</td>
+            <td align="left">INTJ</td>
+          </tr>
+          <tr>
+            <td align="left">好きな食べもの、よく飲むドリンクは？</td>
+            <td align="left">焼き魚とカフェラテ？</td>
+            <td align="left">絶品まかない飯と深煎りブラックコーヒー</td>
+            <td align="left">おにぎり＆ブラックコーヒー</td>
+          </tr>
+          <tr>
+            <td align="left">休日の過ごし方は？</td>
+            <td align="left">個人サイトの更新・読書・料理</td>
+            <td align="left">読書と個人開発、たまにカフェ巡り</td>
+            <td align="left">サイト改修＆読書</td>
+          </tr>
+          <tr>
+            <td align="left">動物に例えるなら？</td>
+            <td align="left">フクロウ</td>
+            <td align="left">好奇心旺盛で器用な「アライグマ」</td>
+            <td align="left">ビーバー</td>
+          </tr>
+          <tr>
+            <td align="left">質問したらどんなふうに教えてくれそう？</td>
+            <td align="left">納得するまで一緒に考えてくれる先生タイプ</td>
+            <td align="left">図解とたとえ話で、超やさしく噛み砕く</td>
+            <td align="left">画面を一緒に触りながら丁寧に教えてくれる</td>
+          </tr>
+        </tbody>
+      </table>
+
+
+      <h3>結果解釈</h3>
+      <p>過去のやりとりを元にしての推理は、当たっているところもそうでないところもあります。</p>
+      <ul>
+        <li><strong>専門領域、職種、環境:</strong> 概ね合っています。このサイトのことなどよく会話するジャンルなので、生成AIにとって<span
+            class='inline-marker'>推理の根拠となる情報が豊富</span>だったと思われます。</li>
+        <li><strong>興味関心事、MBTI:</strong> 間違ってはいないものの、限定的な範囲での回答にとどまりました。前出の<span
+            class='inline-marker'>会話に多く登場するジャンルの枠内</span>で連想しているのではと考えられます。</li>
+        <li><strong>食べもの、ドリンク、休日:</strong> 合っている箇所もあります。これも推理しやすいジャンルからの類推であったり、<span
+            class='inline-marker'>たった一度のやりとりを拠り所</span>にしている傾向がうかがえます。</li>
+        <li><strong>動物、教え方:</strong> Webサイトに掲載することやジョークと明記したことなどの影響か、<span
+            class='inline-marker'>こちらが喜びそうな肯定的で好意的</span>な方向に人物像を寄せている様子が感じられます。</li>
+      </ul>
+
+
+      <h3>考察</h3>
+      <p>総合評価としては、<span class='inline-mark'>大きくは外れていないものの、無難にまとめた</span>印象です。</p>
+      <ul>
+        <li><strong>会話履歴の偏り:</strong> よく話題にすることと日常の関心事は同じではないです。推理される人物像はふだんの会話次第で左右されます。</li>
+        <li><strong>回答の不確実性:</strong> 何度か試したところ、違う回答になることもありました。時期を変えたり質問の仕方を変えた場合も異なる結果になると予想されます。</li>
+        <li><strong>事前の予想:</strong>
+          サービス間でもう少し違いが出ることを期待していたんですがそうでもありませんでした。生成AIの回答の裏取りをするために、別の生成AIでも同じ会話をしていたことが反映されたとも考えられます。</li>
+      </ul>
+      <p>そして、推理が当たっているかどうかは<span class='inline-mark'>「こちらの受け取り方」次第</span>の可能性もあります。</p>
+      <ul>
+        <li><strong>実際に当たっている:</strong> 確実な過去のログに基づいており、こちらの記憶も明瞭、かつ確固たる事実が存在している。</li>
+        <li><strong>記憶の再構成:</strong> 過去のやりとりを忘れていても、こちらが納得しやすい理由を提示されると「確かにそうだったかも」と記憶や解釈が補完され、当たっているように思える。</li>
+        <li><strong>確証バイアス:</strong> 自らの先入観や自己認識に合う記述のみに目を向け、事実と異なる部分や自分に不都合な記述を無意識に無視、軽視してしまう認知バイアス。</li>
+        <li><strong>バーナム効果（フォアラー効果）:</strong> 誰にでもあてはまりそうな曖昧な記述があると「自分のことを言い当てられた」と感じてしまう。</li>
+      </ul>
+      <p>別の角度から捉えると、言語モデル特有の<span class='inline-mark'>「文脈に応じて、確率的にもっともらしい表現を生成する」性質</span>が発揮されたとも考えられます。</p>
+      <ul>
+        <li><strong>連想による疑似的な関連付け:</strong> 「データ分析をする人」という情報から、「コーディングをする」「コーヒーを飲みそう」という関連性のありそうな要素を結びつけた。</li>
+        <li><strong>ステレオタイプ:</strong> 「データ分析×コーディング＝コーヒー好き」といった、職業や趣味に結びついた一般的なイメージからの連想。</li>
+      </ul>
+      <p>息抜きコンテンツのつもりでしたが、心理学や行動経済学、生成AI利用時の注意点にまで考えを巡らせる楽しい試みになりました。なお実際にコーヒーは好きです☕️</p>
+
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
+  </div>
+</body>
+
+</html>
