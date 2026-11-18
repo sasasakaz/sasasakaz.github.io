@@ -6,8 +6,11 @@
 //  - 計算とグラフ描画は classical-props-py.js 内のPythonコード（CLASSICAL_PROPS_PY）がPyodide上で行う。
 //    Pythonの run() は表(HTML)とグラフ(SVG)をJSONで返し、ここで下記idのdivに挿入する。
 //      #omni-summary                       （全体の検定。omni から文章を作る）
-//      #group-table / #group-chart         （各群の比率とWilson区間）
-//      #pair-p-table / #pair-ci-table / #pair-chart  （各群間の検定結果と信頼区間）
+//      #group-table / #group-chart         （各群の Sample Size・Events・比率とWilson区間）
+//      #pair-table                         （各ペアの diff, χ², df と、補正方法別のp値）
+//      #pair-warning                       （期待度数が小さいペア等の注意。pair.warnings から文章を作る）
+//      #pair-effect-table                  （補助指標: 相対差・オッズ比。HTML側の <details> の中）
+//      #pair-ci-table / #pair-ci-note / #pair-chart  （各群間の信頼区間・CIの臨界値）
 //  - これらのidは classical-props.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
@@ -27,7 +30,8 @@ ToolCommon.configurePyodide({
 });
 
 // 結果を入れるdivのid（Clear で空にする）
-const RESULT_IDS = ['omni-summary', 'group-table', 'group-chart', 'pair-p-table', 'pair-ci-table', 'pair-chart'];
+const RESULT_IDS = ['omni-summary', 'group-table', 'group-chart', 'pair-table', 'pair-warning',
+  'pair-effect-table', 'pair-ci-table', 'pair-ci-note', 'pair-chart'];
 
 // 結果タブ。Clear のときは既定のタブに戻す
 const resultTabs = ToolCommon.createResultTabs();
@@ -53,8 +57,23 @@ function renderOmniSummary(omni, alpha) {
     : '';
   return `<ul>
       <li>Pearson chi-squared = ${omni.chi2.toFixed(4)}, df = ${omni.df}, p = ${pText}, Cramér's V = ${omni.v.toFixed(4)}</li>
+      <li>合計 N = ${omni.n.toLocaleString()}, 期待度数の最小値 = ${omni.min_expected.toFixed(2)}</li>
       <li>結果: <strong>${verdict}</strong></li>
     </ul>${warn}`;
+}
+
+/**
+ * ペアごとの注意書き（期待度数が小さいペア / 検定できず p = 1.0 にしたペア）。なければ空
+ */
+function renderPairWarnings(warnings) {
+  const items = [];
+  if (warnings.low_expected.length) {
+    items.push(`<li>† ${warnings.low_expected.join('、')}: 期待度数が5未満のセルがあります。カイ二乗近似の精度が低い可能性があります。</li>`);
+  }
+  if (warnings.degenerate.length) {
+    items.push(`<li>‡ ${warnings.degenerate.join('、')}: 期待度数が0のセルがあり検定できないため、χ² と df は算出せず p = 1.0 としています。</li>`);
+  }
+  return items.length ? `<div class="mdc-warn-box"><ul>${items.join('')}</ul></div>` : '';
 }
 
 /**
@@ -65,9 +84,14 @@ function renderResults(result, alpha) {
   document.getElementById('group-table').innerHTML = result.group.table;
   document.getElementById('group-chart').innerHTML = result.group.chart;
 
-  document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
+  document.getElementById('pair-table').innerHTML = result.pair.table;
+  document.getElementById('pair-warning').innerHTML = renderPairWarnings(result.pair.warnings);
+  document.getElementById('pair-effect-table').innerHTML = result.pair.effect_table;
   document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
   document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
+  const crit = result.pair.crit;
+  document.getElementById('pair-ci-note').textContent =
+    `※CIの臨界値: z = ${crit.z.toFixed(3)}（Unadjusted）、z = ${crit.z_bonf.toFixed(3)}（Bonferroni。ペア数 m = ${crit.m}、α/m = ${Number(crit.alpha_bonf.toPrecision(3))}）`;
   const pairChart = document.getElementById('pair-chart');
   pairChart.innerHTML = result.pair.chart;
   ToolCommon.attachPairChartTooltips(pairChart, {

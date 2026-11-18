@@ -55,7 +55,7 @@
     <main id="content">
       <header id="header">
         <h1>Classical Comparison of Proportions</h1>
-        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。比率の差の検定ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。「比率の差の検定」ができます。</p>
       </header>
 
       <div class="tool-split">
@@ -170,12 +170,14 @@
 
             <div id="panel-omni" class="result-panel" role="tabpanel" aria-labelledby="tab-omni">
               <h2 id="result-omni">全体動向</h2>
-              <p>Pearsonのカイ二乗検定（独立性の検定）をおこないます（3群以上の平均の検定にはANOVAを使用しますがカイ二乗検定は3群以上も対応可能）。</p>
+              <p>Pearsonのカイ二乗検定（独立性の検定、Yates補正なし）をおこないます。</p>
+              <p class="note-text">※平均の検定は3群以上ではANOVAを使用しますが、カイ二乗検定は3群以上も対応可能。</p>
 
 
               <h3 id="result-omni-test">カイ二乗検定（全体）の結果</h3>
               <p>帰無仮説: 全群の比率が等しい。</p>
               <div id="omni-summary"></div>
+              <p class="note-text">※Cramér's V = √(χ² / N)。群間で比率がどれだけ違うかを表す効果量（0〜1）です。</p>
 
 
               <h3 id="result-group">各群の信頼区間</h3>
@@ -186,7 +188,7 @@
 
             <div id="panel-pair" class="result-panel" role="tabpanel" aria-labelledby="tab-pair" hidden>
               <h2 id="result-pair">群間の比率の差</h2>
-              <p>全ペアでPearsonのカイ二乗検定をおこないます（2群の場合は全体動向と同じ結果です）。</p>
+              <p>全ペアでPearsonのカイ二乗検定（Yates補正なし）をおこないます（2群の場合は全体動向と同じ結果です）。</p>
               <p class="note-text">※diff B - A: B群の比率からA群の比率を差し引いた値です。</p>
 
 
@@ -211,7 +213,14 @@
               </div>
 
               <p id="pair-count"></p>
-              <div class="table-wrap" id="pair-p-table"></div>
+              <div class="table-wrap" id="pair-table"></div>
+              <div id="pair-warning"></div>
+
+              <details>
+                <summary>相対差・オッズ比（補助指標）</summary>
+                <p class="note-text">※相対差 = (左の群の比率 − 右の群の比率) / 右の群の比率（B - A なら A が基準）。Odds Ratio = 左の群のオッズ / 右の群のオッズ（オッズ = 比率 / (1 − 比率)）。基準となる値が0で計算できないときは「—」です。点推定のみで、差の不確かさは下の各ペアの信頼区間を参照してください。</p>
+                <div class="table-wrap" id="pair-effect-table"></div>
+              </details>
 
 
               <div id="pair-section">
@@ -227,6 +236,8 @@
                 </div>
                 <div id="pair-chart" class="chart-box"></div>
                 <div id="pair-ci-table" class="table-wrap"></div>
+                <p id="pair-ci-note" class="note-text"></p>
+                <p class="note-text">※p値はPearsonのカイ二乗検定（2群をプールした比率を使う）、CIはWald法（各群の標本比率から求めたSE。表のSE列）で計算しているため、境界付近では「p値は有意なのにCIが0を含む」（またはその逆）ことがあります。</p>
               </div>
             </div>
           </div>

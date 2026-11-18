@@ -24,10 +24,6 @@
     .layout-3col {
       --l3-content-max: min(94%, 2200px);
     }
-
-    .result-details {
-      margin: 0.5rem 0;
-    }
   </style>
   <script src="page-layout.js" defer></script>
   <script src="tool-common-py.js" defer></script>
@@ -59,7 +55,7 @@
     <main id="content">
       <header id="header">
         <h1>Classical Comparison of Means</h1>
-        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。平均の差の検定ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。「平均の差の検定」ができます。</p>
       </header>
 
       <div class="tool-split">
@@ -214,13 +210,8 @@
               </div>
 
               <p id="pair-count"></p>
-              <div class="table-wrap" id="pair-p-table"></div>
-
-
-              <details class="result-details">
-                <summary>Welch t検定の詳細（N, Mean, diff, SE, t, dof）</summary>
-                <div class="table-wrap" id="pair-t-table"></div>
-              </details>
+              <div class="table-wrap" id="pair-table"></div>
+              <p class="note-text">※t = diff / SE、SE = √(s₁²/n₁ + s₂²/n₂)（s² は不偏分散）、dof は Welch–Satterthwaite の自由度。p (Unadjusted) は t と dof から求めた両側p値です。各群の N・Mean・不偏分散は「全体動向」タブの表を参照してください。</p>
 
 
               <div id="pair-section">

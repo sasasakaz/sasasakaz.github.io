@@ -48,18 +48,6 @@
       width: 100%;
       height: auto;
     }
-
-    .summary-table-details {
-      margin: 2rem 0 0 2rem;
-      /* 折りたたみ部分にマウスを乗せると指マークになるように */
-      cursor: pointer;
-    }
-
-    @media (max-width: 767px) {
-      .summary-table-details {
-        margin-left: 0;
-      }
-    }
   </style>
 
   <script src="page-layout.js" defer></script>
@@ -92,7 +80,7 @@
     <main id="content">
       <header id="header">
         <h1>Bayesian Comparison of Proportions</h1>
-        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。比率の差のベイズ推定ができます。</p>
+        <p>A/Bテスト結果を入力して、🚀 ボタンを押してください。「比率の差のベイズ推定」ができます。</p>
       </header>
 
       <div class="tool-split">
@@ -227,10 +215,17 @@
               <div id="summary-chart" class="chart-box"></div>
               <div id="summary-hdi" class="chart-box"></div>
 
-              <details class="summary-table-details">
-                <summary>データテーブル（コピペ用）</summary>
-                <div id="summary-table-container" class="table-wrap"></div>
-              </details>
+              <p class="note-text">※事前分布は全群共通の Beta(1, 1)（一様分布）です。Posterior はその更新結果で、Beta(1 + Events, 1 + Sample Size − Events) になります。</p>
+              <div id="summary-table-container" class="table-wrap"></div>
+              <p id="estimation-note" class="note-text"></p>
+
+              <div id="best-section" hidden>
+                <details>
+                  <summary>P(best)（補助指標）</summary>
+                  <p class="note-text">※P(best) = その群の比率が、全群のなかで最大になる確率です（3群以上のときだけ表示します）。</p>
+                  <div id="best-table" class="table-wrap"></div>
+                </details>
+              </div>
 
               <div class="mdc-warn-box">
                 <ul>
@@ -255,15 +250,24 @@
               <ul>
                 <li>各群間の比率の差がとりそうな値の範囲を表します。</li>
                 <li>横棒がオレンジ線をまたいでいない（94%HDIが0を含まない）場合は、各群間の比率に十分な差があると解釈しやすいです。</li>
+                <li>下の図の横棒は、細い線が94%HDI、太い線が50%HDIです。</li>
                 <li>diff B - A: B群の比率からA群の比率を差し引いた値です。</li>
               </ul>
 
               <div id="diff-hdi" class="chart-box"></div>
+              <div id="diff-table-container" class="table-wrap"></div>
+
+              <details>
+                <summary>相対差（補助指標）</summary>
+                <p class="note-text">※相対差 = (左の群の比率 − 右の群の比率) / 右の群の比率（B - A なら A が基準）を、サンプルごとに計算した事後分布の Mean と94%HDIです。基準となる群の比率が0に近いと、値が大きくぶれます。</p>
+                <div id="relative-table-container" class="table-wrap"></div>
+              </details>
+
               <div id="diff-chart"></div>
 
               <div class="mdc-warn-box">
                 <ul>
-                  <li>下段グラフのオレンジ色の数値は、片方の群の比率がもう片方の群の比率を上回っている（下回っている）確率を表します。</li>
+                  <li>各ペアのヒストグラムのオレンジ色の数値（上の表の P(diff &lt; 0)、P(diff &gt; 0) と同じ値）は、片方の群の比率がもう片方の群の比率を上回っている（下回っている）確率を表します。</li>
                   <li>各群間の比率の差が0を上回る（下回る）確率が示唆される、これがベイズ推定の利点の一つです（94%HDIに0が含まれていてもこの値で各群間の比率の差を判断しやすいです）。</li>
                   <li>もしもこの値が50%に近い場合は、比率に差があるかは不確かです。100%（0%）に近い場合は、比率の差の確からしさが高まります。</li>
                   <li>この値の判断基準にはp値のような決まりはありません。<ul>

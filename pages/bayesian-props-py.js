@@ -8,8 +8,12 @@
 //  - 実行ボタンで bayesian-props.js が Python の run(denoms, numers, num_samples) を呼ぶと、
 //    各グラフのSVG文字列などを含むJSONが返り、JSが下記のidのdivに innerHTML で挿入する。
 //      posterior -> #summary-chart / hdis -> #summary-hdi
+//      table     -> #summary-table-container（各群の Sample Size・Events・観測比率・事後分布Beta(α, β)・Mean・SD・HDI）
+//      best_table -> #best-table（P(best)。<details>の中。3群以上のときだけ。2群は null）
 //      forest    -> #diff-hdi      / diffs -> #diff-chart（1枚ずつ .diff-plot で包む）
-//      table     -> #summary-table-container（JSが表にする）
+//      diff_table -> #diff-table-container（各ペアの差の Mean・HDI・P(diff>0)・P(diff<0)）
+//      relative_table -> #relative-table-container（補助指標: 相対差の Mean・HDI。<details>の中）
+//      num_samples -> #estimation-note（JSが文章化）
 //    hover はツールチップ用データ（bayesian-props.js の attachPosteriorHover が使用）。
 //  - 図の表示サイズは page-common.css とHTMLの <style>（各idのwidthと svg{width:100%}）で決まり、
 //    ここの figsize(px指定) は縦横比と文字の相対サイズを決める。
@@ -47,7 +51,7 @@ def hdi(samples, level=HDI_MAIN):
 
 def stats(samples, level=HDI_MAIN):
     lower, upper = hdi(samples, level)
-    return {"mean": float(np.mean(samples)), "lower": lower, "upper": upper}
+    return {"mean": float(np.mean(samples)), "sd": float(np.std(samples, ddof=1)), "lower": lower, "upper": upper}
 
 
 def auto_edges(arrays, min_bins=20, max_bins=150):
@@ -179,9 +183,53 @@ def plot_diff_histograms(groups):
     return out
 
 
+def group_table(groups, denoms, numers):
+    """各群の表。事前分布は全群共通の Beta(1, 1) なので列にはせず、Posterior = Beta(1 + Events, 1 + Sample Size − Events)"""
+    rows = [[f"Group {g['id']}", d, n, PERCENTAGE_FACTOR * n / d if d else None,
+             f"Beta({1 + n}, {1 + d - n})", g["mean"], g["sd"], g["lower"], g["upper"]]
+            for g, d, n in zip(groups, denoms, numers)]
+    return html_table(
+        ["Group", "Sample Size", "Events", "Observed (%)", "Posterior", "Mean (%)", "Std (points)",
+         "HDI Lower (%)", "HDI Upper (%)"],
+        ["text", "int", "int", "f2", "text", "f2", "f2", "f2", "f2"], rows)
+
+
+def diff_table(groups):
+    """各ペアの差（点・%ポイント）。P(diff<0) は P(diff>0) の補数（ヒストグラムのオレンジ文字と同じ値）"""
+    rows = []
+    for a, b, d in pair_diffs(groups):
+        s = stats(d)
+        prob = float(np.mean(d > 0)) * PERCENTAGE_FACTOR
+        rows.append([f"{a} - {b}", s["mean"], s["lower"], s["upper"], prob, PERCENTAGE_FACTOR - prob])
+    return html_table(
+        ["Pair", "Mean diff (points)", "HDI Lower", "HDI Upper", "P(diff > 0) (%)", "P(diff < 0) (%)"],
+        ["text", "f2", "f2", "f2", "f2", "f2"], rows)
+
+
+def relative_table(groups):
+    """補助指標: 相対差 =（左の群 − 右の群）/ 右の群 を、サンプルごとに計算した事後分布の Mean と HDI（%）"""
+    rows = []
+    for i in range(len(groups)):
+        for j in range(i + 1, len(groups)):
+            rel = PERCENTAGE_FACTOR * (groups[j]["samples"] / groups[i]["samples"] - 1)
+            s = stats(rel)
+            rows.append([f"{groups[j]['id']} - {groups[i]['id']}", s["mean"], s["lower"], s["upper"]])
+    return html_table(["Pair", "Mean (%)", "HDI Lower (%)", "HDI Upper (%)"], ["text", "f2", "f2", "f2"], rows)
+
+
+def best_table(groups):
+    """補助指標: 各群の比率が全群のなかで最大になる確率（3群以上のときだけ。2群は差の表の P(diff>0) と同じなので None）"""
+    if len(groups) < 3:
+        return None
+    winners = np.argmax(np.vstack([g["samples"] for g in groups]), axis=0)
+    shares = np.bincount(winners, minlength=len(groups)) / len(winners) * PERCENTAGE_FACTOR
+    return html_table(["Group", "P(best) (%)"], ["text", "f2"],
+                      [[f"Group {g['id']}", s] for g, s in zip(groups, shares)])
+
+
 def run(denoms, numers, num_samples):
-    denoms = list(denoms)
-    numers = list(numers)
+    denoms = [int(x) for x in denoms]
+    numers = [int(x) for x in numers]
     num_samples = int(num_samples)
     rng = np.random.default_rng()
     groups = []
@@ -198,6 +246,10 @@ def run(denoms, numers, num_samples):
         "hdis": plot_individual_hdis(groups),
         "forest": plot_forest(groups),
         "diffs": plot_diff_histograms(groups),
-        "table": [{k: g[k] for k in ("id", "mean", "lower", "upper")} for g in groups],
+        "table": group_table(groups, denoms, numers),
+        "best_table": best_table(groups),
+        "diff_table": diff_table(groups),
+        "relative_table": relative_table(groups),
+        "num_samples": num_samples,
     })
 `;

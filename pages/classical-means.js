@@ -7,8 +7,8 @@
 //    Pythonの run() は表(HTML)とグラフ(SVG)をJSONで返し、ここで下記idのdivに挿入する。
 //      #omni-summary                       （Welch ANOVA。omni から文章を作る。2群のときは null）
 //      #group-table / #group-chart         （各群の平均と信頼区間）
-//      #pair-t-table                       （Welchのt検定の詳細）
-//      #pair-p-table / #pair-ci-table / #pair-chart  （各群間の検定結果と信頼区間）
+//      #pair-table                         （各ペアのWelch t検定: diff, SE, t, dof と、補正方法別のp値）
+//      #pair-ci-table / #pair-chart        （各群間の信頼区間）
 //  - これらのidは classical-means.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 群ごとの入力欄は、ToolCommon.createMeansInput() が #group-inputs の中に作る（HTMLには書いていない）。
@@ -37,7 +37,7 @@ ToolCommon.configurePyodide({
 });
 
 // 結果を入れるdivのid（Clear で空にする）
-const RESULT_IDS = ['group-table', 'group-chart', 'omni-summary', 'pair-t-table', 'pair-p-table', 'pair-chart', 'pair-ci-table'];
+const RESULT_IDS = ['group-table', 'group-chart', 'omni-summary', 'pair-table', 'pair-chart', 'pair-ci-table'];
 
 // 結果タブ（「全体動向」「群間の差」）。Clear のときは既定のタブに戻す
 const resultTabs = ToolCommon.createResultTabs();
@@ -75,14 +75,13 @@ function renderResults(result, alpha) {
   document.getElementById('omni-summary').innerHTML = renderOmniSummary(result.omni, alpha);
 
   document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
-  document.getElementById('pair-t-table').innerHTML = result.pair.t_table;
+  document.getElementById('pair-table').innerHTML = result.pair.table;
   document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
   const pairChart = document.getElementById('pair-chart');
   pairChart.innerHTML = result.pair.chart;
   ToolCommon.attachPairChartTooltips(pairChart, {
     prefix: 'pair', items: result.pair.tooltips, level: result.pair.level,
   });
-  document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
 }
 
 /**

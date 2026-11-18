@@ -5,7 +5,9 @@
 // 【仕組み】
 //  - 計算とグラフ描画は bayesian-props-py.js 内のPythonコード（BAYESIAN_PROPS_PY）がPyodide上で行う。
 //    Pythonの run() は各グラフのSVG文字列をJSONで返し、ここで下記idのdivに挿入する。
-//      #summary-chart / #summary-hdi / #diff-hdi / #diff-chart / #summary-table-container
+//      #summary-chart / #summary-hdi / #summary-table-container（各群の表。Python が作る） / #estimation-note
+//      #best-table（P(best)。HTML側の <details> の中。2群のときは #best-section ごと隠す）
+//      #diff-hdi / #diff-table-container（各ペアの差の表） / #relative-table-container（相対差。<details>の中） / #diff-chart
 //  - これらのidは bayesian-props.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
@@ -26,13 +28,15 @@ ToolCommon.configurePyodide({
 });
 
 // 結果を入れるdivのid（Clear で空にする）
-const RESULT_IDS = ['summary-chart', 'summary-hdi', 'diff-hdi', 'diff-chart', 'summary-table-container'];
+const RESULT_IDS = ['summary-chart', 'summary-hdi', 'summary-table-container', 'estimation-note', 'best-table',
+  'diff-hdi', 'diff-table-container', 'relative-table-container', 'diff-chart'];
 
 // 結果タブ。Clear のときは既定のタブに戻す
 const resultTabs = ToolCommon.createResultTabs();
 
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
+  document.getElementById('best-section').hidden = true;
   if (resultTabs) resultTabs.reset();
 }
 
@@ -66,22 +70,6 @@ function setupSampleCountStepper() {
 }
 
 setupSampleCountStepper();
-
-/**
- * 推定結果のサマリーテーブル（見た目はクラスで指定: 1列目は col-label）
- */
-function renderSummaryTable(rows) {
-  const container = document.getElementById('summary-table-container');
-  if (!container) return;
-  const body = rows.map(s => `
-            <tr>
-                <td class="col-label">Group ${s.id}</td>
-                <td>${s.mean.toFixed(2)}%</td>
-                <td>${s.lower.toFixed(2)}%</td>
-                <td>${s.upper.toFixed(2)}%</td>
-            </tr>`).join('');
-  container.innerHTML = `<table class="summary-table"><thead><tr><th>Group</th><th>Mean</th><th>HDI Lower</th><th>HDI Upper</th></tr></thead><tbody>${body}</tbody></table>`;
-}
 
 /**
  * 事後分布グラフ上のホバー表示（SVGの上にツールチップを重ねる。背景は群の色）
@@ -130,10 +118,18 @@ function renderResults(result) {
   attachPosteriorHover(posterior, result.hover);
 
   document.getElementById('summary-hdi').innerHTML = result.hdis;
+  document.getElementById('summary-table-container').innerHTML = result.table;
+  document.getElementById('estimation-note').textContent =
+    `※Mean・Std・HDI は、各群の事後分布から ${result.num_samples.toLocaleString()} 回サンプリングした値で計算しています（共役事後分布からの直接サンプリングでMCMCではないため、r_hat や ESS などの収束診断は不要です）。94% HDI はそのサンプルから求めた最短区間です。乱数の種は固定していないので、実行のたびに小数第2位あたりが少し変わることがあります。`;
+  // P(best) は3群以上のときだけ（2群は null）
+  document.getElementById('best-table').innerHTML = result.best_table || '';
+  document.getElementById('best-section').hidden = !result.best_table;
+
   document.getElementById('diff-hdi').innerHTML = result.forest;
+  document.getElementById('diff-table-container').innerHTML = result.diff_table;
+  document.getElementById('relative-table-container').innerHTML = result.relative_table;
   document.getElementById('diff-chart').innerHTML =
     result.diffs.map(svg => `<div class="diff-plot">${svg}</div>`).join('');
-  renderSummaryTable(result.table);
 }
 
 /**
