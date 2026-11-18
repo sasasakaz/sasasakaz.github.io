@@ -7,8 +7,9 @@
 //    Pythonの run() は表(HTML)とグラフ(SVG)をJSONで返し、ここで下記idのdivに挿入する。
 //      #omni-summary                       （Welch ANOVA。omni から文章を作る。2群のときは null）
 //      #group-table / #group-chart         （各群の平均と信頼区間）
-//      #pair-table                         （各ペアのWelch t検定: diff, SE, t, dof と、補正方法別のp値）
-//      #pair-ci-table / #pair-chart        （各群間の信頼区間）
+//      #pair-table / #pair-chart           （群間の差の主表と主グラフ: p (Holm) と Bonferroni同時CI）
+//      #pair-adjust-details の中           （3群以上のときだけ表示: #pair-p-table 補正方法別のp値 /
+//                                          #pair-chart-all 補正なし・Bonferroniの2本のCI / #pair-ci-table CIの表）
 //  - これらのidは classical-means.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 群ごとの入力欄は、ToolCommon.createMeansInput() が #group-inputs の中に作る（HTMLには書いていない）。
@@ -37,7 +38,8 @@ ToolCommon.configurePyodide({
 });
 
 // 結果を入れるdivのid（Clear で空にする）
-const RESULT_IDS = ['group-table', 'group-chart', 'omni-summary', 'pair-table', 'pair-chart', 'pair-ci-table'];
+const RESULT_IDS = ['group-table', 'group-chart', 'omni-summary', 'pair-table', 'pair-chart',
+  'pair-p-table', 'pair-chart-all', 'pair-ci-table'];
 
 // 結果タブ（「全体動向」「群間の差」）。Clear のときは既定のタブに戻す
 const resultTabs = ToolCommon.createResultTabs();
@@ -45,6 +47,10 @@ const resultTabs = ToolCommon.createResultTabs();
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
   document.getElementById('pair-count').textContent = '';
+  document.getElementById('pair-adjust-single').hidden = true;
+  const details = document.getElementById('pair-adjust-details');
+  details.hidden = true;
+  details.open = false;
   if (resultTabs) resultTabs.reset();
 }
 
@@ -67,6 +73,17 @@ function renderOmniSummary(omni, alpha) {
 }
 
 /**
+ * 「多重比較の補正」の表示切り替え。2群（ペア数 1）のときは補正が不要なので details ごと隠し、短い説明だけを出す。
+ * h3「多重比較の補正」自体は常に表示する。
+ */
+function setAdjustVisible(multi) {
+  const details = document.getElementById('pair-adjust-details');
+  details.hidden = !multi;
+  if (!multi) details.open = false;
+  document.getElementById('pair-adjust-single').hidden = multi;
+}
+
+/**
  * Pythonの結果を画面に入れる
  */
 function renderResults(result, alpha) {
@@ -76,12 +93,18 @@ function renderResults(result, alpha) {
 
   document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
   document.getElementById('pair-table').innerHTML = result.pair.table;
+  document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
   document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
+  setAdjustVisible(result.pair.pairs > 1);
+
+  // 主グラフ（Bonferroni）と details 内のグラフ（補正なし + Bonferroni）は、要素idの接頭辞が違う（pair / pair-all）
+  const tip = { items: result.pair.tooltips, level: result.pair.level };
   const pairChart = document.getElementById('pair-chart');
   pairChart.innerHTML = result.pair.chart;
-  ToolCommon.attachPairChartTooltips(pairChart, {
-    prefix: 'pair', items: result.pair.tooltips, level: result.pair.level,
-  });
+  ToolCommon.attachPairChartTooltips(pairChart, { prefix: 'pair', ...tip });
+  const pairChartAll = document.getElementById('pair-chart-all');
+  pairChartAll.innerHTML = result.pair.chart_all;
+  ToolCommon.attachPairChartTooltips(pairChartAll, { prefix: 'pair-all', ...tip });
 }
 
 /**

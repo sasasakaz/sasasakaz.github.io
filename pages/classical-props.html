@@ -197,55 +197,63 @@
 
 
               <h3 id="result-pair-p">カイ二乗検定（ペア）の結果</h3>
+              <p>ここではHolm法（p値）とBonferroni同時CI（区間）での補正値を示します。</p>
               <ul>
-                <li>3群以上を比較する場合、ここでは<span
-                    class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします（偽陽性を抑えることと、必要以上に検出力を落とさないことのバランスのよさを考慮）。</li>
-                <li>他の補正方法やUnadjusted（補正なし）のp値は比較用の参考値です。探索的な分析など、分析目的に応じて採用する方法をあらかじめ決めておいてください。</li>
+                <li>Holm法: p値を小さい順に並べ、段階的に判定することでFWERを制御しつつ、一般にはより高い検出力を得やすい。</li>
+                <li>Bonferroni同時CI: 全ペアをまとめて信頼水準（1−α）でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）。</li>
+                <li>2群の場合のp値とCIは、補正なしの値と同じです。</li>
               </ul>
-              <div class="mdc-note-box">
-                <ul>
-                  <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
-                    少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
-                  <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。
-                  </li>
-                  <li><strong>Holm</strong>:
-                    p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般により高い検出力を得やすい方法です。
-                  </li>
-                  <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
-                    有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
-                </ul>
-              </div>
-
               <p id="pair-count"></p>
               <div class="table-wrap" id="pair-table"></div>
+              <p class="note-text">※diff は比率の差、χ² と dof は2×2のPearsonカイ二乗検定（Yates補正なし）の値です。p (Holm)
+                はそのp値をHolm法で調整した値です。CI Lower, CI Upper は diff に対する Bonferroni同時CI（SE列を使ったWald法）です。</p>
+              <p class="note-text">※relative_diff (%) 相対差 = diff / 基準群（B - A なら A）の比率 × 100。Odds Ratio = 左の群のオッズ /
+                右の群のオッズ（オッズ = 比率 / (1 − 比率)）。基準となる値が0で計算できないときは「—」。</p>
+              <p id="pair-ci-note" class="note-text"></p>
               <div id="pair-warning"></div>
 
-              <details>
-                <summary>相対差・オッズ比（補助指標）</summary>
-                <p class="note-text">※相対差 = (左の群の比率 − 右の群の比率) / 右の群の比率（B - A なら A が基準）。Odds Ratio = 左の群のオッズ /
-                  右の群のオッズ（オッズ = 比率 / (1 − 比率)）。基準となる値が0で計算できないときは「—」です。点推定のみで、差の不確かさは下の各ペアの信頼区間を参照してください。</p>
-                <div class="table-wrap" id="pair-effect-table"></div>
-              </details>
+              <p class="note-text">※Holm法のp値とBonferroni同時CIは、補正の仕組みが違うため完全には整合しません（Holm法のほうが検出力が高いので、p (Holm)
+                は有意なのにCIが0を含むことがあります。さらに、p値はPearsonのカイ二乗検定（2群をプールした比率を使う）、CIはWald法（各群の標本比率から求めたSE）で計算しているため、境界付近では判定が食い違うことがあります。差の大きさと不確かさは、Bonferroni同時CIで確認してください。
+              </p>
+
+              <div id="pair-chart" class="chart-box"></div>
 
 
-              <div id="pair-section">
-                <h3 id="result-pair-chart">各ペアの信頼区間</h3>
-                <p>全ペアについて95%CIを算出します。</p>
+              <h3 id="result-pair-adjust">多重比較補正の有無</h3>
+              <p>3群以上では複数のペアを同時に検定するため、補正なしのp値や個別のCIのまま判断すると偽陽性が増えます。</p>
+              <p id="pair-adjust-single" class="note-text" hidden>今回は2群（ペア数 1）なので補正は不要です。上のp値とCIは補正なしの値と同じです。</p>
+              <details id="pair-adjust-details" hidden>
+                <summary>補正なし・他の補正方法の結果</summary>
+
+                <h4>p値（補正方法別）</h4>
+                <div class="mdc-note-box">
+                  <ul>
+                    <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error
+                      Rate
+                      少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
+                    <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。
+                    </li>
+                    <li><strong>Holm</strong>:
+                      p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般にはより高い検出力を得やすい方法です。</li>
+                    <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
+                      有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
+                  </ul>
+                </div>
+                <div class="table-wrap" id="pair-p-table"></div>
+
+                <h4>信頼区間（補正有無別）</h4>
                 <div class="mdc-note-box">
                   <ul>
                     <li><strong>Unadjusted（個別CI）</strong>: 各ペアの比率の差について、Wald法で個別に算出したCI（標本比率から標準誤差を推定し、正規分布に基づいて区間を算出）。
                     </li>
                     <li><strong>Bonferroni（同時CI）</strong>:
-                      全ペアをまとめて少なくとも95%の信頼水準でカバーするCI（Wald法の臨界値を、比較するペア数に応じてBonferroni補正して算出）。</li>
+                      全ペアをまとめて少なくとも信頼水準（1−α）でカバーするCI（Wald法の臨界値を、比較するペア数に応じてBonferroni補正して算出）。</li>
                   </ul>
                 </div>
-                <div id="pair-chart" class="chart-box"></div>
+                <div id="pair-chart-all" class="chart-box"></div>
                 <div id="pair-ci-table" class="table-wrap"></div>
-                <p id="pair-ci-note" class="note-text"></p>
-                <p class="note-text">
-                  ※p値はPearsonのカイ二乗検定（2群をプールした比率を使う）、CIはWald法（各群の標本比率から求めたSE。表のSE列）で計算しているため、境界付近では「p値は有意なのにCIが0を含む」（またはその逆）ことがあります。
-                </p>
-              </div>
+                <p id="pair-ci-note-all" class="note-text"></p>
+              </details>
             </div>
           </div>
         </div>

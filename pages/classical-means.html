@@ -195,44 +195,60 @@
 
 
               <h3 id="result-pair-p">Welch t検定の結果</h3>
+              <p>ここではHolm法（p値）とBonferroni同時CI（区間）での補正値を示します。</p>
               <ul>
-                <li>3群以上を比較する場合、ここでは<span
-                    class='inline-marker'>Holm法による調整済みp値を主な判断基準</span>とします（偽陽性を抑えることと、必要以上に検出力を落とさないことのバランスのよさを考慮）。</li>
-                <li>他の補正方法やUnadjusted（補正なし）のp値は比較用の参考値です。探索的な分析など、分析目的に応じて採用する方法をあらかじめ決めておいてください。</li>
+                <li>Holm法: p値を小さい順に並べ、段階的に判定することでFWERを制御しつつ、一般にはより高い検出力を得やすい。</li>
+                <li>Bonferroni同時CI: 全ペアをまとめて信頼水準（1−α）でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）。</li>
+                <li>2群の場合のp値とCIは、補正なしの値と同じです。</li>
               </ul>
-              <div class="mdc-note-box">
-                <ul>
-                  <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error Rate
-                    少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
-                  <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。
-                  </li>
-                  <li><strong>Holm</strong>:
-                    p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般により高い検出力を得やすい方法です。
-                  </li>
-                  <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
-                    有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
-                </ul>
-              </div>
-
               <p id="pair-count"></p>
               <div class="table-wrap" id="pair-table"></div>
-              <p class="note-text">※t = diff / SE、SE = √(s₁²/n₁ + s₂²/n₂)（s² は不偏分散）、dof は Welch–Satterthwaite の自由度。p
-                (Unadjusted) は t と dof から求めた両側p値です。各群の N・Mean・不偏分散は「全体動向」タブの表を参照してください。</p>
+              <p class="note-text">※diff は平均の差、t = diff / SE、SE = √(s₁²/n₁ + s₂²/n₂)（s² は不偏分散）、dof は Welch–Satterthwaite
+                の自由度。p
+                (Holm) は t と dof から求めた両側p値をHolm法で調整した値です。CI Lower, CI Upper は diff に対する Bonferroni同時CI です。各群の
+                N・Mean・不偏分散は「全体動向」タブの表を参照してください。</p>
+              <p class="note-text">※relative_diff (%) 相対差 = diff / 基準群（B - A なら A）の平均 ×
+                100（値が正の量的データ向けの指標で、基準群の平均が0以下のときは「—」）。Cohen's d = diff / √((s₁² + s₂²) / 2)（s²
+                は不偏分散）で、単位のない効果量の目安です。</p>
+              <p class="note-text">※Holm法のp値とBonferroni同時CIは、補正の仕組みが違うため完全には整合しません。Holm法のほうが検出力が高いため、p (Holm)
+                は有意なのにCIが0を含むことがあります（逆は起こりません）。差の大きさと不確かさは、Bonferroni同時CIで確認してください。</p>
+
+              <div id="pair-chart" class="chart-box"></div>
 
 
-              <div id="pair-section">
-                <h3 id="result-pair-chart">各ペアの信頼区間</h3>
-                <p>全ペアについて95%CIを算出します。</p>
+              <h3 id="result-pair-adjust">多重比較補正の有無</h3>
+              <p>3群以上では複数のペアを同時に検定するため、補正なしのp値や個別のCIのまま判断すると偽陽性が増えます。</p>
+              <p id="pair-adjust-single" class="note-text" hidden>今回は2群（ペア数 1）なので補正は不要です。上のp値とCIは補正なしの値と同じです。</p>
+              <details id="pair-adjust-details" hidden>
+                <summary>補正なし・他の補正方法の結果</summary>
+
+                <h4>p値（補正方法別）</h4>
+                <div class="mdc-note-box">
+                  <ul>
+                    <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error
+                      Rate
+                      少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
+                    <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。
+                    </li>
+                    <li><strong>Holm</strong>:
+                      p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般にはより高い検出力を得やすい方法です。</li>
+                    <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
+                      有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
+                  </ul>
+                </div>
+                <div class="table-wrap" id="pair-p-table"></div>
+
+                <h4>信頼区間（補正有無別）</h4>
                 <div class="mdc-note-box">
                   <ul>
                     <li><strong>Unadjusted（個別CI）</strong>: 各ペアについてWelchの方法で個別に算出したCI</li>
-                    <li><strong>Bonferroni（同時CI）</strong>: 全ペアをまとめて95%の信頼水準でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）
+                    <li><strong>Bonferroni（同時CI）</strong>: 全ペアをまとめて信頼水準（1−α）でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）
                     </li>
                   </ul>
                 </div>
-                <div id="pair-chart" class="chart-box"></div>
+                <div id="pair-chart-all" class="chart-box"></div>
                 <div id="pair-ci-table" class="table-wrap"></div>
-              </div>
+              </details>
             </div>
           </div>
         </div>

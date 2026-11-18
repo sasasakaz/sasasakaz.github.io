@@ -9,9 +9,13 @@
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
 //      group.table / group.chart  -> #group-table / #group-chart
 //      omni（3群以上のみ。2群は null）-> #omni-summary（JSが文章化）
-//      pair.table    -> #pair-table（Pair, diff, SE, t, dof と、補正方法別のp値。N・Meanは各群の表にあるので出さない）
-//      pair.ci_table -> #pair-ci-table / pair.chart -> #pair-chart
-//      pair.tooltips -> グラフ上のツールチップ用（tool-common.js の attachPairChartTooltips）
+//      pair.table    -> #pair-table（主表: Pair, diff, relative_diff, Cohen's d, SE, t, dof, p (Holm), Bonferroni同時CI。N・Meanは各群の表にあるので出さない）
+//      pair.chart    -> #pair-chart（主グラフ: Bonferroni同時CIのみ）
+//      --- 以下は「多重比較の補正」の <details> の中（3群以上のときだけ表示） ---
+//      pair.p_table  -> #pair-p-table（補正方法別のp値4列）
+//      pair.chart_all -> #pair-chart-all（補正なし/Bonferroniの2本のCI）/ pair.ci_table -> #pair-ci-table
+//      pair.tooltips -> グラフ上のツールチップ用（tool-common.js の attachPairChartTooltips）。
+//                       主グラフは prefix="pair"、details内のグラフは prefix="pair-all" で呼ぶ
 //  - 入力が不正なときは {"error": "..."} を返す。
 //  - 変数名の方針: std_biased = 標準偏差（n で割る）、std_unbiased = 不偏標準偏差（n-1 で割る）、
 //    var_unbiased = 不偏分散（n-1 で割る）。検定・信頼区間の計算はすべて不偏の値を使う。
@@ -25,7 +29,8 @@
 //  - scipy だけで完結させている（Welch検定・多重比較補正は自前実装。statsmodels/pandas不要）。
 //  - 計算は best_5g.ipynb の「welch t検定」セクションに対応している。
 //  - グラフの要素id（set_gid）は {prefix}-ci-{method}-{行} / {prefix}-mean-{method}-{行}。
-//    classical-props と同じ接頭辞 "pair" にしてあり、tooltips はJS側の PAIR_METHODS の色と対応する。
+//    主グラフは接頭辞 "pair"、details内のグラフは "pair-all"（同じidが2つ並ばないように分けている）。
+//    classical-props と同じ接頭辞にしてあり、tooltips はJS側の PAIR_METHODS の色と対応する。
 // =====================================================================
 const CLASSICAL_MEANS_PY = String.raw`
 """classical-means: 平均の古典的検定の計算とmatplotlibによる描画（Pyodide上で実行）。
@@ -97,8 +102,12 @@ def pairwise(ids, n, mean, std_unbiased, alpha, level):
         dof = (se_i + se_j) ** 2 / (se_i ** 2 / (n[i] - 1) + se_j ** 2 / (n[j] - 1))  # Welch-Satterthwaite
         p_val = float(sps.t.sf(abs(t_stat), dof) * 2)
         t_crit = sps.t.ppf(1 - alpha / 2, dof)
+        # 補助指標（点推定のみ）。relative_diff（相対差）は前の群(i)が基準。基準の平均が0以下だと意味が崩れるので None（表では「—」）
+        rel = 100 * diff / mean[i] if mean[i] > 0 else None
+        cohens_d = diff / np.sqrt((var_unbiased[i] + var_unbiased[j]) / 2)  # 両群の不偏分散の平均で割る
         row = {"pair": f"{ids[j]} - {ids[i]}", "diff": float(diff), "se": float(se), "t": float(t_stat),
-               "dof": float(dof), "p": p_val, "lo": float(diff - t_crit * se), "hi": float(diff + t_crit * se)}
+               "dof": float(dof), "p": p_val, "lo": float(diff - t_crit * se), "hi": float(diff + t_crit * se),
+               "rel": None if rel is None else float(rel), "d": float(cohens_d)}
         t_bonf = sps.t.ppf(1 - alpha / (2 * m), dof)
         row.update({"blo": float(diff - t_bonf * se), "bhi": float(diff + t_bonf * se)})
         rows.append(row)
@@ -106,23 +115,30 @@ def pairwise(ids, n, mean, std_unbiased, alpha, level):
     p_raw = np.array([r["p"] for r in rows])
     p_bonf, p_hol, p_bhh = p_bonferroni(p_raw), p_holm(p_raw), p_bh(p_raw)
 
-    # Pair | diff, SE, t, dof | p値（補正方法別）。左から計算の流れ順に並べる。
+    # 主表: Pair | diff, relative_diff, Cohen's d | SE, t, dof | p (Holm) | CI（Bonferroni同時CI）
     # N・Mean・不偏分散は各群の表（#group-table）にあるので、ここでは出さない
-    test_rows = [[r["pair"], r["diff"], r["se"], r["t"], r["dof"], r["p"], p_bonf[x], p_hol[x], p_bhh[x]]
+    main_rows = [[r["pair"], r["diff"], r["rel"], r["d"], r["se"], r["t"], r["dof"], p_hol[x], r["blo"], r["bhi"]]
                  for x, r in enumerate(rows)]
-    test_table = html_table(
-        ["Pair", "diff", "SE", "t", "dof", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
-        ["text", "f2", "f2", "f2", "f2", "p", "p", "p", "p"], test_rows, alpha)
+    main_table = html_table(
+        ["Pair", "diff (points)", "relative_diff (%)", "Cohen's d", "SE", "t", "dof", "p (Holm)", "CI Lower", "CI Upper"],
+        ["text", "f2", "f2", "f2", "f2", "f2", "f2", "p", "f2", "f2"], main_rows, alpha)
+
+    # details用: 補正方法別のp値、補正なし/BonferroniのCI
+    p_table = html_table(
+        ["Pair", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["text", "p", "p", "p", "p"],
+        [[r["pair"], r["p"], p_bonf[x], p_hol[x], p_bhh[x]] for x, r in enumerate(rows)], alpha)
 
     adj_ci_table = html_table(
-        ["Pair", "diff", "CI Lower", "CI Upper",
+        ["Pair", "diff (points)", "CI Lower", "CI Upper",
          "Bonf CI Lower", "Bonf CI Upper"],
         ["text"] + ["f2"] * 5,
         [[r["pair"], r["diff"], r["lo"], r["hi"], r["blo"], r["bhi"]]
          for r in rows])
 
-    specs = [("lo", "hi", "Unadjusted", "unadjusted", "#1f77b4", -0.15),
-             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)]
+    spec_unadj = ("lo", "hi", "Unadjusted", "unadjusted", "#1f77b4", -0.15)
+    spec_bonf = ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)
+    spec_bonf_main = ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0)  # 1本だけなので行の中央に置く
 
     def draw_pair_chart(chart_specs, prefix, title, height, legend):
         fig, ax = new_fig(640, height)
@@ -147,15 +163,20 @@ def pairwise(ids, n, mean, std_unbiased, alpha, level):
         fig.tight_layout()
         return to_svg(fig)
 
+    # 主グラフ（Bonferroni同時CIのみ）と、details内のグラフ（補正なし + Bonferroni）
+    # tooltips は2つのグラフで共通（要素idの接頭辞だけ違う）。区間は両方入れてあり、ある方だけが使われる
     tooltips = [{
         "pair": row["pair"], "diff": row["diff"],
         "intervals": {"unadjusted": [row["lo"], row["hi"]],
                       "bonferroni": [row["blo"], row["bhi"]]},
     } for row in rows]
 
-    adj_chart = draw_pair_chart(specs, "pair", f"Pairwise differences: {level}% CI", 55 * m + 150, True)
+    main_chart = draw_pair_chart([spec_bonf_main], "pair", f"Pairwise differences: {level}% CI (Bonferroni)",
+                                 45 * m + 110, False)
+    all_chart = draw_pair_chart([spec_unadj, spec_bonf], "pair-all", f"Pairwise differences: {level}% CI",
+                                55 * m + 150, True)
 
-    return test_table, adj_chart, tooltips, adj_ci_table
+    return main_table, main_chart, tooltips, p_table, all_chart, adj_ci_table
 
 
 def run(ids, groups, alpha):
@@ -174,13 +195,14 @@ def run(ids, groups, alpha):
 
         n, mean, std_unbiased, group_table, group_chart = group_summary(ids, xs, alpha, level)
         omni = welch_anova(n, mean, std_unbiased, alpha)
-        test_table, chart, tooltips, ci_table = pairwise(ids, n, mean, std_unbiased, alpha, level)
+        table, chart, tooltips, p_table, chart_all, ci_table = pairwise(ids, n, mean, std_unbiased, alpha, level)
         return json.dumps({
             "alpha": alpha, "level": level,
             "omni": omni,
             "group": {"table": group_table, "chart": group_chart},
-            "pair": {"pairs": k * (k - 1) // 2, "level": level, "table": test_table,
-                     "ci_table": ci_table, "chart": chart, "tooltips": tooltips},
+            "pair": {"pairs": k * (k - 1) // 2, "level": level, "table": table, "chart": chart,
+                     "p_table": p_table, "chart_all": chart_all, "ci_table": ci_table,
+                     "tooltips": tooltips},
         })
     except ValueError as e:
         return json.dumps({"error": str(e)})

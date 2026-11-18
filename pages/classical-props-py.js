@@ -9,12 +9,14 @@
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
 //      omni(統計量) -> #omni-summary（JSが文章化。χ²・dof・p・Cramér's V・合計N・期待度数の最小値）
 //      group.table / group.chart -> #group-table / #group-chart（各群の Sample Size・Events・比率とWilson区間）
-//      pair.table    -> #pair-table（Pair, diff, χ², dof と、補正方法別のp値）
+//      pair.table    -> #pair-table（主表: Pair, diff, relative_diff, Odds Ratio, χ², dof, p (Holm), SE, Bonferroni同時CI）
+//      pair.chart    -> #pair-chart（主グラフ: Bonferroni同時CIのみ）/ pair.crit -> #pair-ci-note（Bonferroni臨界値。JSが文章化）
 //      pair.warnings -> #pair-warning（期待度数が小さいペア、検定できず p=1.0 にしたペア。JSが文章化）
-//      pair.effect_table -> #pair-effect-table（補助指標: 相対差・オッズ比。<details>の中）
-//      pair.ci_table -> #pair-ci-table（diff, SE, CI）/ pair.crit -> #pair-ci-note（CIの臨界値。JSが文章化）
-//      pair.chart    -> #pair-chart
-//      pair.tooltips -> グラフ上のツールチップ用（tool-common.js の attachPairChartTooltips）
+//      --- 以下は「多重比較の補正」の <details> の中（3群以上のときだけ表示） ---
+//      pair.p_table  -> #pair-p-table（補正方法別のp値4列）
+//      pair.chart_all -> #pair-chart-all（補正なし/Bonferroniの2本のCI）/ pair.ci_table -> #pair-ci-table / 臨界値は #pair-ci-note-all
+//      pair.tooltips -> グラフ上のツールチップ用（tool-common.js の attachPairChartTooltips）。
+//                       主グラフは prefix="pair"、details内のグラフは prefix="pair-all" で呼ぶ
 //  - 図の表示サイズは classical-props.css（各idのwidthと svg{width:100%}）で決まり、
 //    ここの figsize(px指定) は縦横比と文字の相対サイズを決める。
 //
@@ -26,8 +28,9 @@
 //  - scipy だけで完結させている（Wilson区間・多重比較補正は自前実装。statsmodels/pandas不要）。
 //  - ペアの検定は2×2のPearsonカイ二乗検定（Yates補正なし）、CIはWald法（非プールのSE）。
 //    両者は計算の仕方が違うので、境界付近ではp値の判定とCIが0を含むかが食い違うことがある（HTML側に注記あり）。
-//  - グラフの要素id（set_gid）は pair-ci-{method}-{行} / pair-mean-{method}-{行}。
-//    classical-means と同じ接頭辞 "pair" にしてあり、tooltips はJS側の PAIR_METHODS の色と対応する。
+//  - グラフの要素id（set_gid）は {prefix}-ci-{method}-{行} / {prefix}-mean-{method}-{行}。
+//    主グラフは接頭辞 "pair"、details内のグラフは "pair-all"（同じidが2つ並ばないように分けている）。
+//    classical-means と同じ接頭辞にしてあり、tooltips はJS側の PAIR_METHODS の色と対応する。
 // =====================================================================
 const CLASSICAL_PROPS_PY = String.raw`
 """classical-props: 古典的検定の計算とmatplotlibによる描画（Pyodide上で実行）。
@@ -108,7 +111,7 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat):
         except ValueError:  # 期待度数0（両群とも0%/100%など）: 検定できないので p=1.0 とする
             chi2, dof, p_raw = None, None, 1.0
             low_expected, degenerate = False, True
-        # 補助指標。相対差は右の群(i)が基準。基準が0で計算できないものは None（表では「—」）
+        # 補助指標。relative_diff（相対差）は右の群(i)が基準。基準が0で計算できないものは None（表では「—」）
         rel = 100 * d / p_hat[i] if p_hat[i] > 0 else None
         odds_den = (denoms[j] - numers[j]) * numers[i]
         odds_ratio = numers[j] * (denoms[i] - numers[i]) / odds_den if odds_den > 0 else None
@@ -127,43 +130,58 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat):
     def label(r):  # 注意が必要なペアには印をつける（説明は #pair-warning）
         return r["pair"] + (" †" if r["low_expected"] else "") + (" ‡" if r["degenerate"] else "")
 
-    # Pair | diff, χ², dof | p値（補正方法別）。左から計算の流れ順に並べる
-    test_rows = [[label(r), r["diff"], r["chi2"], r["dof"], r["p_raw"], p_bonf[n], p_hol[n], p_bhh[n]]
-                 for n, r in enumerate(rows)]
-    test_table = html_table(
-        ["Pair", "diff (points)", "χ²", "dof", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
-        ["text", "f2", "f2", "int", "p", "p", "p", "p"], test_rows, alpha)
-    effect_table = html_table(
-        ["Pair", "相対差 (%)", "Odds Ratio"], ["text", "f2", "f2"],
-        [[r["pair"], r["rel"], r["odds_ratio"]] for r in rows])
+    # 主表: Pair | diff, relative_diff, Odds Ratio | χ², dof | p (Holm) | SE, CI（Bonferroni同時CI）
+    # relative_diff・Odds Ratio は点推定のみ（CIは diff に対するもの）。基準が0で計算できないものは None（表では「—」）
+    main_rows = [[label(r), r["diff"], r["rel"], r["odds_ratio"], r["chi2"], r["dof"], p_hol[n],
+                  r["se"], r["blo"], r["bhi"]] for n, r in enumerate(rows)]
+    main_table = html_table(
+        ["Pair", "diff (points)", "relative_diff (%)", "Odds Ratio", "χ²", "dof", "p (Holm)", "SE (points)",
+         "CI Lower", "CI Upper"],
+        ["text", "f2", "f2", "f2", "f2", "int", "p", "f2", "f2", "f2"], main_rows, alpha)
+    # details用: 補正方法別のp値、補正なし/BonferroniのCI
+    p_table = html_table(
+        ["Pair", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["text", "p", "p", "p", "p"],
+        [[label(r), r["p_raw"], p_bonf[n], p_hol[n], p_bhh[n]] for n, r in enumerate(rows)], alpha)
     ci_rows = [[r["pair"], r["diff"], r["se"], r["lo"], r["hi"], r["blo"], r["bhi"]] for r in rows]
     ci_table = html_table(
         ["Pair", "diff (points)", "SE (points)", "CI Lower", "CI Upper", "Bonf CI Lower", "Bonf CI Upper"],
         ["text"] + ["f2"] * 6, ci_rows)
 
-    # 差のCI比較（Unadjusted vs Bonferroni）
-    fig, ax = new_fig(640, 55 * m + 150)
-    style_axes(ax)
-    specs = [("lo", "hi", "Unadjusted", "unadjusted", "#1f77b4", -0.15),
-             ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)]
-    for lo_c, hi_c, label, method, c, off in specs:
-        for r, row in enumerate(rows):
-            interval = ax.hlines(r + off, row[lo_c], row[hi_c], color=c, linewidth=3.5,
-                                 label=label if r == 0 else None)
-            interval.set_gid(f"pair-ci-{method}-{r}")
-            mean = ax.plot([row["diff"]], [r + off], "o", markersize=5,
-                           markerfacecolor="white", markeredgecolor="black")[0]
-            mean.set_gid(f"pair-mean-{method}-{r}")
-    ax.axvline(0, color="gray", linestyle="--", linewidth=1.5, zorder=0)
-    ax.set_yticks(range(m))
-    ax.set_yticklabels([r["pair"] for r in rows])
-    ax.invert_yaxis()
-    ax.set_xlabel("Difference in rate (points)")
-    ax.set_title(f"Pairwise differences: {level}% CI", pad=24)
-    ax.legend(frameon=False, fontsize=8, loc="lower center", bbox_to_anchor=(0.5, 1.02),
-              ncol=3, borderaxespad=0)
-    fig.tight_layout()
+    spec_unadj = ("lo", "hi", "Unadjusted", "unadjusted", "#1f77b4", -0.15)
+    spec_bonf = ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.15)
+    spec_bonf_main = ("blo", "bhi", "Bonferroni", "bonferroni", "#2ca02c", 0.0)  # 1本だけなので行の中央に置く
 
+    def draw_pair_chart(chart_specs, prefix, title, height, legend):
+        fig, ax = new_fig(640, height)
+        style_axes(ax)
+        for lo_c, hi_c, name, method, c, off in chart_specs:
+            for r, row in enumerate(rows):
+                interval = ax.hlines(r + off, row[lo_c], row[hi_c], color=c, linewidth=3.5,
+                                     label=name if r == 0 else None)
+                interval.set_gid(f"{prefix}-ci-{method}-{r}")
+                mean = ax.plot([row["diff"]], [r + off], "o", markersize=5,
+                               markerfacecolor="white", markeredgecolor="black")[0]
+                mean.set_gid(f"{prefix}-mean-{method}-{r}")
+        ax.axvline(0, color="gray", linestyle="--", linewidth=1.5, zorder=0)
+        ax.set_yticks(range(m))
+        ax.set_yticklabels([r["pair"] for r in rows])
+        ax.invert_yaxis()
+        ax.set_xlabel("Difference in rate (points)")
+        ax.set_title(title, pad=24 if legend else 6)
+        if legend:
+            ax.legend(frameon=False, fontsize=8, loc="lower center", bbox_to_anchor=(0.5, 1.02),
+                      ncol=3, borderaxespad=0)
+        fig.tight_layout()
+        return to_svg(fig)
+
+    # 主グラフ（Bonferroni同時CIのみ）と、details内のグラフ（補正なし + Bonferroni）
+    main_chart = draw_pair_chart([spec_bonf_main], "pair", f"Pairwise differences: {level}% CI (Bonferroni)",
+                                 45 * m + 110, False)
+    all_chart = draw_pair_chart([spec_unadj, spec_bonf], "pair-all", f"Pairwise differences: {level}% CI",
+                                55 * m + 150, True)
+
+    # tooltips は2つのグラフで共通（要素idの接頭辞だけ違う）。区間は両方入れてあり、ある方だけが使われる
     tooltips = [{
         "pair": row["pair"],
         "diff": row["diff"],
@@ -173,8 +191,9 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat):
         },
     } for row in rows]
     return {
-        "pairs": m, "level": level, "table": test_table, "effect_table": effect_table,
-        "ci_table": ci_table, "chart": to_svg(fig), "tooltips": tooltips,
+        "pairs": m, "level": level, "table": main_table, "chart": main_chart,
+        "p_table": p_table, "chart_all": all_chart, "ci_table": ci_table,
+        "tooltips": tooltips,
         "warnings": {"low_expected": [r["pair"] for r in rows if r["low_expected"]],
                      "degenerate": [r["pair"] for r in rows if r["degenerate"]]},
         "crit": {"z": float(z_unadj), "z_bonf": float(z_bonf), "m": m, "alpha_bonf": alpha / m},

@@ -7,10 +7,10 @@
 //    Pythonの run() は表(HTML)とグラフ(SVG)をJSONで返し、ここで下記idのdivに挿入する。
 //      #omni-summary                       （全体の検定。omni から文章を作る）
 //      #group-table / #group-chart         （各群の Sample Size・Events・比率とWilson区間）
-//      #pair-table                         （各ペアの diff, χ², dof と、補正方法別のp値）
+//      #pair-table / #pair-chart / #pair-ci-note  （群間の差の主表・主グラフ・CIの臨界値: p (Holm) と Bonferroni同時CI）
 //      #pair-warning                       （期待度数が小さいペア等の注意。pair.warnings から文章を作る）
-//      #pair-effect-table                  （補助指標: 相対差・オッズ比。HTML側の <details> の中）
-//      #pair-ci-table / #pair-ci-note / #pair-chart  （各群間の信頼区間・CIの臨界値）
+//      #pair-adjust-details の中           （3群以上のときだけ表示: #pair-p-table 補正方法別のp値 /
+//                                          #pair-chart-all 補正なし・Bonferroniの2本のCI / #pair-ci-table / #pair-ci-note-all）
 //  - これらのidは classical-props.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
@@ -31,7 +31,8 @@ ToolCommon.configurePyodide({
 
 // 結果を入れるdivのid（Clear で空にする）
 const RESULT_IDS = ['omni-summary', 'group-table', 'group-chart', 'pair-table', 'pair-warning',
-  'pair-effect-table', 'pair-ci-table', 'pair-ci-note', 'pair-chart'];
+  'pair-p-table', 'pair-ci-table', 'pair-ci-note', 'pair-ci-note-all',
+  'pair-chart', 'pair-chart-all'];
 
 // 結果タブ。Clear のときは既定のタブに戻す
 const resultTabs = ToolCommon.createResultTabs();
@@ -39,6 +40,10 @@ const resultTabs = ToolCommon.createResultTabs();
 function clearResults() {
   ToolCommon.clearElements(RESULT_IDS);
   document.getElementById('pair-count').textContent = '';
+  document.getElementById('pair-adjust-single').hidden = true;
+  const details = document.getElementById('pair-adjust-details');
+  details.hidden = true;
+  details.open = false;
   if (resultTabs) resultTabs.reset();
 }
 
@@ -77,6 +82,17 @@ function renderPairWarnings(warnings) {
 }
 
 /**
+ * 「多重比較の補正」の表示切り替え。2群（ペア数 1）のときは補正が不要なので details ごと隠し、短い説明だけを出す。
+ * h3「多重比較の補正」自体は常に表示する。
+ */
+function setAdjustVisible(multi) {
+  const details = document.getElementById('pair-adjust-details');
+  details.hidden = !multi;
+  if (!multi) details.open = false;
+  document.getElementById('pair-adjust-single').hidden = multi;
+}
+
+/**
  * Pythonの結果を画面に入れる
  */
 function renderResults(result, alpha) {
@@ -86,17 +102,29 @@ function renderResults(result, alpha) {
 
   document.getElementById('pair-table').innerHTML = result.pair.table;
   document.getElementById('pair-warning').innerHTML = renderPairWarnings(result.pair.warnings);
-  document.getElementById('pair-effect-table').innerHTML = result.pair.effect_table;
   document.getElementById('pair-count').textContent = `${result.pair.pairs} ペア / 有意水準 ${alpha}`;
+  document.getElementById('pair-p-table').innerHTML = result.pair.p_table;
   document.getElementById('pair-ci-table').innerHTML = result.pair.ci_table;
+  const multi = result.pair.pairs > 1;
+  setAdjustVisible(multi);
+
+  // CIの臨界値の注記（主表の下はBonferroniだけ、details内は補正なしとBonferroniの両方）
   const crit = result.pair.crit;
-  document.getElementById('pair-ci-note').textContent =
-    `※CIの臨界値: z = ${crit.z.toFixed(3)}（Unadjusted）、z = ${crit.z_bonf.toFixed(3)}（Bonferroni。ペア数 m = ${crit.m}、α/m = ${Number(crit.alpha_bonf.toPrecision(3))}）`;
+  const alphaBonf = Number(crit.alpha_bonf.toPrecision(3));
+  document.getElementById('pair-ci-note').textContent = multi
+    ? `※CIの臨界値: z = ${crit.z_bonf.toFixed(3)}（Bonferroni。ペア数 m = ${crit.m}、α/m = ${alphaBonf}）`
+    : `※CIの臨界値: z = ${crit.z.toFixed(3)}（ペア数 m = 1 のため補正なし）`;
+  document.getElementById('pair-ci-note-all').textContent =
+    `※CIの臨界値: z = ${crit.z.toFixed(3)}（Unadjusted）、z = ${crit.z_bonf.toFixed(3)}（Bonferroni。ペア数 m = ${crit.m}、α/m = ${alphaBonf}）`;
+
+  // 主グラフ（Bonferroni）と details 内のグラフ（補正なし + Bonferroni）は、要素idの接頭辞が違う（pair / pair-all）
+  const tip = { items: result.pair.tooltips, level: result.pair.level, unit: ' points' };
   const pairChart = document.getElementById('pair-chart');
   pairChart.innerHTML = result.pair.chart;
-  ToolCommon.attachPairChartTooltips(pairChart, {
-    prefix: 'pair', items: result.pair.tooltips, level: result.pair.level, unit: ' points',
-  });
+  ToolCommon.attachPairChartTooltips(pairChart, { prefix: 'pair', ...tip });
+  const pairChartAll = document.getElementById('pair-chart-all');
+  pairChartAll.innerHTML = result.pair.chart_all;
+  ToolCommon.attachPairChartTooltips(pairChartAll, { prefix: 'pair-all', ...tip });
 }
 
 /**
