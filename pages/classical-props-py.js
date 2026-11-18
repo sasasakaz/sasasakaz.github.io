@@ -7,9 +7,9 @@
 //    TOOL_COMMON_PY（共通部分）→ 下のコード の順に pyodide.runPython() で評価する。
 //  - 実行ボタンで classical-props.js が Python の run(denoms, numers, alpha) を呼ぶと、
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
-//      omni(統計量) -> #omni-summary（JSが文章化。χ²・df・p・Cramér's V・合計N・期待度数の最小値）
+//      omni(統計量) -> #omni-summary（JSが文章化。χ²・dof・p・Cramér's V・合計N・期待度数の最小値）
 //      group.table / group.chart -> #group-table / #group-chart（各群の Sample Size・Events・比率とWilson区間）
-//      pair.table    -> #pair-table（Pair, diff, χ², df と、補正方法別のp値）
+//      pair.table    -> #pair-table（Pair, diff, χ², dof と、補正方法別のp値）
 //      pair.warnings -> #pair-warning（期待度数が小さいペア、検定できず p=1.0 にしたペア。JSが文章化）
 //      pair.effect_table -> #pair-effect-table（補助指標: 相対差・オッズ比。<details>の中）
 //      pair.ci_table -> #pair-ci-table（diff, SE, CI）/ pair.crit -> #pair-ci-note（CIの臨界値。JSが文章化）
@@ -77,7 +77,7 @@ def omnibus(denoms, numers, ids, alpha, level):
     fig.tight_layout()
 
     omni = {
-        "chi2": float(chi2), "df": int(dof), "p": float(p_omni), "v": cramers_v,
+        "chi2": float(chi2), "dof": int(dof), "p": float(p_omni), "v": cramers_v,
         "n": n_total, "min_expected": float(expected.min()),
         "significant": bool(p_omni < alpha),
         "low_expected": bool(expected.min() < 5),
@@ -127,11 +127,11 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat):
     def label(r):  # 注意が必要なペアには印をつける（説明は #pair-warning）
         return r["pair"] + (" †" if r["low_expected"] else "") + (" ‡" if r["degenerate"] else "")
 
-    # Pair | diff, χ², df | p値（補正方法別）。左から計算の流れ順に並べる
+    # Pair | diff, χ², dof | p値（補正方法別）。左から計算の流れ順に並べる
     test_rows = [[label(r), r["diff"], r["chi2"], r["dof"], r["p_raw"], p_bonf[n], p_hol[n], p_bhh[n]]
                  for n, r in enumerate(rows)]
     test_table = html_table(
-        ["Pair", "diff (points)", "χ²", "df", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
+        ["Pair", "diff (points)", "χ²", "dof", "p (Unadjusted)", "p (Bonferroni)", "p (Holm)", "p (BH)"],
         ["text", "f2", "f2", "int", "p", "p", "p", "p"], test_rows, alpha)
     effect_table = html_table(
         ["Pair", "相対差 (%)", "Odds Ratio"], ["text", "f2", "f2"],

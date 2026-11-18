@@ -57,7 +57,7 @@ const input = ToolCommon.createMeansInput({
  */
 function renderOmniSummary(omni, alpha) {
   const verdict = omni.significant
-    ? `有意（p &lt; ${alpha}）：少なくとも1つの群の平均が他と異なります`
+    ? `有意差あり（p &lt; ${alpha}）少なくとも1つの群の平均が他と異なります`
     : `有意差なし（p ≥ ${alpha}）`;
   const pText = omni.p < 0.0001 ? omni.p.toExponential(2) : omni.p.toFixed(4);
   return `<ul>

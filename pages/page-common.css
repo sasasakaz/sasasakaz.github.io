@@ -284,9 +284,9 @@ blockquote {
   font-size: 0.9em;
 }
 
-/* ul や ol の直後にある note-text だけ字下げする */
-:where(ul, ol)+.note-text {
-  padding-left: 0.5em;
+/* ulやolの後にあるnote-textは字下げする */
+:where(ul, ol)~.note-text {
+  padding-left: 2em;
 }
 
 

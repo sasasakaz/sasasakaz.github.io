@@ -167,10 +167,15 @@
                 aria-selected="false" tabindex="-1">🔍 群間の差</button>
             </div>
 
+
+
             <div id="panel-omni" class="result-panel" role="tabpanel" aria-labelledby="tab-omni">
               <h2 id="result-omni">全体動向</h2>
-              <p>3群以上の場合に全体として平均に差があるかを調べるにはANOVA（Analysis of Variance
-                分散分析）を使用します。ここでは等分散を仮定しないWelchの一元配置分散分析をおこないます。</p>
+              <p>全群の平均が等しいかを調べるために、等分散を仮定しないWelchの一元配置分散分析をおこないます。</p>
+              <p class="note-text">※平均の検定では、3群以上にはANOVA（Analysis of Variance 分散分析）を用います（cf.比率の差の場合のカイ二乗検定は3群以上にも対応可能）。
+              </p>
+              <p class="note-text">※2群の場合はWelch t検定の結果と同じです（検定統計量 <em>F=t^2</em>）。</p>
+
 
 
               <h3 id="result-omni-test">Welch ANOVAの結果</h3>
@@ -185,7 +190,7 @@
 
             <div id="panel-pair" class="result-panel" role="tabpanel" aria-labelledby="tab-pair" hidden>
               <h2 id="result-pair">群間の平均の差</h2>
-              <p>全ペアでWelch t検定をおこないます（2群の場合は全体動向と同じ結果です。検定統計量 <em>F=t^2</em>）。</p>
+              <p>全ペアでWelch t検定をおこないます。</p>
               <p class="note-text">※diff B - A: B群の平均からA群の平均を差し引いた値です。</p>
 
 
@@ -211,7 +216,8 @@
 
               <p id="pair-count"></p>
               <div class="table-wrap" id="pair-table"></div>
-              <p class="note-text">※t = diff / SE、SE = √(s₁²/n₁ + s₂²/n₂)（s² は不偏分散）、dof は Welch–Satterthwaite の自由度。p (Unadjusted) は t と dof から求めた両側p値です。各群の N・Mean・不偏分散は「全体動向」タブの表を参照してください。</p>
+              <p class="note-text">※t = diff / SE、SE = √(s₁²/n₁ + s₂²/n₂)（s² は不偏分散）、dof は Welch–Satterthwaite の自由度。p
+                (Unadjusted) は t と dof から求めた両側p値です。各群の N・Mean・不偏分散は「全体動向」タブの表を参照してください。</p>
 
 
               <div id="pair-section">

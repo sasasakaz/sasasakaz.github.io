@@ -7,7 +7,7 @@
 //    Pythonの run() は表(HTML)とグラフ(SVG)をJSONで返し、ここで下記idのdivに挿入する。
 //      #omni-summary                       （全体の検定。omni から文章を作る）
 //      #group-table / #group-chart         （各群の Sample Size・Events・比率とWilson区間）
-//      #pair-table                         （各ペアの diff, χ², df と、補正方法別のp値）
+//      #pair-table                         （各ペアの diff, χ², dof と、補正方法別のp値）
 //      #pair-warning                       （期待度数が小さいペア等の注意。pair.warnings から文章を作る）
 //      #pair-effect-table                  （補助指標: 相対差・オッズ比。HTML側の <details> の中）
 //      #pair-ci-table / #pair-ci-note / #pair-chart  （各群間の信頼区間・CIの臨界値）
@@ -49,14 +49,14 @@ const input = ToolCommon.createPropsInput({ sample: SAMPLE, onClear: clearResult
  */
 function renderOmniSummary(omni, alpha) {
   const verdict = omni.significant
-    ? `有意（p &lt; ${alpha}）：少なくとも1つの群の比率が他と異なります`
+    ? `有意差あり（p &lt; ${alpha}）少なくとも1つの群の比率が他と異なります`
     : `有意差なし（p ≥ ${alpha}）`;
   const pText = omni.p < 0.0001 ? omni.p.toExponential(2) : omni.p.toFixed(4);
   const warn = omni.low_expected
     ? '<p class="mdc-warn-box">注意: 期待度数が5未満のセルがあります。カイ二乗近似の精度が低い可能性があります。</p>'
     : '';
   return `<ul>
-      <li>Pearson chi-squared = ${omni.chi2.toFixed(4)}, df = ${omni.df}, p = ${pText}, Cramér's V = ${omni.v.toFixed(4)}</li>
+      <li>Pearson chi-squared = ${omni.chi2.toFixed(4)}, dof = ${omni.dof}, p = ${pText}, Cramér's V = ${omni.v.toFixed(4)}</li>
       <li>合計 N = ${omni.n.toLocaleString()}, 期待度数の最小値 = ${omni.min_expected.toFixed(2)}</li>
       <li>結果: <strong>${verdict}</strong></li>
     </ul>${warn}`;
@@ -71,7 +71,7 @@ function renderPairWarnings(warnings) {
     items.push(`<li>† ${warnings.low_expected.join('、')}: 期待度数が5未満のセルがあります。カイ二乗近似の精度が低い可能性があります。</li>`);
   }
   if (warnings.degenerate.length) {
-    items.push(`<li>‡ ${warnings.degenerate.join('、')}: 期待度数が0のセルがあり検定できないため、χ² と df は算出せず p = 1.0 としています。</li>`);
+    items.push(`<li>‡ ${warnings.degenerate.join('、')}: 期待度数が0のセルがあり検定できないため、χ² と dof は算出せず p = 1.0 としています。</li>`);
   }
   return items.length ? `<div class="mdc-warn-box"><ul>${items.join('')}</ul></div>` : '';
 }
