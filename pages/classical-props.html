@@ -140,6 +140,13 @@
                   <option value="0.1">0.10（90%CI）</option>
                 </select>
               </div>
+              <details>
+                <summary>p値とCIの補正方法</summary>
+                <p class="note-text">・各ペアの検定結果ではHolm法（p値）とBonferroni同時CI（信頼区間）での補正値を出力します。</p>
+                <p class="note-text">
+                  ・補正なしの値と、p値についてはBonferroniとBH（Benjamini-Hochberg）も出力します。探索的な分析など、目的によっては補正なしやBHを選ぶ場合もあります。分析目的に応じて、採用する方法をあらかじめ決めておいてください。
+                </p>
+              </details>
             </div>
           </div>
 
@@ -172,9 +179,9 @@
 
             <div id="panel-omni" class="result-panel" role="tabpanel" aria-labelledby="tab-omni">
               <h2 id="result-omni">全体動向</h2>
-              <p>全群の比率が等しいかを調べるために、Pearsonのカイ二乗検定（独立性の検定、Yates補正なし）をおこないます。</p>
-              <p class="note-text">※比率の差の場合のカイ二乗検定は3群以上にも対応可能（cf.平均の検定では3群以上にはANOVAを用います）。</p>
+              <p>「全群の比率が等しいか」を調べるために、Pearsonのカイ二乗検定（独立性の検定、Yates補正なし）をおこないます。</p>
               <p class="note-text">※2群の場合は群間の差タブでの出力結果と同じです。</p>
+              <p class="note-text">※カイ二乗検定は3群以上にも対応可能（cf.平均の検定では3群以上にはANOVAを用います）。</p>
 
 
 
@@ -192,36 +199,54 @@
 
             <div id="panel-pair" class="result-panel" role="tabpanel" aria-labelledby="tab-pair" hidden>
               <h2 id="result-pair">群間の比率の差</h2>
-              <p>全ペアでPearsonのカイ二乗検定（Yates補正なし）をおこないます。</p>
-              <p class="note-text">※diff B - A: B群の比率からA群の比率を差し引いた値です。</p>
+              <p>Pearsonのカイ二乗検定（Yates補正なし）を全ペアでおこないます。</p>
 
 
               <h3 id="result-pair-p">カイ二乗検定（ペア）の結果</h3>
-              <p>ここではHolm法（p値）とBonferroni同時CI（区間）での補正値を示します。</p>
-              <ul>
-                <li>Holm法: p値を小さい順に並べ、段階的に判定することでFWERを制御しつつ、一般にはより高い検出力を得やすい。</li>
-                <li>Bonferroni同時CI: 全ペアをまとめて信頼水準（1−α）でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）。</li>
-                <li>2群の場合のp値とCIは、補正なしの値と同じです。</li>
-              </ul>
+              <p>ここではHolm法（p値）とBonferroni同時CI（信頼区間）での補正値を示します。</p>
+              <p>2群の場合のp値とCIは、補正なしの値と同じです。</p>
+
+              <details>
+                <summary>Holm法のp値とBonferroni同時CIについて</summary>
+                <ul>
+                  <li>Holm法: p値を小さい順に並べ、段階的に判定することでFWER（少なくとも1つの帰無仮説を誤って棄却する確率）を制御しつつ、一般にはより高い検出力を得やすいです。</li>
+                  <li>Bonferroni同時CI: 全ペアをまとめて、少なくとも信頼水準（1−α）でカバーするCIです（Wald法の臨界値を、比較するペア数に応じてBonferroni補正して算出）。</li>
+                  <li>2つは補正の仕組みが違うため、完全には整合しません。</li>
+                  <li>Holm法のほうが検出力が高いため、p値は有意なのにCIが0を含むことがあります。</li>
+                  <li>
+                    p値はPearsonのカイ二乗検定、CIはWald法と異なる方法で求めているため、境界付近（p値が有意水準に近い、またはCIの端が0に近いとき）では、CIは0を含まないのにp値が有意でないことがあります。
+                  </li>
+                </ul>
+              </details>
+
               <p id="pair-count"></p>
               <div class="table-wrap" id="pair-table"></div>
-              <p class="note-text">※diff は比率の差、χ² と dof は2×2のPearsonカイ二乗検定（Yates補正なし）の値です。p (Holm)
-                はそのp値をHolm法で調整した値です。CI Lower, CI Upper は diff に対する Bonferroni同時CI（SE列を使ったWald法）です。</p>
-              <p class="note-text">※relative_diff (%) 相対差 = diff / 基準群（B - A なら A）の比率 × 100。Odds Ratio = 左の群のオッズ /
-                右の群のオッズ（オッズ = 比率 / (1 − 比率)）。基準となる値が0で計算できないときは「—」。</p>
-              <p id="pair-ci-note" class="note-text"></p>
+              <details>
+                <summary>表の意味</summary>
+                <ul>
+                  <li>diff は比率の差（B - A なら B群の比率からA群の比率を差し引いた値）。</li>
+                  <li>relative diff (%) 相対差 = diff / 基準群（B - A なら A）の比率 × 100。</li>
+                  <li>Odds Ratio = 左の群のオッズ / 右の群のオッズ（オッズ = 比率 / (1 − 比率)）。基準となる値が0で計算できないときは「—」。</li>
+                  <li>χ² と dof は2×2のPearsonカイ二乗検定（Yates補正なし）の値。</li>
+                  <li>p-valueは上記のp値をHolm法で調整した値（2群をプールした比率を使って求めるため、diff / SE から χ² は再現できない）。有意水準以下であれば塗りつぶし表示。</li>
+                  <li>SE (points) は diff の標準誤差（群ごとの比率からそのまま求める非プールのSE）。SE = √(p̂₁(1−p̂₁)/n₁ + p̂₂(1−p̂₂)/n₂) × 100　（p̂
+                    は各群の標本比率、n は
+                    Sample Size）</li>
+                  <li>CI は diff ± 臨界値z × SE（Wald法）。Bonferroni同時CIの臨界値は z = Φ⁻¹(1 − α / (2m))　（Φ⁻¹ は標準正規分布の分位点関数、m はペア数）
+                  </li>
+                </ul>
+
+                <p id="pair-ci-note" class="note-text"></p>
+
+              </details>
               <div id="pair-warning"></div>
-
-              <p class="note-text">※Holm法のp値とBonferroni同時CIは、補正の仕組みが違うため完全には整合しません（Holm法のほうが検出力が高いので、p (Holm)
-                は有意なのにCIが0を含むことがあります。さらに、p値はPearsonのカイ二乗検定（2群をプールした比率を使う）、CIはWald法（各群の標本比率から求めたSE）で計算しているため、境界付近では判定が食い違うことがあります。差の大きさと不確かさは、Bonferroni同時CIで確認してください。
-              </p>
-
               <div id="pair-chart" class="chart-box"></div>
 
 
               <h3 id="result-pair-adjust">多重比較補正の有無</h3>
-              <p>3群以上では複数のペアを同時に検定するため、補正なしのp値や個別のCIのまま判断すると偽陽性が増えます。</p>
-              <p id="pair-adjust-single" class="note-text" hidden>今回は2群（ペア数 1）なので補正は不要です。上のp値とCIは補正なしの値と同じです。</p>
+              <p>3群以上では複数のペアを同時に検定するため、補正なしのp値やCIを用いる場合は偽陽性（本当は差がないのに差があると判断してしまうこと）の発生確率がペア数に応じて高まります。</p>
+              <p id="pair-adjust-single" class="note-text" hidden>入力されたデータは2群（ペア数
+                1）です。前段の出力値と同じになるため、補正なし・他の補正方法の結果は出力されません。</p>
               <details id="pair-adjust-details" hidden>
                 <summary>補正なし・他の補正方法の結果</summary>
 
@@ -247,7 +272,7 @@
                     <li><strong>Unadjusted（個別CI）</strong>: 各ペアの比率の差について、Wald法で個別に算出したCI（標本比率から標準誤差を推定し、正規分布に基づいて区間を算出）。
                     </li>
                     <li><strong>Bonferroni（同時CI）</strong>:
-                      全ペアをまとめて少なくとも信頼水準（1−α）でカバーするCI（Wald法の臨界値を、比較するペア数に応じてBonferroni補正して算出）。</li>
+                      全ペアをまとめて、少なくとも信頼水準（1−α）でカバーするCI（Wald法の臨界値を、比較するペア数に応じてBonferroni補正して算出）。</li>
                   </ul>
                 </div>
                 <div id="pair-chart-all" class="chart-box"></div>

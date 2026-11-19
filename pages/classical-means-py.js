@@ -9,7 +9,7 @@
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
 //      group.table / group.chart  -> #group-table / #group-chart
 //      omni（3群以上のみ。2群は null）-> #omni-summary（JSが文章化）
-//      pair.table    -> #pair-table（主表: Pair, diff, relative_diff, Cohen's d, SE, t, dof, p (Holm), Bonferroni同時CI。N・Meanは各群の表にあるので出さない）
+//      pair.table    -> #pair-table（主表: Pair, diff, relative diff, Cohen's d, SE, t, dof, p (Holm), Bonferroni同時CI。N・Meanは各群の表にあるので出さない）
 //      pair.chart    -> #pair-chart（主グラフ: Bonferroni同時CIのみ）
 //      --- 以下は「多重比較の補正」の <details> の中（3群以上のときだけ表示） ---
 //      pair.p_table  -> #pair-p-table（補正方法別のp値4列）
@@ -102,7 +102,7 @@ def pairwise(ids, n, mean, std_unbiased, alpha, level):
         dof = (se_i + se_j) ** 2 / (se_i ** 2 / (n[i] - 1) + se_j ** 2 / (n[j] - 1))  # Welch-Satterthwaite
         p_val = float(sps.t.sf(abs(t_stat), dof) * 2)
         t_crit = sps.t.ppf(1 - alpha / 2, dof)
-        # 補助指標（点推定のみ）。relative_diff（相対差）は前の群(i)が基準。基準の平均が0以下だと意味が崩れるので None（表では「—」）
+        # 補助指標（点推定のみ）。relative diff（相対差）は前の群(i)が基準。基準の平均が0以下だと意味が崩れるので None（表では「—」）
         rel = 100 * diff / mean[i] if mean[i] > 0 else None
         cohens_d = diff / np.sqrt((var_unbiased[i] + var_unbiased[j]) / 2)  # 両群の不偏分散の平均で割る
         row = {"pair": f"{ids[j]} - {ids[i]}", "diff": float(diff), "se": float(se), "t": float(t_stat),
@@ -115,12 +115,12 @@ def pairwise(ids, n, mean, std_unbiased, alpha, level):
     p_raw = np.array([r["p"] for r in rows])
     p_bonf, p_hol, p_bhh = p_bonferroni(p_raw), p_holm(p_raw), p_bh(p_raw)
 
-    # 主表: Pair | diff, relative_diff, Cohen's d | SE, t, dof | p (Holm) | CI（Bonferroni同時CI）
+    # 主表: Pair | diff, relative diff, Cohen's d | SE, t, dof | p (Holm) | CI（Bonferroni同時CI）
     # N・Mean・不偏分散は各群の表（#group-table）にあるので、ここでは出さない
     main_rows = [[r["pair"], r["diff"], r["rel"], r["d"], r["se"], r["t"], r["dof"], p_hol[x], r["blo"], r["bhi"]]
                  for x, r in enumerate(rows)]
     main_table = html_table(
-        ["Pair", "diff (points)", "relative_diff (%)", "Cohen's d", "SE", "t", "dof", "p (Holm)", "CI Lower", "CI Upper"],
+        ["Pair", "diff (points)", "relative diff (%)", "Cohen's d", "SE", "t", "dof", "p-value", "CI Lower", "CI Upper"],
         ["text", "f2", "f2", "f2", "f2", "f2", "f2", "p", "f2", "f2"], main_rows, alpha)
 
     # details用: 補正方法別のp値、補正なし/BonferroniのCI

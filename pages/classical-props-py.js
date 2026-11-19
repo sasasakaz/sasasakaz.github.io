@@ -9,7 +9,7 @@
 //    表(HTML文字列)とグラフ(SVG文字列)を含むJSONが返り、JSが各idのdivに innerHTML で挿入する。
 //      omni(統計量) -> #omni-summary（JSが文章化。χ²・dof・p・Cramér's V・合計N・期待度数の最小値）
 //      group.table / group.chart -> #group-table / #group-chart（各群の Sample Size・Events・比率とWilson区間）
-//      pair.table    -> #pair-table（主表: Pair, diff, relative_diff, Odds Ratio, χ², dof, p (Holm), SE, Bonferroni同時CI）
+//      pair.table    -> #pair-table（主表: Pair, diff, relative diff, Odds Ratio, χ², dof, p (Holm), SE, Bonferroni同時CI）
 //      pair.chart    -> #pair-chart（主グラフ: Bonferroni同時CIのみ）/ pair.crit -> #pair-ci-note（Bonferroni臨界値。JSが文章化）
 //      pair.warnings -> #pair-warning（期待度数が小さいペア、検定できず p=1.0 にしたペア。JSが文章化）
 //      --- 以下は「多重比較の補正」の <details> の中（3群以上のときだけ表示） ---
@@ -111,7 +111,7 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat):
         except ValueError:  # 期待度数0（両群とも0%/100%など）: 検定できないので p=1.0 とする
             chi2, dof, p_raw = None, None, 1.0
             low_expected, degenerate = False, True
-        # 補助指標。relative_diff（相対差）は右の群(i)が基準。基準が0で計算できないものは None（表では「—」）
+        # 補助指標。relative diff（相対差）は右の群(i)が基準。基準が0で計算できないものは None（表では「—」）
         rel = 100 * d / p_hat[i] if p_hat[i] > 0 else None
         odds_den = (denoms[j] - numers[j]) * numers[i]
         odds_ratio = numers[j] * (denoms[i] - numers[i]) / odds_den if odds_den > 0 else None
@@ -130,12 +130,12 @@ def pairwise(denoms, numers, ids, alpha, level, p_hat):
     def label(r):  # 注意が必要なペアには印をつける（説明は #pair-warning）
         return r["pair"] + (" †" if r["low_expected"] else "") + (" ‡" if r["degenerate"] else "")
 
-    # 主表: Pair | diff, relative_diff, Odds Ratio | χ², dof | p (Holm) | SE, CI（Bonferroni同時CI）
-    # relative_diff・Odds Ratio は点推定のみ（CIは diff に対するもの）。基準が0で計算できないものは None（表では「—」）
+    # 主表: Pair | diff, relative diff, Odds Ratio | χ², dof | p (Holm) | SE, CI（Bonferroni同時CI）
+    # relative diff・Odds Ratio は点推定のみ（CIは diff に対するもの）。基準が0で計算できないものは None（表では「—」）
     main_rows = [[label(r), r["diff"], r["rel"], r["odds_ratio"], r["chi2"], r["dof"], p_hol[n],
                   r["se"], r["blo"], r["bhi"]] for n, r in enumerate(rows)]
     main_table = html_table(
-        ["Pair", "diff (points)", "relative_diff (%)", "Odds Ratio", "χ²", "dof", "p (Holm)", "SE (points)",
+        ["Pair", "diff (points)", "relative diff (%)", "Odds Ratio", "χ²", "dof", "p-value", "SE (points)",
          "CI Lower", "CI Upper"],
         ["text", "f2", "f2", "f2", "f2", "int", "p", "f2", "f2", "f2"], main_rows, alpha)
     # details用: 補正方法別のp値、補正なし/BonferroniのCI
