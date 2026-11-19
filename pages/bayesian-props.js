@@ -7,7 +7,7 @@
 //    Pythonの run() は各グラフのSVG文字列をJSONで返し、ここで下記idのdivに挿入する。
 //      #summary-chart / #summary-hdi / #summary-table-container（各群の表。Python が作る） / #estimation-note
 //      #best-table（P(best)。HTML側の <details> の中。2群のときは #best-section ごと隠す）
-//      #diff-hdi / #diff-table-container（各ペアの差の表） / #relative-table-container（相対差。<details>の中） / #diff-chart
+//      #diff-hdi / #diff-table-container（各ペアの差と相対差の表。<details>の中） / #diff-chart
 //  - これらのidは bayesian-props.html と page-common.css とHTMLの <style> に対応する。
 //    id を変える時は html / css / このファイル（と py.js の戻り値のキー）を同時に直すこと。
 //  - 確認表(#confirmation-table)は、HTML側に5行(Group A〜E)を固定で書いてあり、
@@ -29,7 +29,7 @@ ToolCommon.configurePyodide({
 
 // 結果を入れるdivのid（Clear で空にする）
 const RESULT_IDS = ['summary-chart', 'summary-hdi', 'summary-table-container', 'estimation-note', 'best-table',
-  'diff-hdi', 'diff-table-container', 'relative-table-container', 'diff-chart'];
+  'diff-hdi', 'diff-table-container', 'diff-chart'];
 
 // 結果タブ。Clear のときは既定のタブに戻す
 const resultTabs = ToolCommon.createResultTabs();
@@ -127,7 +127,6 @@ function renderResults(result) {
 
   document.getElementById('diff-hdi').innerHTML = result.forest;
   document.getElementById('diff-table-container').innerHTML = result.diff_table;
-  document.getElementById('relative-table-container').innerHTML = result.relative_table;
   document.getElementById('diff-chart').innerHTML =
     result.diffs.map(svg => `<div class="diff-plot">${svg}</div>`).join('');
 }

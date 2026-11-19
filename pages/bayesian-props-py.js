@@ -11,8 +11,7 @@
 //      table     -> #summary-table-container（各群の Sample Size・Events・観測比率・事後分布Beta(α, β)・Mean・SD・HDI）
 //      best_table -> #best-table（P(best)。<details>の中。3群以上のときだけ。2群は null）
 //      forest    -> #diff-hdi      / diffs -> #diff-chart（1枚ずつ .diff-plot で包む）
-//      diff_table -> #diff-table-container（各ペアの差の Mean・HDI・P(diff>0)・P(diff<0)）
-//      relative_table -> #relative-table-container（補助指標: 相対差の Mean・HDI。<details>の中）
+//      diff_table -> #diff-table-container（各ペアの差の Mean・HDI・P(diff>0)・P(diff<0) と、相対差の Mean・HDI を1つの表に。<details>の中）
 //      num_samples -> #estimation-note（JSが文章化）
 //    hover はツールチップ用データ（bayesian-props.js の attachPosteriorHover が使用）。
 //  - 図の表示サイズは page-common.css とHTMLの <style>（各idのwidthと svg{width:100%}）で決まり、
@@ -195,26 +194,24 @@ def group_table(groups, denoms, numers):
 
 
 def diff_table(groups):
-    """各ペアの差（点・%ポイント）。P(diff<0) は P(diff>0) の補数（ヒストグラムのオレンジ文字と同じ値）"""
-    rows = []
-    for a, b, d in pair_diffs(groups):
-        s = stats(d)
-        prob = float(np.mean(d > 0)) * PERCENTAGE_FACTOR
-        rows.append([f"{a} - {b}", s["mean"], s["lower"], s["upper"], prob, PERCENTAGE_FACTOR - prob])
-    return html_table(
-        ["Pair", "Mean diff (points)", "HDI Lower", "HDI Upper", "P(diff > 0) (%)", "P(diff < 0) (%)"],
-        ["text", "f2", "f2", "f2", "f2", "f2"], rows)
-
-
-def relative_table(groups):
-    """補助指標: 相対差 =（左の群 − 右の群）/ 右の群 を、サンプルごとに計算した事後分布の Mean と HDI（%）"""
+    """各ペアの差と相対差を1つの表にまとめる（<details>の中に表示）。
+    差（点・%ポイント）: 後ろの群 − 前の群。P(diff<0) は P(diff>0) の補数（ヒストグラムのオレンジ文字と同じ値）。
+    相対差（%）:（後ろの群 − 前の群）/ 前の群 を、サンプルごとに計算した事後分布の Mean と HDI（補助指標）"""
     rows = []
     for i in range(len(groups)):
         for j in range(i + 1, len(groups)):
-            rel = PERCENTAGE_FACTOR * (groups[j]["samples"] / groups[i]["samples"] - 1)
-            s = stats(rel)
-            rows.append([f"{groups[j]['id']} - {groups[i]['id']}", s["mean"], s["lower"], s["upper"]])
-    return html_table(["Pair", "Mean (%)", "HDI Lower (%)", "HDI Upper (%)"], ["text", "f2", "f2", "f2"], rows)
+            d = groups[j]["samples"] - groups[i]["samples"]
+            s = stats(d)
+            prob = float(np.mean(d > 0)) * PERCENTAGE_FACTOR
+            rel = stats(PERCENTAGE_FACTOR * (groups[j]["samples"] / groups[i]["samples"] - 1))
+            rows.append([f"{groups[j]['id']} - {groups[i]['id']}",
+                         s["mean"], s["lower"], s["upper"], PERCENTAGE_FACTOR - prob, prob,
+                         rel["mean"], rel["lower"], rel["upper"]])
+    return html_table(
+        ["Pair", "Diff Mean (points)", "Diff HDI Lower (points)", "Diff HDI Upper (points)",
+         "P(diff < 0) (%)", "P(diff > 0) (%)", 
+         "Relative Mean (%)", "Relative HDI Lower (%)", "Relative HDI Upper (%)"],
+        ["text", "f2", "f2", "f2", "f2", "f2", "f2", "f2", "f2"], rows)
 
 
 def best_table(groups):
@@ -249,7 +246,6 @@ def run(denoms, numers, num_samples):
         "table": group_table(groups, denoms, numers),
         "best_table": best_table(groups),
         "diff_table": diff_table(groups),
-        "relative_table": relative_table(groups),
         "num_samples": num_samples,
     })
 `;

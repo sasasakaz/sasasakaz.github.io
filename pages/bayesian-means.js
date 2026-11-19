@@ -8,6 +8,7 @@
 // 結果欄は「収束診断」「全体動向」「群間の差」の3タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
 // Clear のときは既定のタブ（data-default を付けたタブ。なければ先頭の収束診断）に戻す。
 // 収束診断の表（#mcse-ratios）は、目安（DIAGNOSTIC_LIMITS）を外れたセルに is-warn を付けて着色する。
+// 群間の差タブの詳細表（#diff-table。<details>の中）は、サーバーの diff_summary（各ペアの差・P(diff)・相対差）を表にする。
 // =====================================================================
 const GROUPS = ["A", "B", "C", "D", "E"];
 const SAMPLE_DATA = [
@@ -70,7 +71,7 @@ const PLOT_IDS = {
   trace: "trace-plot"
 };
 // const TABLE_IDS = ["means-summary", "diagnostics", "mcse-ratios"];
-const TABLE_IDS = ["means-summary", "mcse-ratios"];
+const TABLE_IDS = ["means-summary", "mcse-ratios", "diff-table"];
 
 /** 収束診断の目安（HTMLの本文「基本パラメータの要約統計量」の記載と揃える）。外れたセルは is-warn で着色する */
 const DIAGNOSTIC_LIMITS = {
@@ -252,6 +253,18 @@ function renderResults(data) {
     ["r_hat", "r_hat", { digits: 4, warn: warnUnless(v => v < DIAGNOSTIC_LIMITS.rHatMax) }],
     ["mcse_mean / sd (%)", "mcse_mean / sd (%)", { warn: warnUnless(v => v <= DIAGNOSTIC_LIMITS.mcseRatioMax) }]
   ], 2);
+  // 古いサーバー（diff_summary なし）でも落ちないよう ?? [] を付けている
+  renderTable("diff-table", data.diff_summary ?? [], [
+    ["parameter", "Pair"],
+    ["mean", "mean"],
+    ["hdi_3%", "hdi_3%"],
+    ["hdi_97%", "hdi_97%"],
+    ["p_negative", "P(diff < 0) (%)"],
+    ["p_positive", "P(diff > 0) (%)"],
+    ["relative_mean", "relative mean (%)"],
+    ["relative_hdi_3%", "relative hdi_3% (%)"],
+    ["relative_hdi_97%", "relative hdi_97% (%)"]
+  ]);
   showPlots(data.plots);
   $("large-values").hidden = !data.large_values;
 }

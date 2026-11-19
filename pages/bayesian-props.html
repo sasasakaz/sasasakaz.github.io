@@ -249,7 +249,7 @@
 
             <div id="panel-diff" class="result-panel" role="tabpanel" aria-labelledby="tab-diff" hidden>
               <h2 id="result-diff">各群間の比較（比率の差分）</h2>
-                <p>各群間の比率の差がとりそうな値の範囲を表します。</p>
+              <p>各群間の比率の差がとりそうな値の範囲を表します。</p>
               <ul>
                 <li>横棒がオレンジ線をまたいでいない（94%HDIが0を含まない）場合は、各群間の比率に十分な差があると解釈しやすいです。</li>
               </ul>
@@ -258,20 +258,23 @@
 
 
               <div id="diff-hdi" class="chart-box"></div>
-              <div id="diff-table-container" class="table-wrap"></div>
 
               <details>
-                <summary>相対差（補助指標）</summary>
-                <p class="note-text">※相対差 = (左の群の比率 − 右の群の比率) / 右の群の比率（B - A なら A が基準）を、サンプルごとに計算した事後分布の Mean
-                  と94%HDIです。基準となる群の比率が0に近いと、値が大きくぶれます。</p>
-                <div id="relative-table-container" class="table-wrap"></div>
+                <summary>各ペアの差の詳細（表）</summary>
+                <ul>
+                  <li>Diff は、左の群の比率から右の群の比率を差し引いた値（%ポイント）の事後分布の Mean と94%HDIです。</li>
+                  <li>P(diff &lt; 0) は、左の群の比率が右の群の比率を下回る確率(%)です。P(diff &gt; 0) はその逆（上回る確率）で、合計は100%になります。</li>
+                  <li>Relative（相対差）= (左の群の比率 − 右の群の比率) / 右の群の比率（B - A なら A が基準）を、サンプルごとに計算した事後分布の Mean
+                    と94%HDIです。基準となる群の比率が0に近いと、値がブレやすいです。</li>
+                </ul>
+                <div id="diff-table-container" class="table-wrap"></div>
               </details>
 
               <div id="diff-chart"></div>
 
               <div class="mdc-warn-box">
                 <ul>
-                  <li>各ペアのヒストグラムのオレンジ色の数値（上の表の P(diff &lt; 0)、P(diff &gt; 0)
+                  <li>各ペアのヒストグラムのオレンジ色の数値（「各ペアの差の詳細（表）」の P(diff &lt; 0)、P(diff &gt; 0)
                     と同じ値）は、片方の群の比率がもう片方の群の比率を上回っている（下回っている）確率を表します。</li>
                   <li>各群間の比率の差が0を上回る（下回る）確率が示唆される、これがベイズ推定の利点の一つです（94%HDIに0が含まれていてもこの値で各群間の比率の差を判断しやすいです）。</li>
                   <li>もしもこの値が50%に近い場合は、比率に差があるかは不確かです。100%（0%）に近い場合は、比率の差の確からしさが高まります。</li>
