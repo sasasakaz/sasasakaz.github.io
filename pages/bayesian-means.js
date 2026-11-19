@@ -228,9 +228,9 @@ async function fetchEstimate(parsedGroups) {
 function renderResults(data) {
   renderTable("means-summary", data.means_summary, [
     ["parameter", "Group"],
-    ["mean", "mean"],
-    ["hdi_3%", "hdi_3%"],
-    ["hdi_97%", "hdi_97%"]
+    ["mean", "Mean"],
+    ["hdi_3%", "HDI Lower"],
+    ["hdi_97%", "HDI Upper"]
   ]);
   // renderTable("diagnostics", data.diagnostics, [
   //   ["parameter", "パラメータ"],
@@ -256,14 +256,14 @@ function renderResults(data) {
   // 古いサーバー（diff_summary なし）でも落ちないよう ?? [] を付けている
   renderTable("diff-table", data.diff_summary ?? [], [
     ["parameter", "Pair"],
-    ["mean", "mean"],
-    ["hdi_3%", "hdi_3%"],
-    ["hdi_97%", "hdi_97%"],
+    ["mean", "Diff Mean"],
+    ["hdi_3%", "Diff HDI Lower"],
+    ["hdi_97%", "Diff HDI Upper"],
     ["p_negative", "P(diff < 0) (%)"],
     ["p_positive", "P(diff > 0) (%)"],
-    ["relative_mean", "relative mean (%)"],
-    ["relative_hdi_3%", "relative hdi_3% (%)"],
-    ["relative_hdi_97%", "relative hdi_97% (%)"]
+    ["relative_mean", "Relative Mean (%)"],
+    ["relative_hdi_3%", "Relative HDI Lower (%)"],
+    ["relative_hdi_97%", "Relative HDI Upper (%)"]
   ]);
   showPlots(data.plots);
   $("large-values").hidden = !data.large_values;

@@ -208,7 +208,7 @@ def diff_table(groups):
                          s["mean"], s["lower"], s["upper"], PERCENTAGE_FACTOR - prob, prob,
                          rel["mean"], rel["lower"], rel["upper"]])
     return html_table(
-        ["Pair", "Diff Mean (points)", "Diff HDI Lower (points)", "Diff HDI Upper (points)",
+        ["Pair", "Mean (points)", "HDI Lower (points)", "HDI Upper (points)",
          "P(diff < 0) (%)", "P(diff > 0) (%)", 
          "Relative Mean (%)", "Relative HDI Lower (%)", "Relative HDI Upper (%)"],
         ["text", "f2", "f2", "f2", "f2", "f2", "f2", "f2", "f2"], rows)
