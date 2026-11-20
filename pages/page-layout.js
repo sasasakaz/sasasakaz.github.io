@@ -47,8 +47,8 @@
         ['🤖 機械学習の手法', 'pages/ml-for-structured-data.html'],
         ['🤖 機械学習の評価指標', 'pages/ml-evaluation.html'],
         ['🤖 機械学習モデルの解釈', 'pages/ml-interpretation.html'],
-        ['🎯 アップリフトモデリング（基礎）', 'pages/uplift-basic.html'],
-        ['🎯 アップリフトモデリング（実践）', 'pages/uplift-advanced.html']
+        ['🎯 アップリフト（基礎）', 'pages/uplift-basic.html'],
+        ['🎯 アップリフト（実践）', 'pages/uplift-advanced.html']
       ]
     },
     {
