@@ -8,6 +8,8 @@
 // 結果欄は「収束診断」「全体動向」「群間の差」の3タブ（HTMLの .result-tabs）。切り替えは ToolCommon.createResultTabs() が担当し、
 // Clear のときは既定のタブ（data-default を付けたタブ。なければ先頭の収束診断）に戻す。
 // 収束診断の表（#mcse-ratios）は、目安（DIAGNOSTIC_LIMITS）を外れたセルに is-warn を付けて着色する。
+// 全体動向の表（#means-summary）は、サーバーの means_summary（各群の Sample Size・Observed Mean と、mu の事後分布の Mean・HDI）を表にする。
+//   注記（#estimation-note）には、サーバーが返す chains・tune・draws から事後サンプル数を書く。
 // 群間の差タブの詳細表（#diff-table。<details>の中）は、サーバーの diff_summary（各ペアの差・P(diff)・相対差）を表にする。
 // =====================================================================
 const GROUPS = ["A", "B", "C", "D", "E"];
@@ -133,6 +135,7 @@ function showPlots(plots) {
 /** 結果の表・画像・警告を空にする。見出しと解説は残す（Clear と、実行を始めるときに使う） */
 function resetResults() {
   $("large-values").hidden = true;
+  $("estimation-note").textContent = "";
   TABLE_IDS.forEach(id => $(id).replaceChildren());
   Object.values(PLOT_IDS).forEach(id => $(id).removeAttribute("src"));
 }
@@ -228,6 +231,8 @@ async function fetchEstimate(parsedGroups) {
 function renderResults(data) {
   renderTable("means-summary", data.means_summary, [
     ["parameter", "Group"],
+    ["sample_size", "Sample Size", { digits: 0 }],
+    ["observed_mean", "Observed Mean"],
     ["mean", "Mean"],
     ["hdi_3%", "HDI Lower"],
     ["hdi_97%", "HDI Upper"]
@@ -265,6 +270,13 @@ function renderResults(data) {
     ["relative_hdi_3%", "Relative HDI Lower (%)"],
     ["relative_hdi_97%", "Relative HDI Upper (%)"]
   ]);
+  // 古いサーバー（chains などなし）のときは注記を出さない
+  if (data.chains && data.draws) {
+    $("estimation-note").textContent =
+      `※Mean・HDI は、${data.chains}チェーン × ${data.draws.toLocaleString()}回（tune ${data.tune.toLocaleString()}回は除く）＝ ` +
+      `${(data.chains * data.draws).toLocaleString()}個の事後サンプルから計算しています。` +
+      `ただしMCMCのサンプルは互いに独立ではないため、実質的なサンプル数は「収束診断」タブの ess_bulk / ess_tail で確認してください。`;
+  }
   showPlots(data.plots);
   $("large-values").hidden = !data.large_values;
 }
