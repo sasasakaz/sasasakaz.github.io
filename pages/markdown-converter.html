@@ -168,6 +168,7 @@ Notes:
       .inline-pink { background-color: #f8bbd0; padding: 0 2px; }
       .inline-marker { background: linear-gradient(transparent 60%, #fff176 60%); padding: 0 2px; }
       .inline-gray { background-color: #eceff1; padding: 0 2px; }
+      .strong-accent { background-color: #fff3e0; padding: 0.1em 0.3em; border-radius: 0.3em; }
       .note-text { color: #666; font-size: 0.9em; }
       .mdc-info-box { background-color: #e8f5e9; border-left: 0.25rem solid #4caf50; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
       .mdc-warn-box { background-color: #fff3e0; border-left: 0.25rem solid #ff9800; padding: 1rem; margin: 0.75rem 0; border-radius: 0.5rem; }
@@ -287,14 +288,15 @@ Notes:
       ['note_text', '💭', '注釈テキスト (note-text)'],
       ['mark', '🌻', 'ハイライト 黄 (inline-mark)'],
       ['marker', '🖍️', 'マーカー (inline-marker)'],
-      ['gray', '◽️', 'グレー (inline-gray)'],
-      ['pink', '🌸', 'ハイライト ピンク (inline-pink)']
+      ['strong_accent', '🟠', '背景付き強調 (strong-accent)'],
+      ['note', '🗒️', '注釈ボックス']
     ];
     const MENU = [ // [グループ名, [[id, アイコン, 説明], ...]] 「挿入 ▾」の中身
-      ['インデント', [['indent_add', '➡️', 'インデント+（space4）'], ['indent_remove', '⬅️', 'インデント-（space4）']]],
       ['挿入', [['link', '🔗', 'リンク'], ['quote', '❝', '引用'], ['table', '📊', '表（TSVは範囲選択して押下）']]],
       ['コード', [['inline_code', '🏷️', 'インラインコード'], ['code', '🧱', 'コードブロック'], ['pre_quote', '📋', 'コード出力結果の貼付用']]],
-      ['ボックス・区切り', [['info', '✅', '情報ボックス'], ['warn', '⚠️', '注意ボックス'], ['alert', '🚫', '警告ボックス'], ['note', '🗒️', '注釈ボックス'], ['br_hr', '➖', '改行＆区切り線']]]
+      ['ハイライト', [['gray', '◽️', 'グレー (inline-gray)'], ['pink', '🌸', 'ハイライト ピンク (inline-pink)']]],
+      ['ボックス・区切り', [['info', '✅', '情報ボックス'], ['warn', '⚠️', '注意ボックス'], ['alert', '🚫', '警告ボックス'], ['br_hr', '➖', '改行＆区切り線']]],
+      ['インデント', [['indent_add', '➡️', 'インデント+（space4）'], ['indent_remove', '⬅️', 'インデント-（space4）']]]
     ];
 
     function runBtn(id) {
@@ -453,6 +455,7 @@ Notes:
         case 'code': insertText = '\n```\n' + (selectedText || '') + '\n```\n'; break;
         case 'pre_quote': insertText = '\n<blockquote><pre>\n' + (selectedText || 'ここにテキストをペースト') + '\n</pre></blockquote>\n'; break;
         case 'strong': insertText = '<strong>' + (selectedText || '強調') + '</strong>'; break;
+        case 'strong_accent': insertText = '<strong class="strong-accent">' + (selectedText || '強調') + '</strong>'; break;
         case 'note_text': insertText = '<p class="note-text">' + (selectedText || 'そっと注釈') + '</p>\n'; break;
         case 'mark': insertText = "<span class='inline-mark'>" + (selectedText || 'mark') + "</span>"; break;
         case 'marker': insertText = "<span class='inline-marker'>" + (selectedText || 'marker') + "</span>"; break;

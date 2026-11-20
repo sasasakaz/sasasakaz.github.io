@@ -289,10 +289,17 @@ blockquote {
   padding-left: 2em;
 }
 
-/* li の最初の要素としてのstrongをアクセントカラーに */
-li>strong:first-child {
-  color: var(--c-accent-dark);
-  /* 好きなアクセントカラーなどに変更 */
+/* 背景付きの強調（<strong class="strong-accent">）。
+   リスト先頭の見出し語など、「ここだけ目立たせたい」ときに使う。
+   太字と文字色は strong 本来のまま、背景だけ塗る。
+   複数行にまたがっても各行の端に角丸が付くよう、他の inline-* と同じ clone を指定。
+   末尾のスペースまで塗られないよう、スペースは </strong> の外に書く */
+strong.strong-accent {
+  background-color: var(--c-accent-light);
+  padding: 0.1em 0.3em;
+  border-radius: 0.3em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
 

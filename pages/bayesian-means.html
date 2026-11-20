@@ -224,7 +224,7 @@
 
 
               <h3 id="plot-summary">基本パラメータの要約統計量</h3>
-              <p>目安として、以下の値であれば概ね問題ないと考えてください。</p>
+              <p>目安として、以下の値であれば概ね問題ないと考えてください。以下を満たしていない場合はセルが赤く塗りつぶし表示されます。</p>
               <ul>
                 <li><code>ess_bulk</code>と<code>ess_tail</code>が400以上（できれば数千）</li>
                 <li><code>r_hat</code>が1.01未満（理想は1.00）</li>
@@ -292,8 +292,10 @@
 
               <img id="forest-plot" class="plot" alt="2群間の平均値差のフォレストプロット">
 
+              <img id="differences-plot" class="plot" alt="群間差の事後分布">
+
               <details>
-                <summary>各ペアの差の詳細（表）</summary>
+                <summary>詳細数表</summary>
                 <ul>
                   <li>Diffは、左の群の平均から右の群の平均を差し引いた値（元データと同じ単位）の事後分布の Mean と94%HDIです。</li>
                   <li>P(diff &lt; 0) は、左の群の平均が右の群の平均を下回る確率(%)です。P(diff &gt; 0) はその逆（上回る確率）で、合計は100%になります。</li>
@@ -305,7 +307,7 @@
                 </div>
               </details>
 
-              <img id="differences-plot" class="plot" alt="群間差の事後分布">
+
 
               <div class="mdc-warn-box">
                 <ul>

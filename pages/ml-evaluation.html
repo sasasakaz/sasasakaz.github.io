@@ -113,9 +113,9 @@
       <h2 id="data-split">データの分割</h2>
       <p>機械学習では、データを役割に応じて3つに分けて使うことがある。</p>
       <ul>
-        <li><strong>Train（学習用）: </strong>モデルの学習に直接使う。</li>
-        <li><strong>Validation（検証用）: </strong>学習中のモデルの性能を確認し、Early Stoppingやパラメータ調整などに使う。</li>
-        <li><strong>Test（評価用）: </strong>すべての調整が終わった後、初見のデータに対してどのくらい性能を発揮できるか、最後に確認するために使う。</li>
+        <li><strong class="strong-accent">Train（学習用）:</strong> モデルの学習に直接使う。</li>
+        <li><strong class="strong-accent">Validation（検証用）:</strong> 学習中のモデルの性能を確認し、Early Stoppingやパラメータ調整などに使う。</li>
+        <li><strong class="strong-accent">Test（評価用）:</strong> すべての調整が終わった後、初見のデータに対してどのくらい性能を発揮できるか、最後に確認するために使う。</li>
       </ul>
       <p>例えば、70, 15, 15に分けたり、まず80と20（Test用）に分けて、その80をさらにTrain 80, Validation 20（つまりTrain64, Val16, Test20）に分けたりする。</p>
 
@@ -192,8 +192,8 @@ y_pred_train = model.predict_proba(X_train)[:, 1]
         </tbody>
       </table>
 
-      <div class="mdc-note-box">
-        <p>混同行列（Confusion Matrix）の各象限</p>
+      <details>
+        <summary>混同行列（Confusion Matrix）の各象限</summary>
         <ul>
           <li>TP (True Positive 真陽性): 正例を正しく正例と予測したもの → 実際に買った人を、正しく買うと予測してた</li>
           <li>FP (False Positive 偽陽性): 負例を誤って正例と予測したもの → 実際には買わなかった人を、誤って買うと予測してた</li>
@@ -219,9 +219,9 @@ y_pred_train = model.predict_proba(X_train)[:, 1]
             </ul>
           </li>
         </ul>
-      </div>
+      </details>
 
-      <img src="../images/ml-evaluation-confusion-matrix.jpg" alt="サンプルデータでの混同行列画像">
+      <img src="../images/ml-evaluation-confusion-matrix.jpg" alt="サンプルデータでの混同行列画像" style="max-width: 80%;">
 
       <p>サンプル事例での結果は、合計5,662人のうち実際の購入者は1,718人（出現率30%）、非購入者は3,944人。この4セルのどこに注目するか。</p>
       <blockquote>
@@ -315,9 +315,8 @@ FN (False Negative): 713 件
         </ul>
       </div>
 
-      <br>
-      <div class="mdc-note-box">
-        <p>PrecisionとRecallからF1へのつながり </p>
+      <details>
+        <summary>PrecisionとRecallからF1へのつながり </summary>
         <ol>
           <li>PrecisionとRecallはトレードオフの関係にある。</li>
           <li>Precisionを1(100%)に近づけたいなら、予測確率の判定基準であるしきい値を1に極力近づけて、確実に買いそうな人だけを少数予測すればいい。代償として、Recallは低くなる。</li>
@@ -353,7 +352,6 @@ FN (False Negative): 713 件
           <li>欲しい状態を的確に表す指標になったっぽい。これがF1-score</li>
           <li>数学でいう調和平均の計算方法を、機械学習の評価指標として使っている。</li>
         </ul>
-      </div>
 
       <pre><code class="language-python">F1 score = 1 / { (1/Precision + 1/Recall) / 2 }
          = 2 / { (1/Precision) + (1/Recall) }
@@ -361,15 +359,13 @@ FN (False Negative): 713 件
          = 2 * Precision * Recall / (Precision + Recall)
 </code></pre>
 
-
-      <div class="mdc-note-box">
         <p>
           なお、PrecisionとRecallのどちらかを明確に重視したい場合には、F1-scoreを拡張したFβ-scoreという指標もある。βを大きくするとRecall、小さくするとPrecisionをより重視した評価になる。
         </p>
         <p>
           ただし、どの程度の重み付けが適切かは用途によって異なる。実務では、Fβ-scoreという1つの数値にまとめるよりも、PrecisionとRecallを個別に確認し、施策コストや取りこぼしの損失を考慮して判断するほうがわかりやすい場面も多い。
         </p>
-      </div>
+      </details>
 
 
       <h3 id="mcc">MCC</h3>
@@ -378,7 +374,11 @@ FN (False Negative): 713 件
         Correlation Coefficient</p>
       <p><span class='inline-code'>MCC = (TP × TN − FP × FN) / √{(TP + FP)(TP + FN)(TN + FP)(TN + FN)}
         </span></p>
-      <pre><code class="language-python">mcc = (tp * tn - fp * fn) / math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+
+<details>
+  <summary>詳細</summary>
+
+        <pre><code class="language-python">mcc = (tp * tn - fp * fn) / math.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
 # 一気に計算する場合、モデルが全員を同じクラスに予測した時などに、分母が0になるケースがある
 
 # 分子の計算: (TP * TN) - (FP * FN)
@@ -412,10 +412,15 @@ print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
 
       <p>正例と負例の両方を考慮するため、クラス不均衡な場合にも、モデルの分類性能をシビアに評価しやすい（多数派のクラスで正答を稼いだ高Accuracyなモデルでも、MCCは高くなりにくい）。</p>
 
+</details>
+
 
       <h3 id="balanced-accuracy">Balanced Accuracy</h3>
       <p>クラス不均衡でも、正解率をシンプルかつ公平に評価したい場合に（均衡正解率）。</p>
       <p><span class='inline-code'>Balanced Accuracy = (Recall + Specificity) / 2</span></p>
+
+  <details>
+    <summary>詳細</summary>
       <p>Specificity(特異度) : 実際は負例の対象のうち、正しく負例と予測できた割合（真陰性率） <span class='inline-gray'>Specificity = TN / (TN +
           FP)</span>
       </p>
@@ -436,12 +441,16 @@ print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
          = { TP / (TP+FN) * (TP+FN) / Total } + { TN / (TN+FP) * (TN+FP) / Total }
          = (Recall * 正例出現率) + (Specificity * 負例出現率)
 </code></pre>
-      つまりAccuracyは、データに多く存在するクラスの正解率ほど強く反映される。
+      <p>つまりAccuracyは、データに多く存在するクラスの正解率ほど強く反映される。</p>
+</details>
+
 
 
       <h3 id="other-metrics">その他の指標</h3>
       <p>4セルの組み合わせ次第で、他にもいろんな指標が算出可能。似たものにも見えるが、分母の捉え方がちょっとずつ異なる。</p>
 
+      <details>
+        <summary>詳細</summary>
       <table>
         <thead>
           <tr>
@@ -487,12 +496,17 @@ print(f&quot;MCC (Matthews Correlation Coefficient): {mcc:.3f}&quot;)
           </tr>
         </tbody>
       </table>
+      </details>
 
 
       <h4>Cohen's Kappa（カッパ係数）</h4>
       <p>
         MCC同様に実際のクラスと予測クラスの一致度を評価する指標。違いは、偶然による一致を考慮する点。実際と予測が一致したのは、モデルの実力なのか、それともたまたまなのか。たまたま当たったぶん（期待値）を全体から引いて、純粋な予測の重みを評価する。
       </p>
+
+<details>
+  <summary>詳細</summary>
+
       <p>クラスの出現率割合と予測割合から「偶然でもこれくらいは一致しそう」という一致率を考え、その分を差し引いて評価する。</p>
       <ul>
         <li>実測の一致率： 実際に予測が当たった割合（つまりAccuracy）。</li>
@@ -527,6 +541,9 @@ kappa = (po - pe) / (1 - pe)
 
 print(f&quot;Cohen&#39;s Kappa: {kappa:.3f}&quot;)
 </code></pre>
+
+</details>
+
 
 
       <h3 id="metric-usage">ここまでの指標をどう使い分けるか</h3>
@@ -599,15 +616,15 @@ print(f&quot;Cohen&#39;s Kappa: {kappa:.3f}&quot;)
         <li>TPR（True Positive Rate）= Recall</li>
         <li>FPR（False Positive Rate）= FP / (TN + FP)</li>
       </ul>
-      <p>の関係を表した曲線。Receiver Operating Characteristic Curve）</p>
+      <p>の関係を表した曲線。Receiver Operating Characteristic Curve</p>
       <p>これを2次元の平面に表現する。</p>
       <ul>
         <li>縦軸 TPR: 実際は正例の対象のうち、正しく正例と予測できた割合（=Recall）</li>
         <li>横軸 FPR: 実際は負例の対象のうち、誤って正例と予測した割合</li>
       </ul>
 
-
-      <h4>ROC曲線のプロット手順</h4>
+<details>
+      <summary>ROC曲線のプロット手順</summary>
       <blockquote>
         <pre>
 顧客 購入確率
@@ -660,6 +677,7 @@ J 0.10（実際：0）※間違い、空振り
           </ul>
         </li>
       </ol>
+</details>
 
 
       <h4>ROC曲線における良いモデルと悪いモデル</h4>
@@ -782,19 +800,20 @@ J 0.10（実際：0）※間違い、空振り
         </tbody>
       </table>
 
-      <div class="mdc-note-box">
-        <p><strong>PR-AUCとAverage Precision</strong></p>
+      <details>
+        <summary>PR-AUCとAverage Precision</summary>
         <p>PR曲線を描いて、その下の面積を全部足し算（積分）した値。その代表的な方法がPR-AUCだけども、「PR-AUC」と「Average Precision（AP）」は同じものとは限らないことに注意。</p>
         <p>
           Precision-Recall曲線の面積を単純に台形公式などで計算する方法と、scikit-learnのaverage_precision_scoreのように、Recallの変化量を重みとしてPrecisionを平均する方法では、結果が異なる場合がある。
         </p>
         <p>なので、PR-AUCという言葉だけで済ませず、どの方法で曲線を要約した値なのかを示す、確認するのも大事。</p>
-      </div>
+      </details>
+
 
       <h3 id="auc-metric-usage">ROC-AUCとPR-AUCの使い分け</h3>
       <p>どちらが優れているというものではなく、注目するポイントが異なる。</p>
 
-      <img src="../images/ml-evaluation-roc-pr-curve.jpg" alt="ROC曲線とPR曲線画像">
+      <img src="../images/ml-evaluation-roc-pr-curve.jpg" alt="ROC曲線とPR曲線画像" style="max-width: 80%;">
 
       <table>
         <thead>

@@ -173,9 +173,9 @@
       <h3 id="what-is-uplift">アップリフト</h3>
       <p>ある顧客について「もしもこの人にクーポン配布したら何％の確率で購入するか？」「もしもこの人にクーポン配布しなかったら何％の確率で購入するか？」をそれぞれ予測する。</p>
       <ul>
-        <li><span class='inline-gray'>prob_t</span>: 処置した場合の予測確率 70%</li>
-        <li><span class='inline-gray'>prob_c</span>: 処置しなかった場合の予測確率 30%</li>
-        <li><span class='inline-gray'>uplift</span>: prob_tとprob_cの差分 40points</li>
+        <li><strong class="strong-accent">prob_t:</strong> 処置した場合の予測確率 70%</li>
+        <li><strong class="strong-accent">prob_c:</strong> 処置しなかった場合の予測確率 30%</li>
+        <li><strong class="strong-accent">uplift:</strong> prob_tとprob_cの差分 40points</li>
       </ul>
       <p>差分の値が大きい顧客ほど、クーポン配布したことにより、配布しなかった場合に比べて購入確率が上昇すると解釈できる。このように、ある人に<span
           class='inline-mark'>処置をした場合と、処置をしなかった場合で、結果がどの程度変化するかを表す指標</span>を<strong>アップリフト</strong>と呼ぶ。</p>
@@ -193,8 +193,8 @@
       <p>実際のモデルでは連続値の特徴量などを条件として推定するため、顧客ごとに異なるアップリフト推定値が出力される。だが、同じ個人について施策あり/なしの両方の結果を同時に観測できないため、
         個人の真の処置効果（ITE）を直接求めているわけではない。</p>
       <ul>
-        <li><span class='inline-gray'>CATE（Conditional Average Treatment Effect）</span>: 顧客の特徴量などの条件に応じた平均処置効果</li>
-        <li><span class='inline-gray'>ITE（Individual Treatment Effect）</span>: 個人ごとの処置効果</li>
+        <li><strong class="strong-accent">CATE（Conditional Average Treatment Effect）:</strong> 顧客の特徴量などの条件に応じた平均処置効果</li>
+        <li><strong class="strong-accent">ITE（Individual Treatment Effect）:</strong> 個人ごとの処置効果</li>
       </ul>
       <div class="mdc-note-box">
 
@@ -205,7 +205,7 @@
 
 
       <h3 id="basic-concept">基本的な考え方</h3>
-      <p><span class='inline-gray'>通常の分類モデル</span>: 特徴量Xからyを予測する</p>
+      <p><strong class="strong-accent">通常の分類モデル:</strong> 特徴量Xからyを予測する</p>
       <ul>
         <li>特徴量 X：顧客の属性や過去の行動など</li>
         <li>処置変数 T：施策（クーポン配布）をおこなったかどうか（1/0）</li>
@@ -213,7 +213,7 @@
         <li>X + T → y という形で、処置有無に関わらず、購入しそうな顧客を予測する。</li>
         <li>クーポンが購入を後押ししてくれそうかは不明。</li>
       </ul>
-      <p><span class='inline-gray'>アップリフトモデリング</span>: 処置変数も考慮する</p>
+      <p><strong class="strong-accent">アップリフトモデリング:</strong> 処置変数も考慮する</p>
       <ul>
         <li>特徴量 X + 施策あり → prob_t</li>
         <li>特徴量 X + 施策なし → prob_c</li>
@@ -230,17 +230,17 @@
       <h4>メリット</h4>
       <p>通常の購買予測モデルとは異なり、施策によって行動が変わる顧客を推定できるという特徴がある。</p>
       <ul>
-        <li><strong>施策効果に基づく対象者の選定</strong>：もともと購入する可能性が高い顧客ではなく、施策によって購入確率が高まる顧客を優先できる。</li>
-        <li><strong>施策コストの効率化</strong>：施策による増分効果が小さい顧客への配布を抑え、限られた予算で効果を高めることを目指せる。</li>
-        <li><strong>顧客に応じた施策の最適化</strong>：顧客の特徴による効果の違いを推定し、対象者の選定や施策の改善に活用できる。</li>
+        <li><strong class="strong-accent">施策効果に基づく対象者の選定:</strong> もともと購入する可能性が高い顧客ではなく、施策によって購入確率が高まる顧客を優先できる。</li>
+        <li><strong class="strong-accent">施策コストの効率化:</strong> 施策による増分効果が小さい顧客への配布を抑え、限られた予算で効果を高めることを目指せる。</li>
+        <li><strong class="strong-accent">顧客に応じた施策の最適化:</strong> 顧客の特徴による効果の違いを推定し、対象者の選定や施策の改善に活用できる。</li>
       </ul>
 
       <h4>課題</h4>
       <p>一方、通常の予測モデルとは異なる難しさがある。</p>
       <ul>
-        <li><strong>反実仮想の問題</strong>：同じ顧客について、施策を実施した場合と実施しなかった場合の結果を同時に観測することはできない。そのため、個人ごとの施策効果を直接計算することはできない。</li>
-        <li><strong>データと因果推論の重要性</strong>：施策群と対照群の違いが、施策そのものによるものなのか、顧客の特徴や施策の割り当てによるものなのかを考慮する必要がある。</li>
-        <li><strong>推定と評価の難しさ</strong>：個人ごとの効果の正解値がないため、通常の予測モデルと同じ方法では評価できない。また、推定値にはばらつきがあり、モデルの性能を安定して評価するには工夫が必要になる。
+        <li><strong class="strong-accent">反実仮想の問題:</strong> 同じ顧客について、施策を実施した場合と実施しなかった場合の結果を同時に観測することはできない。そのため、個人ごとの施策効果を直接計算することはできない。</li>
+        <li><strong class="strong-accent">データと因果推論の重要性:</strong> 施策群と対照群の違いが、施策そのものによるものなのか、顧客の特徴や施策の割り当てによるものなのかを考慮する必要がある。</li>
+        <li><strong class="strong-accent">推定と評価の難しさ:</strong> 個人ごとの効果の正解値がないため、通常の予測モデルと同じ方法では評価できない。また、推定値にはばらつきがあり、モデルの性能を安定して評価するには工夫が必要になる。
         </li>
       </ul>
       <table>
@@ -417,7 +417,7 @@
 
       <h2 id="history">アップリフトモデリングの歴史</h2>
       <h3 id="concept-development">2000年代初頭</h3>
-      <p><strong>概念の発展</strong></p>
+      <p><strong class="strong-accent">概念の発展</strong></p>
       <p>現在のアップリフトモデリングにつながる考え方は、1990年代末から2000年代初頭にかけて、ダイレクトマーケティングの分野で発展した。</p>
       <p>従来の応答予測モデルでは、「広告やキャンペーンに反応しそうな人」を予測する。しかし、その中には、施策がなくても自発的に購入する顧客も含まれている。そこで、施策によって生じる<strong>増分価値（Incremental
           Value）</strong>を予測しようという考え方が登場した。</p>
@@ -427,7 +427,7 @@
 
 
       <h3 id="causal-inference-and-ml">2010年代〜</h3>
-      <p><strong>因果推論・機械学習との融合</strong></p>
+      <p><strong class="strong-accent">因果推論・機械学習との融合</strong></p>
       <p>2010年代になると、統計的な因果推論と機械学習を組み合わせ、顧客ごと・サブグループごとに異なる処置効果（heterogeneous treatment effects）を推定する研究が発展した。</p>
       <p>アップリフトモデリングも、マーケティングにおける「増分を予測する手法」という位置付けから、個別処置効果（ITE）や条件付き平均処置効果（CATE）を推定する問題として捉えられるようになった。</p>
       <p>こうした流れの中で、既存の機械学習モデルを組み合わせて処置効果を推定するMeta-Learnerという考え方が発展した。2019年にはKünzel et
@@ -435,7 +435,7 @@
 
 
       <h3 id="practical-adoption">2010年代後半〜</h3>
-      <p><strong>実務への広がり</strong></p>
+      <p><strong class="strong-accent">実務への広がり</strong></p>
       <p>2010年代後半には、オンラインサービスや広告・マーケティングの分野でも、A/Bテストなどの実験データを利用して、顧客ごとの処置効果を推定し、施策対象を最適化する取り組みが広がった。</p>
       <p>Uberの研究チームもuplift modelingを研究・実務に取り入れており、2017年には複数の施策に対応したUplift Modelingの手法を発表している。</p>
       <p>さらに2019年には、複数の施策についてそれぞれのコストまで考慮して施策を最適化する手法も発表された。</p>

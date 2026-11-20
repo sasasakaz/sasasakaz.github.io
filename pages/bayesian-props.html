@@ -215,19 +215,20 @@
               <div id="summary-chart" class="chart-box"></div>
               <div id="summary-hdi" class="chart-box"></div>
 
-              <div id="summary-table-container" class="table-wrap"></div>
-              <p class="note-text">※事前分布は全群共通の Beta(1, 1)（一様分布）です。Posterior はその更新結果で、Beta(1 + Events, 1 + Sample Size −
-                Events) になります。
-              </p>
-              <p id="estimation-note" class="note-text"></p>
+              <details>
+                <summary>詳細数表</summary>
+                <div id="summary-table-container" class="table-wrap"></div>
+                <p class="note-text">※事前分布は全群共通の Beta(1, 1)（一様分布）です。Posterior はその更新結果で、Beta(1 + Events, 1 + Sample Size
+                  −
+                  Events) になります。
+                </p>
+                <p id="estimation-note" class="note-text"></p>
 
-              <div id="best-section" hidden>
-                <details>
-                  <summary>P(best)（補助指標）</summary>
-                  <p>※P(best) = その群の比率が、全群のなかで最大になる確率(%)です（3群以上のときだけ表示します）。</p>
+                <div id="best-section" hidden>
+                  <p>■P(best): その群の比率が、全群のなかで最大になる確率(%)です（3群以上のときだけ表示します）。</p>
                   <div id="best-table" class="table-wrap"></div>
-                </details>
-              </div>
+                </div>
+              </details>
 
               <div class="mdc-warn-box">
                 <ul>
@@ -259,8 +260,10 @@
 
               <div id="diff-hdi" class="chart-box"></div>
 
+              <div id="diff-chart"></div>
+
               <details>
-                <summary>各ペアの差の詳細（表）</summary>
+                <summary>詳細数表</summary>
                 <ul>
                   <li>Diff は、左の群の比率から右の群の比率を差し引いた値の事後分布の Mean と94%HDIです。</li>
                   <li>P(diff &lt; 0) は、左の群の比率が右の群の比率を下回る確率(%)です。P(diff &gt; 0) はその逆（上回る確率）で、合計は100%になります。</li>
@@ -269,8 +272,6 @@
                 </ul>
                 <div id="diff-table-container" class="table-wrap"></div>
               </details>
-
-              <div id="diff-chart"></div>
 
               <div class="mdc-warn-box">
                 <ul>
