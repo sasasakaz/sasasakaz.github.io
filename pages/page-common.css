@@ -289,6 +289,12 @@ blockquote {
   padding-left: 2em;
 }
 
+/* li の最初の要素としてのstrongをアクセントカラーに */
+li>strong:first-child {
+  color: var(--c-accent-dark);
+  /* 好きなアクセントカラーなどに変更 */
+}
+
 
 
 
@@ -514,11 +520,6 @@ details> :last-child {
     transition: none;
   }
 }
-
-
-
-
-
 
 
 
@@ -1753,7 +1754,4 @@ html.right-open .layout-3col .side-backdrop {
   text-indent: -0.5em;
   line-height: 1.5;
 }
-
-
-
 

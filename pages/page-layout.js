@@ -42,6 +42,7 @@
       group: 'Articles',
       items: [
         ['📘 AI 70年', 'pages/ai-70-years.html'],
+        ['📈 統計的推測', 'pages/statistical-inference.html'],
         ['🤖 機械学習の歴史', 'pages/ml-history.html'],
         ['🤖 機械学習の手法', 'pages/ml-for-structured-data.html'],
         ['🤖 機械学習の評価指標', 'pages/ml-evaluation.html'],

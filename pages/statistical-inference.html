@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>統計的推測</title>
+  <link rel="canonical" href="https://sasasakaz.github.io/pages/statistical-inference.html">
+  <link rel="icon" href="https://sasasakaz.github.io/images/sasasakaz.png">
+  <meta name="description" content="平均の差を例に、統計的推測する方法について解説します。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="統計的推測">
+  <meta property="og:description" content="平均の差を例に、統計的推測する方法について解説します。">
+  <meta property="og:url" content="https://sasasakaz.github.io/pages/statistical-inference.html">
+  <meta property="og:site_name" content="sasasakaz">
+  <meta property="og:locale" content="ja_JP">
+  <link rel="stylesheet" href="page-common.css">
+  <script src="page-layout.js" defer></script>
+
+  <script>
+    /* 左右カラムの開閉状態を描画前に復元（ちらつき防止）。キーは page-layout.js と同じ */
+    try { var s = JSON.parse(localStorage.getItem('layout3col.v1') || '{}'); if (s.left) document.documentElement.classList.add('left-closed'); if (s.right) document.documentElement.classList.add('right-closed'); } catch (e) { }
+  </script>
+
+  <!-- syntax highlighter start -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" defer></script>
+  <script>
+    // ページ全体の準備（外部ライブラリの読み込み含む）が終わってから実行する
+    window.addEventListener('DOMContentLoaded', () => {
+      hljs.highlightAll();
+    });
+  </script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/vs2015.min.css">
+  <!-- syntax highlighter end -->
+
+  <style>
+  </style>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-QRGD44CZBH"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-QRGD44CZBH');
+  </script>
+  <!-- End Google tag (gtag.js) -->
+</head>
+
+<body class="layout-3col">
+  <div class="topbar">
+    <button type="button" id="btn-left" class="topbar-btn" aria-controls="site-nav" aria-expanded="true">📚
+      ページ一覧</button>
+    <span id="topbar-title" class="topbar-title"></span>
+    <button type="button" id="btn-right" class="topbar-btn" aria-controls="page-toc" aria-expanded="true">📑 目次</button>
+  </div>
+  <div id="side-backdrop" class="side-backdrop"></div>
+  <div class="layout">
+    <nav id="site-nav" class="side side-left" aria-label="ページ一覧"></nav>
+
+    <main id="content">
+      <header id="header">
+        <h1>統計的推測（Draft version）</h1>
+
+        <!-- 投稿日・更新日メタ情報 -->
+        <div class="entry-meta">
+          <span class="meta-item published">
+            <span class="meta-icon" aria-hidden="true">🕒</span>
+            <span class="meta-label">公開：</span><time datetime="2026-11-20">2026.11.20</time>
+          </span>
+          <span class="meta-divider" aria-hidden="true">/</span>
+          <span class="meta-item updated">
+            <span class="meta-icon" aria-hidden="true">🔄</span>
+            <span class="meta-label">更新：</span><time datetime="2026-11-20">2026.11.20</time>
+          </span>
+        </div>
+
+        <p>A/Bテストで得られた「2群の平均の差」を推定しながら、統計的推測の意味と具体的な方法を紹介します。</p>
+      </header>
+
+<div class="mdc-warn-box">
+  <ul>
+    <li>検定: 仮説を評価する</li>
+    <li>信頼区間: 推定の不確実性を評価する</li>
+    <li>ベイズ推定: データと事前分布をもとにパラメーターの事後分布を推定し、その不確実性を評価する（確率で評価する）</li>
+  </ul>
+</div>
+
+
+
+<h2 id="statistical-basic-thinking">統計学の基本的な考え方</h2>
+<p>データを集めて整理して比較する。データの傾向を把握・推測して、判断に役立てる。そのときに活躍する統計的な手法では「どのようにデータを眺めているのか」を説明します。</p>
+
+
+<h3 id="difference-in-means">その平均に差はあるか</h3>
+<p>実務においてA/Bテストの結果が得られたとき、まずは処置群と対照群でどのくらいの違いがあったかを確認しておきたいです。</p>
+<div class="mdc-note-box">
+  <p>サンプル事例</p>
+  <ul>
+    <li>あるカフェチェーンで「ラテ」の店内POPを刷新する施策が進行中。</li>
+    <li>A店では従来POPを、B店では新POPを掲出して、A/Bテストを模した比較実験を実施。</li>
+    <li>テスト初日の昼の会議で初動速報を求められているため、初日の開店から3時間以内に来店してラテを購入した各店40人前後の顧客単価（1人あたりの購入額）を集計。顧客単価が変化しているかを検証する。</li>
+  </ul>
+
+  <details>
+    <summary>補足</summary>
+    <p>実務での利用場面をイメージしやすくするため、現実的にありそうな設定にしています。ここでは統計的推測の説明しやすさを企図して、以下想定が成り立っているとします。</p>
+    <p>不足条件</p>
+    <ul>
+      <li>処置割当単位（店舗）と分析単位（顧客）が一致していない（分析単位は個別の観測値ではあるが、同じ店舗の顧客は店舗環境を共有しているため、同一店舗内の観測値は相関している可能性がある）。</li>
+      <li>2店舗両方に同じ顧客が含まれる可能性がある。</li>
+    </ul>
+    <p>想定条件</p>
+    <ul>
+      <li>各店の顧客単価は、それぞれの母集団から得られた「独立した」観測値とする。</li>
+      <li>2店舗の標本は互いに独立しているものとする（どちらにも来店購入した顧客はいない）。</li>
+    </ul>
+    <p>
+      実務では、理想的な実験条件やデータを常に用意できるとは限りません。ここでは、現実的な利用場面をイメージできるように簡略化した設定を用い、いくつかの仮定を置いて統計的推測の方法を説明します。実際の分析では、こうした仮定やデータの制約を意識しながら、得られた結果を意思決定の参考情報として活用することが大切です。
+    </p>
+
+        <p>■処置効果の捉え方</p>
+    <p>
+      2店舗は立地や客層、テスト以前の売上規模やラテの販売動向などが似ており、顧客の分布も大きく違いません。また片方の店舗のみで発生するイベントはなく、施策の有無と顧客単価の両方に影響しそうな、店舗間の系統的な違いはなさそうです。とはいえRCTではないため（交絡要因がないとは言い切れない）、2群の差がそのまま施策による因果効果とはみなしにくいです。
+    </p>
+
+    <p>■Raw Data</p>
+    <p>Group A（Control） = [470, 360, 380, 390, 420, 420, 480, 420, 440, 420, 480, 410, 420, 480, 360, 410, 420, 410,
+      480, 530, 360, 420, 450, 420, 360, 420, 360, 510, 540, 360, 440, 390, 480, 420, 360, 390, 420, 480, 360, 420, 500]
+    </p>
+    <p>Group B（Test） = [450, 360, 450, 420, 420, 470, 590, 420, 480, 360, 530, 360, 530, 510, 440, 420, 380, 420, 480,
+      480, 530, 420, 550, 420, 420, 530, 440, 510, 480, 380, 420, 530, 360, 360, 500, 480, 470, 480, 420]</p>
+  </details>
+</div>
+
+<p>
+  各群の平均値を算出し、その差がどのくらいかを見るのは、分析初期段階における有効手段の一つです。A店（従来通りのPOPを掲出した対照群）の平均顧客単価は426円、B店（新POPを掲出した処置群）は453円、2群の平均値には約27円の差がありました。
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>Group</th>
+      <th>N</th>
+      <th>Mean</th>
+      <th>Std</th>
+      <th>Min</th>
+      <th>Max</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Group A（Control）</td>
+      <td>41</td>
+      <td>425.9</td>
+      <td>49.1</td>
+      <td>360.0</td>
+      <td>540.0</td>
+    </tr>
+    <tr>
+      <td>Group B（Test）</td>
+      <td>39</td>
+      <td>453.1</td>
+      <td>59.2</td>
+      <td>360.0</td>
+      <td>590.0</td>
+    </tr>
+  </tbody>
+</table>
+<p>平均値の差は施策によって生じたようにも思えます。たまたま生じた偶然の出来事にも思えます。しかし手元の観測データをどれだけ眺めても、今の平均値の差がたまたまなのか（どのくらい変動してもおかしくなさそうなのか）はわからないです。</p>
+<p>かといって「平均で27円差でした」との<span
+    class='inline-mark'>事実情報だけの報告では、結果をどう受け止めればいいのか関係者は困惑する</span>でしょう。こんなときに役立つのが<strong>統計的推測</strong>です。</p>
+
+
+
+<h3 id="statistical-inference">統計的推測</h3>
+<p>統計学では、「今手元にある観測データは、なんらかの確率的なデータ生成過程から得られた」といった捉え方をします。</p>
+<ul>
+  <li>各店約40人のデータは、ラテ顧客単価データ発生装置（母集団）からランダムに抽出されたサンプル（標本）である、とモデル化して考える。</li>
+  <li>観測データを手がかりにして、背後にある母集団やデータ生成過程を推測する。</li>
+</ul>
+<p>標本から母集団の特徴を推測できる背景には、確率論に基づく統計学の理論があります。例えば大数の法則などの理論的性質を根拠として、標本データの平均（実測値）を、母集団における平均（母平均）の推定値として利用します。</p>
+<p class="note-text">※大数の法則: 適切な条件のもとで標本抽出を繰り返し、標本サイズを大きくしていくと、標本データにおける平均や比率が母集団における平均や比率に近づくこと。</p>
+
+<p>こうした統計的推測により母集団の特徴を推し量ることで、観測された平均値やその差27円はたまたま発生したのか、この値はどのくらい変動しそうかなどが解釈しやすくなります。</p>
+<p>
+  統計的推測にはいろんな方法があり、その一つが<strong>検定</strong>です。検定にもいろんな方法があります。サンプル事例のように「2群の母平均に差があるか」が関心事の場合には<strong>t検定</strong>が用いられます。
+</p>
+
+
+
+<h2 id="nhst-and-ci">検定と信頼区間</h2>
+<p>同じ考え方にもとづく、検定と信頼区間について説明します。</p>
+
+
+<h3 id="concept-of-nhst">検定の考え方</h3>
+<p>検定は、帰無仮説のもとで今手元にある観測結果がどれほどめったにない（たまたま発生したとは考えにくい）かを一定のルールに基づいて判断する、というアプローチをとります。以下はt検定の例です。</p>
+<ol>
+  <li>まず「2群の母平均に差はない」という帰無仮説を設定します。</li>
+  <li>有意水準を「5%」と設定します。</li>
+  <li>帰無仮説が正しいと仮定した場合に、<span class='inline-marker'>今回観測された結果と同じか、それ以上に極端な結果が起こりうる確率（p値）</span>を算出します。</li>
+  <li>p値があらかじめ設定した有意水準以下の場合は、帰無仮説を棄却します。帰無仮説のもとでは今回の観測結果はめったにない出来事と判断します。</li>
+  <li>p値が有意水準を上回る場合は、帰無仮説を棄却する十分な証拠が得られなかったと判断します。</li>
+</ol>
+<p class="note-text">※有意水準: 帰無仮説を棄却するかどうかのしきい値として、検定する前に設定しておく基準値。5%という値がよく用いられる。</p>
+
+
+<details>
+  <summary>理論的背景</summary>
+  <p>このやり方がうまく機能する背景には、300年前の学者さんたち（ド・モアブル、ラプラスなど）が発見した確率分布の性質をはじめ、長い時間をかけて発展してきた理論などがあります。</p>
+  <ol>
+    <li><strong>標本平均の差は標本抽出によって変動する</strong>: 今回観測された27円差は、標本データから計算された値です。同じ条件で標本抽出を繰り返せば、そのたびに異なる平均値の差が得られます。</li>
+    <li><strong>その変動を確率分布として考える</strong>: 標本抽出を繰り返したときに得られる統計量の分布を標本分布と呼びます。検定では帰無仮説が正しいと仮定した場合の標本分布を考えます。</li>
+    <li><strong>中心極限定理によって分布の形状を近似できる</strong>:
+      2群のデータが独立に抽出され、分散が有限であるなどの条件を満たす場合、サンプルサイズが十分に大きければ、中心極限定理によって標本平均の差の標本分布は正規分布に近づきます。</li>
+    <li><strong>t分布を使ってp値を算出する</strong>: 観測された平均値の差を標準誤差で割って検定統計量を計算し、p値を求めます。</li>
+  </ol>
+</details>
+
+
+
+<h3 id="strength-of-nhst">検定の強み</h3>
+<p>
+  有意水準を設定して検定をおこなっても、誤って帰無仮説を棄却する、すなわち本当は差がないのに差があると間違った判断をする可能性は残ります（第一種の過誤と言います）。</p>
+  <p>有意水準5%の検定であれば、5%の確率で判断を間違えるリスクを抱えています。それでも、
+</p>
+<ol>
+  <li>帰無仮説が正しい（本当に差がない）場合に、</li>
+  <li>検定の前提条件や運用上のルールが満たされていれば、</li>
+  <li>（同じ条件で独立したテストを実施して）同じ検定をおこなったときに、</li>
+  <li>誤って帰無仮説を棄却する確率は原則として5%以下におさまります。</li>
+</ol>
+<p>つまり、<span class='inline-marker'>あらかじめ決めた有意水準で誤判定率を長期的視点で制御・管理しやすい</span>のが検定の強みです。</p>
+
+
+
+<h3 id="welch-t-test">Welch t検定</h3>
+<p>母平均の差を評価するt検定には複数の種類があります。ここでは、2群の分散が等しいと仮定しない「Welch t検定」を使います。エクセルやスプレッドシートの関数で簡単に実行できます。</p>
+<ol>
+  <li>有意水準を「5%」と設定します。</li>
+  <li>関数T.TEST を呼び出します。</li>
+  <li>2群のデータ範囲をそれぞれ指定します。</li>
+  <li>その次は、基本的には「2」を指定します（両側検定: 新POPによる単価増だけでなく単価減も想定）。</li>
+  <li>その次は、基本的には「3」を指定します（等分散を仮定しないWelchのt検定）。</li>
+  <li><code>=t.test(B4:B44,C4:C42,2,3)</code> といった感じです。</li>
+  <li>するとp値が出力されます。</li>
+</ol>
+<img src="../images/statistical-inference-spread-function.jpg" alt="スプレッドシートでのT.TEST関数" style="max-width: 80%; border: 1px solid var(--c-border, #ccc);">
+
+
+<div class="mdc-note-box">
+  <p><strong>t検定あれこれ</strong></p>
+  <ul>
+    <li>Welch t検定は等分散仮定時にも使用してよい（studentのt検定を使用する必然性は薄い）。</li>
+    <li>t検定の前に、必ず正規性検定をおこなう必要はない。</li>
+    <li>サンプルサイズが小さい場合は、分布の形状や外れ値を確認することが望ましい。</li>
+  </ul>
+</div>
+
+
+<h4>結果の読み解き方</h4>
+<ul>
+  <li>セルにはp値（0.0306）が出力されました。</li>
+  <li>2群の母平均に差がないと仮定した場合に、今回観測された平均値の差27円と同じか、それ以上に極端な差が得られる確率が3.06%であることを意味します。</li>
+  <li>有意水準5%（0.05）よりも小さいため、今回の観測結果はめったにないと判断します。</li>
+</ul>
+<p>つまり、有意水準5%のもとでは帰無仮説は棄却され、2群の平均値には統計的に有意な差があるといえそうです。<span class='inline-marker'>Welch t検定により、今回観測された平均値の差27円は、たまたま発生した出来事とは考えにくい</span>ことが見えてきました。</p>
+
+
+
+<h3 id="confidence-interval">信頼区間</h3>
+<p>観測された2群の平均の差27円は実測値です。そして大数の法則などを拠り所にした、母平均の差の推定値でもあります。とはいえ手元の標本から推定した値が母平均の差とぴったり一致するとは限りません。</p>
+<p>
+  前述の通り、同じ条件で標本抽出を繰り返せば、そのたびに異なる平均値の差が得られるためです。27円という推定値は不確実さを含んでおり、しかもピンポイントの<strong>点推定</strong>なのでどのくらい不確かなのか見当がつきません。
+</p>
+<p>信頼区間（CI: Confidence Interval）は、このような<span
+    class='inline-mark'>推定の不確実性を評価</span>するためのものです。点推定をもとに、その不確実性（標本のバラツキなど）を考慮して、母平均の差を<strong>区間推定</strong>の形で示します。
+</p>
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>検定（p値）</th>
+      <th>信頼区間</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>知りたいこと</td>
+      <td>帰無仮説とデータの整合性</td>
+      <td>母平均の差の推定範囲</td>
+    </tr>
+    <tr>
+      <td>わかること</td>
+      <td>帰無仮説のもとでの観測結果の珍しさ</td>
+      <td>差の大きさと推定の不確実性</td>
+    </tr>
+    <tr>
+      <td>使い道</td>
+      <td>統計的に有意か</td>
+      <td>どの程度の差が考えられるか</td>
+    </tr>
+  </tbody>
+</table>
+
+
+
+<h3 id="confidence-interval-calculation">信頼区間の算出</h3>
+<p>信頼区間を算出するには、複数の関数が必要で手間なので、ここではWelch t検定と信頼区間の算出をまとめておこなうことができるWebサイトを利用します。
+</p>
+<p><a href="https://sasasakaz.github.io/pages/classical-means.html">Classical Comparison of Means</a></p>
+<ol>
+  <li>2群の観測データを入力</li>
+  <li>入力エリア下段表のサンプルサイズ（N）などを見て、入力データが適切に読み込まれていることを確認</li>
+  <li>Runボタンを押す</li>
+  <li>ページ下部に検定結果が表示されます</li>
+</ol>
+<p class="note-text">※「群間の差」タブのWelch t検定の結果を参照してください。</p>
+
+<img src="../images/statistical-inference-test-ci.jpg" alt="welch t検定と信頼区間の結果" style="max-width: 80%; border: 1px solid var(--c-border, #ccc);">
+
+
+<h4>結果の読み解き方</h4>
+<ul>
+  <li><strong>p値:</strong> p-value（0.0306） T.TEST関数での計算結果と同じになります（エクセルなどの書式設定次第では端数処理の影響で少し異なる場合もあります）。</li>
+  <li><strong>信頼区間（CI）:</strong> CI Lower（2.62）　CI Upper（51.82）2群の母平均の差の95%信頼区間はおよそ3円～52円であることを意味します。</li>
+</ul>
+<p>信頼区間の算出により母平均の差の区間推定が得られたことで、<span class='inline-marker'>おおまかな効果の大きさ（27円）と、その不確実性（3円〜52円）</span>が見えてきました。</p>
+
+<details>
+  <summary>95%信頼区間の意味するもの</summary>
+  <p>
+    イメージとしては、同条件のA/Bテストと信頼区間の算出を100回おこなえば、100個の信頼区間のうち、約95個には真の値（本当の母平均の差）が含まれる、すなわち<strong>割合</strong>を表す（実際に100回テストしたときに必ず95%になるわけではない）。
+  </p>
+  <ul>
+    <li>推定値の不確実性を「長期的視点で」評価している。</li>
+    <li>真の値を含む「割合」を表している。</li>
+    <li>真の値が3円～52円の範囲にある確率が95%という意味ではない。</li>
+    <li>今回得られた信頼区間（3円～52円）については、真の値を含んでいるか、含んでいないかのどちらかである。</li>
+  </ul>
+</details>
+
+<details>
+  <summary>エクセルやスプレッドシートで算出したいとき</summary>
+  <p>A列をGroup A（Control）　B列をGroup B（Test）として、95%信頼区間の場合（一部関数における端数処理の影響で、ツールでの出力結果と少し異なるときもあります）。</p>
+  <table>
+    <thead>
+      <tr>
+        <th align="left">指標</th>
+        <th align="left">計算式</th>
+        <th align="left">意味</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td align="left">n1, n2</td>
+        <td align="left">=COUNT(A2:A42), =COUNT(B2:B42)</td>
+        <td align="left">サンプルサイズ</td>
+      </tr>
+      <tr>
+        <td align="left">m1, m2</td>
+        <td align="left">=AVERAGE(...)</td>
+        <td align="left">標本平均</td>
+      </tr>
+      <tr>
+        <td align="left">v1, v2</td>
+        <td align="left">=VAR.S(...)</td>
+        <td align="left">不偏分散</td>
+      </tr>
+      <tr>
+        <td align="left">SE</td>
+        <td align="left">=SQRT(v1/n1 + v2/n2)</td>
+        <td align="left">標準誤差</td>
+      </tr>
+      <tr>
+        <td align="left">t</td>
+        <td align="left">=(m2-m1)/SE</td>
+        <td align="left">t値</td>
+      </tr>
+      <tr>
+        <td align="left">dof</td>
+        <td align="left">=(v1/n1+v2/n2)^2 / ((v1/n1)^2/(n1-1) + (v2/n2)^2/(n2-1))</td>
+        <td align="left">自由度</td>
+      </tr>
+      <tr>
+        <td align="left">p値</td>
+        <td align="left">=T.TEST(A2:A15, B2:B15, 2, 3)</td>
+        <td align="left"></td>
+      </tr>
+      <tr>
+        <td align="left">t臨界値</td>
+        <td align="left">=SQRT(dof*(1/BETA.INV(0.05, dof/2, 0.5) - 1))</td>
+        <td align="left"></td>
+      </tr>
+      <tr>
+        <td align="left">CI Lower</td>
+        <td align="left">=(m2-m1) - t臨界値*SE</td>
+        <td align="left"></td>
+      </tr>
+      <tr>
+        <td align="left">CI Upper</td>
+        <td align="left">=(m2-m1) + t臨界値*SE</td>
+        <td align="left"></td>
+      </tr>
+    </tbody>
+  </table>
+</details>
+
+
+<h3 id="test-and-ci-results">検定と信頼区間でわかったこと</h3>
+<p>検定と信頼区間は、同じ統計的枠組みに基づいています。サンプル事例のようにWelch t検定とそれに対応する95%信頼区間を用いる場合、2つの結果には整合性があります。</p>
+<table>
+  <thead>
+    <tr>
+      <th align="left">検定結果</th>
+      <th align="left">信頼区間</th>
+      <th align="left">意味</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">p値は有意水準5%以下</td>
+      <td align="left">95%信頼区間に0が含まれていない</td>
+      <td align="left">母平均の差が0であるとは考えにくい</td>
+    </tr>
+    <tr>
+      <td align="left">p値は有意水準5%を上回る</td>
+      <td align="left">95%信頼区間に0が含まれている</td>
+      <td align="left">母平均の差が0であるという帰無仮説を棄却するだけの十分な証拠はない</td>
+    </tr>
+  </tbody>
+</table>
+<p>95%信頼区間（3円〜52円）は0を含んでおらず、Welch t検定で得られたp値（0.0306）&lt; 有意水準0.05と一致しています。</p>
+<p>検定と信頼区間により、観測された平均の差が帰無仮説のもとでは起こりにくい結果であることと、母平均差の推定値とその不確実性を確認できました。</p>
+<p>テスト結果の実績値「平均で27円差でした」という事実情報に加えて、結果には<span
+    class='inline-mark'>統計的に有意な差があることを提示し、効果の大きさの推定範囲も示すことで、関係者が解釈しやすい</span>報告内容にアップデートできました。</p>
+<p>そして、おそらく以下のような質問が予想されます。</p>
+<ul>
+  <li>「新POPによって顧客単価が増加する確率はどのくらいか」</li>
+  <li>「20円以上の増加が見込める可能性はどのくらいか」</li>
+  <li>「逆に、新POPで顧客単価が落ち込むリスクはどの程度か」</li>
+</ul>
+<p>検定や信頼区間は、こうした問いに答えるためには設計されていません。これらに答えるべく、検定や信頼区間とはまた違ったアプローチをとる統計的推測の一つが、<strong>ベイズ推定</strong>です。</p>
+<p>次に、今回のデータを使ってベイズ推定をおこない、母平均差の事後分布からどのような情報が得られるのかを見ていきます。</p>
+
+
+<h2 id="bayesian-estimation">ベイズ推定</h2>
+
+
+
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
+  </div>
+</body>
+
+</html>

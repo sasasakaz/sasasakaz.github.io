@@ -61,7 +61,7 @@
 
     <main id="content">
       <header id="header">
-        <h1>アップリフトモデリング（実践）（Draft version）</h1>
+        <h1>アップリフトモデリング（実践）</h1>
 
         <!-- 投稿日・更新日メタ情報 -->
         <div class="entry-meta">
@@ -72,7 +72,7 @@
           <span class="meta-divider" aria-hidden="true">/</span>
           <span class="meta-item updated">
             <span class="meta-icon" aria-hidden="true">🔄</span>
-            <span class="meta-label">更新：</span><time datetime="2026-10-13">2026.10.13</time>
+            <span class="meta-label">更新：</span><time datetime="2026-11-20">2026.11.20</time>
           </span>
         </div>
 
@@ -421,7 +421,7 @@ model.fit(X, y)
         </p>
       </details>
 
-      <img src="../images/uplift-advanced-calibration-before-after.jpg" alt="キャリブレーション前後の比較画像">
+      <img src="../images/uplift-advanced-calibration-before-after.jpg" alt="キャリブレーション前後の比較画像" style="max-width: 80%;">
       <!-- <img src="../images/uplift-advanced-calibration-metrics.jpg" alt="キャリブレーション前後の指標比較画像"> -->
 
       <blockquote>
@@ -616,7 +616,7 @@ T-Learner: Control Calibrated 5628    0.2294     0.2313    0.1652 0.0244       0
         </ul>
       </ul>
 
-      <img src="../images/uplift-advanced-prob-dist-st.jpg" alt="S,T-Learnerの予測確率分布画像">
+      <img src="../images/uplift-advanced-prob-dist-st.jpg" alt="S,T-Learnerの予測確率分布画像" style="max-width: 80%;">
 
 
       <h4>X-Learnerの分布</h4>
@@ -638,7 +638,7 @@ T-Learner: Control Calibrated 5628    0.2294     0.2313    0.1652 0.0244       0
         <li>差の平均は2つの推定値の系統的なズレを、差の標準偏差は顧客ごとのズレのバラツキを表す。</li>
         <li>ズレが大きい場合は処置群/対照群のデータ量や特徴量の分布などを確認し、推定が不安定になっていないかを調べる。</li>
       </ul>
-      <img src="../images/uplift-advanced-prob-dist-x.jpg" alt="X-Learnerの予測確率分布画像">
+      <img src="../images/uplift-advanced-prob-dist-x.jpg" alt="X-Learnerの予測確率分布画像" style="max-width: 80%;">
 
 
       <h4>S,T,X-Learnerのアップリフト</h4>
@@ -654,7 +654,7 @@ T-Learner: Control Calibrated 5628    0.2294     0.2313    0.1652 0.0244       0
         <li>期待値以外に、標準偏差、分位点、負の割合などからも分布の特徴を把握する。</li>
       </ul>
 
-      <img src="../images/uplift-advanced-prob-dist-uplift.jpg" alt="アップリフトの予測分布画像">
+      <img src="../images/uplift-advanced-prob-dist-uplift.jpg" alt="アップリフトの予測分布画像" style="max-width: 80%;">
 
       <blockquote>
         <pre>
@@ -709,7 +709,7 @@ score_x  0.166  0.088  0.044  0.139  0.405  0.000
         傾向スコアモデル（<code>g</code>）の<code>predict_proba()</code>から、処置を受ける確率を取り出し、処置群/対照群別に傾向スコア（PS）の分布をプロットする。2群の分布がどの程度重なっているかを確認することで、似たような特徴を持つ顧客について、<strong>処置群と対照群を比較できるだけのデータがあるか</strong>を把握する。X-LearnerやIPWを含む因果効果推定で重要な診断のひとつ。
       </p>
 
-      <img src="../images/uplift-advanced-ps-overlap.jpg" alt="傾向スコアの分布の重なり画像">
+      <img src="../images/uplift-advanced-ps-overlap.jpg" alt="傾向スコアの分布の重なり画像" style="max-width: 80%;">
 
 
       <strong>2群の分布が十分に重なっている場合</strong>
@@ -808,7 +808,7 @@ gのAUC (Test): 0.500
       </ul>
       <p class="note-text">※共変量バランスが改善しても、未観測の交絡などが残っている可能性があるため、それだけで因果効果を正しく推定できると保証されるわけではない。</p>
 
-      <img src="../images/uplift-advanced-covariate-balance.jpg" alt="共変量バランスの可視化画像">
+      <img src="../images/uplift-advanced-covariate-balance.jpg" alt="共変量バランスの可視化画像" style="max-width: 80%;">
 
 
 
@@ -981,7 +981,7 @@ gのAUC (Test): 0.500
         <li>各Learnerが対角線（ランダムな対象者選定）を上回るだけでなく、ベースライン（通常の購入予測モデル:
           処置有無を使わずに購入しそうな顧客を予測）よりも累積増分成果が大きければ、<strong>アップリフトモデリングを使って施策対象者を選定する意義</strong>がより明確になる。</li>
       </ul>
-      <img src="../images/uplift-advanced-qini-curve.jpg" alt="Qini曲線とAUUC画像">
+      <img src="../images/uplift-advanced-qini-curve.jpg" alt="Qini曲線とAUUC画像" style="max-width: 80%;">
 
 
 
@@ -1074,7 +1074,7 @@ gのAUC (Test): 0.500
         </p>
       </div>
 
-      <img src="../images/uplift-advanced-overfitting-check.jpg" alt="過学習チェック用の正規化Qini曲線画像">
+      <img src="../images/uplift-advanced-overfitting-check.jpg" alt="過学習チェック用の正規化Qini曲線画像" style="max-width: 80%;">
 
 <blockquote>
   <pre>
@@ -1147,8 +1147,8 @@ X-Learner  0.889  0.656     0.5
         <li>どのbinでズレが生じているかを特定したい場合は、bin別で確認する。</li>
       </ul>
 
-      <img src="../images/uplift-advanced-predicted-vs-actual-cum.jpg" alt="予測値と実測推定値の累積比較画像">
-      <img src="../images/uplift-advanced-predicted-vs-actual-bin.jpg" alt="予測値と実測推定値のbin別比較画像">
+      <img src="../images/uplift-advanced-predicted-vs-actual-cum.jpg" alt="予測値と実測推定値の累積比較画像" style="max-width: 80%;">
+      <img src="../images/uplift-advanced-predicted-vs-actual-bin.jpg" alt="予測値と実測推定値のbin別比較画像" style="max-width: 80%;">
 
 
 
@@ -1169,7 +1169,7 @@ X-Learner  0.889  0.656     0.5
       <p>bin別にクロス集計することで<span class='inline-mark'></span>各グループの特徴や購入状況などを比較</span>する。</p>
       <p>アップリフトが大きいグループにどのような特徴があるかを把握し、施策対象の検討や、モデルの予測がドメイン知識と整合しているかの確認に役立てる。</p>
 
-      <img src="../images/uplift-advanced-score-quantiles.jpg" alt="bin別のboxplotの画像">
+      <img src="../images/uplift-advanced-score-quantiles.jpg" alt="bin別のboxplotの画像" style="max-width: 80%;">
 
 
 
@@ -1187,8 +1187,8 @@ X-Learner  0.889  0.656     0.5
       <p>アップリフトモデリングでは、最も複雑なモデルや最も高いAUUCのモデルを機械的に選べばよいとは限らない。</p>
       <p><strong>未知のデータでも安定して施策対象者を適切に選別できるモデルか</strong>という観点で比較することが重要。</p>
 
-      <img src="../images/uplift-advanced-between-learner-heatmap.jpg" alt="Learner間のヒートマップ画像">
-      <img src="../images/uplift-advanced-between-learner-scatter.jpg" alt="Learner間の散布図画像">
+      <img src="../images/uplift-advanced-between-learner-heatmap.jpg" alt="Learner間のヒートマップ画像" style="max-width: 80%;">
+      <img src="../images/uplift-advanced-between-learner-scatter.jpg" alt="Learner間の散布図画像" style="max-width: 80%;">
 
 
 
@@ -1201,7 +1201,7 @@ X-Learner  0.889  0.656     0.5
       <p>最終的には、限られた予算の中で、<strong>誰に施策を実施すれば、どれだけの増分利益が期待できるのか</strong>を判断することにつながる。</p>
       <p>期待純利益を試算することで、施策対象の選定だけでなく、何人に施策を実施するのが望ましいかという判断にもモデルを活用しやすくなる。</p>
 
-      <img src="../images/uplift-advanced-expected-net-profit.jpg" alt="期待純利益のシミュレーショングラフ画像">
+      <img src="../images/uplift-advanced-expected-net-profit.jpg" alt="期待純利益のシミュレーショングラフ画像" style="max-width: 80%;">
 
 
 
