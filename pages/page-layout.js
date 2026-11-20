@@ -54,8 +54,8 @@
     {
       group: 'Tools',
       items: [
-        ['🦊 Bayesian Comparison of Means', 'pages/bayesian-means.html'],
-        ['🦊 Bayesian Comparison of Proportions', 'pages/bayesian-props.html'],
+        ['🦊 Bayesian Means', 'pages/bayesian-means.html'],
+        ['🦊 Bayesian Proportions', 'pages/bayesian-props.html'],
         ['🦁 Classical Means', 'pages/classical-means.html'],
         ['🦁 Classical Proportions', 'pages/classical-props.html'],
         ['🐶 Markdown Converter', 'pages/markdown-converter.html'],
