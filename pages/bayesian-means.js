@@ -273,9 +273,9 @@ function renderResults(data) {
   // 古いサーバー（chains などなし）のときは注記を出さない
   if (data.chains && data.draws) {
     $("estimation-note").textContent =
-      `※Mean・HDI は、${data.chains}チェーン × ${data.draws.toLocaleString()}回（tune ${data.tune.toLocaleString()}回は除く）＝ ` +
+      `※MeanとHDI は、${data.chains}チェーン × ${data.draws.toLocaleString()}回（tune ${data.tune.toLocaleString()}回は除く）＝ ` +
       `${(data.chains * data.draws).toLocaleString()}個の事後サンプルから計算しています。` +
-      `ただしMCMCのサンプルは互いに独立ではないため、実質的なサンプル数は「収束診断」タブの ess_bulk / ess_tail で確認してください。`;
+      `ただしMCMCのサンプルは互いに独立ではないため、実質的なサンプル数は「収束診断」タブの ess_bulkおよびess_tail で確認してください。`;
   }
   showPlots(data.plots);
   $("large-values").hidden = !data.large_values;
