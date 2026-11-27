@@ -54,8 +54,8 @@ const input = ToolCommon.createPropsInput({ sample: SAMPLE, onClear: clearResult
  */
 function renderOmniSummary(omni, alpha) {
   const verdict = omni.significant
-    ? `有意差あり（p &lt; ${alpha}）少なくとも1つの群の比率が他と異なります`
-    : `有意差なし（p ≥ ${alpha}）`;
+    ? `有意差あり（p ≤ ${alpha}）少なくとも1つの群の比率が他と異なります`
+    : `有意差なし（p &gt; ${alpha}）`;
   const pText = omni.p < 0.0001 ? omni.p.toExponential(2) : omni.p.toFixed(4);
   const warn = omni.low_expected
     ? '<p class="mdc-warn-box">注意: 期待度数が5未満のセルがあります。カイ二乗近似の精度が低い可能性があります。</p>'

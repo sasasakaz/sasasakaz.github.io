@@ -155,7 +155,7 @@
             <p id="running-message-text"></p>
           </div>
           <div id="completion-message" class="mdc-info-box" role="status" aria-live="polite" hidden>
-            <p>検定完了！ 以下の結果を確認してください。</p>
+            <p>検定完了！ 解説を参考にしながら結果を読み解いてください</p>
           </div>
           <div id="initial-message" class="mdc-info-box initial-message" role="status">
             <p>検定が完了すると、以下に結果が表示されます。</p>
@@ -200,11 +200,64 @@
             <div id="panel-pair" class="result-panel" role="tabpanel" aria-labelledby="tab-pair" hidden>
               <h2 id="result-pair">群間の平均の差</h2>
               <p>Welch t検定を全ペアでおこないます。</p>
+              <p>帰無仮説: 群間の母平均に差はない。</p>
+              <div class="mdc-warn-box">
+                <ul>
+                  <li>帰無仮説の評価には、p値（Holm法）を利用してください。</li>
+                  <li>あらかじめHolm法以外のp値（補正なし/Bonferroni法/BH法）を採用すると決めていた場合は、最下段に表示される該当のp値を利用してください。</li>
+                  <li>p値が有意水準以下の場合、帰無仮説を棄却して「2群の母平均に差がある」と判断します（母平均の差が0であるとは考えにくいという結論）。</li>
+                </ul>
+              </div>
+
+              <div class="mdc-info-box">
+                <ul>
+                  <li>CIは、母平均の差がどの程度ありそうか、推定にどれくらいの幅があるかの補助的な判断材料としてください。</li>
+                  <li>CIの幅は、推定の不確かさを表します。観測データ件数（Sample Size）が少ないと、区間は広くなりやすいです。</li>
+                  <li>CIの区間が広いこと自体は、検定が失敗したことを意味しません。無理に狭めようとせず、不確かさを踏まえて結果を読み取ってください。</li>
+                </ul>
+              </div>
+
+              <details>
+                <summary>不確かさを抑えたい場合の検討項目</summary>
+                <ol>
+                  <li>入力データが正しく読み取られているか、ページ上部の確認表を確認する。</li>
+                  <li>あらかじめ予定していた計画に沿って、観測データ件数を増やす。</li>
+                  <li>恣意的にならない範囲で観測条件や対象者条件をそろえるなど、データのバラツキを抑える。</li>
+                </ol>
+              </details>
+
+              <details>
+                <summary>p値とCIの結果が不整合の場合</summary>
+                <ul>
+                  <li><strong>p値が有意で、CIが0を含む場合:</strong> 差があると判断できますが、差の大きさはCIの幅も踏まえて控えめに捉えてください。</li>
+                  <li><strong>p値が有意でなく、CIが0を含まない場合:</strong> 同じWelchのt統計量からp値とCIを求めているためこの組み合わせは発生しません。</li>
+                </ul>
+              </details>
+
 
 
               <h3 id="result-pair-p">Welch t検定の結果</h3>
-              <p>ここではHolm法（p値）とBonferroni同時CI（信頼区間）での補正値を表示します。</p>
-              <p>2群の場合のp値とCIは、補正なしの値と同じです。</p>
+              <ul>
+                <li>Holm法（p値）とBonferroni同時CI（信頼区間）での補正値を表示します。</li>
+                <li>2群の場合のp値とCIは、補正なしの値と同じです。</li>
+                <li>p値が有意水準以下の場合は、黄色で塗りつぶし表示されます。</li>
+              </ul>
+              <p id="pair-count"></p>
+              <div class="table-wrap" id="pair-table"></div>
+
+              <details>
+                <summary>表の意味</summary>
+                <ul>
+                  <li>diff は平均の差（B - A なら B群の平均からA群の平均を差し引いた値）。</li>
+                  <li>relative diff (%) 相対差 = diff / 基準群（B - A なら A）の平均 × 100。（値が正の量的データ向けの指標で、基準群の平均が0以下のときは「—」）。</li>
+                  <li>Cohen&#39;s d = diff / √((s₁² + s₂²) / 2)（s² は不偏分散）で、単位のない効果量の目安。</li>
+                  <li>SEは diff の標準誤差で、SE = √(s₁²/n₁ + s₂²/n₂)（s² は不偏分散）。</li>
+                  <li>t = diff / SE </li>
+                  <li>dof は Welch–Satterthwaite の自由度。</li>
+                  <li>p-valueは t と dof から求めた両側p値をHolm法で調整した値。有意水準以下であれば塗りつぶし表示。</li>
+                  <li>CIは diff ± 臨界値 × SE（臨界値は dof のt分布から。Bonferroni同時CIでは有意水準を α/ペア数 にして求める）。</li>
+                </ul>
+              </details>
 
               <details>
                 <summary>Holm法のp値とBonferroni同時CIについて</summary>
@@ -217,76 +270,60 @@
                 </ul>
               </details>
 
-            
-            <p id="pair-count"></p>
-            <div class="table-wrap" id="pair-table"></div>
-            <details>
-              <summary>表の意味</summary>
-              <ul>
-                <li>diff は平均の差（B - A なら B群の平均からA群の平均を差し引いた値）。</li>
-                <li>relative diff (%) 相対差 = diff / 基準群（B - A なら A）の平均 × 100。（値が正の量的データ向けの指標で、基準群の平均が0以下のときは「—」）。</li>
-                <li>Cohen&#39;s d = diff / √((s₁² + s₂²) / 2)（s² は不偏分散）で、単位のない効果量の目安。</li>
-                <li>SEは diff の標準誤差で、SE = √(s₁²/n₁ + s₂²/n₂)（s² は不偏分散）。</li>
-                <li>t = diff / SE </li>
-                <li>dof は Welch–Satterthwaite の自由度。</li>
-                <li>p-valueは t と dof から求めた両側p値をHolm法で調整した値。有意水準以下であれば塗りつぶし表示。</li>
-                <li>CIは diff ± 臨界値 × SE（臨界値は dof のt分布から。Bonferroni同時CIでは有意水準を α/ペア数 にして求める）。</li>
-              </ul>
-            </details>
-
-            <div id="pair-chart" class="chart-box"></div>
+              <div id="pair-chart" class="chart-box"></div>
 
 
-            <h3 id="result-pair-adjust">多重比較補正の有無</h3>
-            <p>3群以上では複数のペアを同時に検定するため、補正なしのp値やCIを用いる場合は偽陽性（本当は差がないのに差があると判断してしまうこと）の発生確率がペア数に応じて高まります。</p>
-            <p id="pair-adjust-single" class="note-text" hidden>入力されたデータは2群（ペア数
-              1）です。前段の出力値と同じになるため、補正なし・他の補正方法の結果は出力されません。</p>
-            <details id="pair-adjust-details" hidden>
-              <summary>補正なし・他の補正方法の結果</summary>
 
-              <h4>p値（補正方法別）</h4>
-              <div class="mdc-note-box">
-                <ul>
-                  <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error
-                    Rate
-                    少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
-                  <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。
-                  </li>
-                  <li><strong>Holm</strong>:
-                    p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般にはより高い検出力を得やすい方法です。</li>
-                  <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
-                    有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
-                </ul>
-              </div>
-              <div class="table-wrap" id="pair-p-table"></div>
+              <h3 id="result-pair-adjust">多重比較補正の有無</h3>
+              <p>3群以上では複数のペアを同時に検定するため、補正なしのp値やCIを用いる場合は偽陽性（本当は差がないのに差があると判断してしまうこと）の発生確率がペア数に応じて高まります。</p>
+              <p id="pair-adjust-single" class="note-text" hidden>入力されたデータは2群（ペア数
+                1）です。前段の出力値と同じになるため、補正なし・他の補正方法の結果は出力されません。</p>
+              <details id="pair-adjust-details" hidden>
+                <summary>補正なし・他の補正方法の結果</summary>
 
-              <h4>信頼区間（補正有無別）</h4>
-              <div class="mdc-note-box">
-                <ul>
-                  <li><strong>Unadjusted（個別CI）</strong>: 各ペアについてWelchの方法で個別に算出したCI</li>
-                  <li><strong>Bonferroni（同時CI）</strong>:
-                    全ペアをまとめて、少なくとも信頼水準（1−α）でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）
-                  </li>
-                </ul>
-              </div>
-              <div id="pair-chart-all" class="chart-box"></div>
-              <div id="pair-ci-table" class="table-wrap"></div>
-            </details>
+                <h4>p値（補正方法別）</h4>
+                <div class="mdc-note-box">
+                  <ul>
+                    <li><strong>Unadjusted（補正なし）</strong>: p値は多重比較を考慮せずに計算します。そのため複数のペアを評価すると、FWER（Family-Wise Error
+                      Rate
+                      少なくとも1つの帰無仮説を誤って棄却する確率）が有意水準を超える可能性があります。</li>
+                    <li><strong>Bonferroni</strong>: p値を補正し、FWERを制御します。比較する検定数に応じて一律に補正するシンプルな方法ですが、検出力が低くなりやすい特徴があります。
+                    </li>
+                    <li><strong>Holm</strong>:
+                      p値を小さい順に並べ、段階的に判定することでFWERを制御します。Bonferroni法と同じくFWERを制御しながら、一般にはより高い検出力を得やすい方法です。</li>
+                    <li><strong>BH（Benjamini-Hochberg）</strong>: FDR（False Discovery Rate
+                      有意と判定した結果に占める偽陽性の割合の期待値）を制御します。FWERを制御する方法よりも多くの検定を有意と判定しやすく、探索的な分析など、多数の検定をおこなう場面で用いられます。</li>
+                  </ul>
+                </div>
+                <div class="table-wrap" id="pair-p-table"></div>
+
+                <h4>信頼区間（補正有無別）</h4>
+                <div class="mdc-note-box">
+                  <ul>
+                    <li><strong>Unadjusted（個別CI）</strong>: 各ペアについてWelchの方法で個別に算出したCI</li>
+                    <li><strong>Bonferroni（同時CI）</strong>:
+                      全ペアをまとめて、少なくとも信頼水準（1−α）でカバーするCI（各ペアのWelch型CIについて、有意水準をα/ペア数として計算）
+                    </li>
+                  </ul>
+                </div>
+                <div id="pair-chart-all" class="chart-box"></div>
+                <div id="pair-ci-table" class="table-wrap"></div>
+              </details>
+            </div>
           </div>
         </div>
       </div>
-  </div>
 
-  <footer id="footer">
-    <div class="footer-links">
-      <a href="https://sasasakaz.github.io/">🏠 Home</a>
-      <span class="separator">|</span>
-      <a href="#header">Back to Top</a>
-    </div>
-    <p>Author: sasasakaz</p>
-  </footer>
-  </main>
-  <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
+      <footer id="footer">
+        <div class="footer-links">
+          <a href="https://sasasakaz.github.io/">🏠 Home</a>
+          <span class="separator">|</span>
+          <a href="#header">Back to Top</a>
+        </div>
+        <p>Author: sasasakaz</p>
+      </footer>
+    </main>
+    <nav id="page-toc" class="side side-right" aria-label="目次"></nav>
   </div>
 </body>
 

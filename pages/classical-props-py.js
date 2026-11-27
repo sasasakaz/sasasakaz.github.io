@@ -82,7 +82,7 @@ def omnibus(denoms, numers, ids, alpha, level):
     omni = {
         "chi2": float(chi2), "dof": int(dof), "p": float(p_omni), "v": cramers_v,
         "n": n_total, "min_expected": float(expected.min()),
-        "significant": bool(p_omni < alpha),
+        "significant": bool(p_omni <= alpha),
         "low_expected": bool(expected.min() < 5),
     }
     group = {"table": ci_table, "chart": to_svg(fig)}

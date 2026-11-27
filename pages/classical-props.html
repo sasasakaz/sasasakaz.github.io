@@ -155,7 +155,7 @@
             <p id="running-message-text"></p>
           </div>
           <div id="completion-message" class="mdc-info-box" role="status" aria-live="polite" hidden>
-            <p>検定完了！ 以下の結果を確認してください</p>
+            <p>検定完了！ 解説を参考にしながら結果を読み解いてください</p>
           </div>
 
           <div id="initial-message" class="mdc-info-box initial-message" role="status">
@@ -198,15 +198,73 @@
             </div>
 
 
-            
+
             <div id="panel-pair" class="result-panel" role="tabpanel" aria-labelledby="tab-pair" hidden>
               <h2 id="result-pair">群間の比率の差</h2>
               <p>Pearsonのカイ二乗検定（Yates補正なし）を全ペアでおこないます。</p>
+              <p>帰無仮説: 群間の母比率に差はない。</p>
+              <div class="mdc-warn-box">
+                <ul>
+                  <li>帰無仮説の評価には、p値（Holm法）を利用してください。</li>
+                  <li>あらかじめHolm法以外のp値（補正なし/Bonferroni法/BH法）を採用すると決めていた場合は、最下段に表示される該当のp値を利用してください。</li>
+                  <li>p値が有意水準以下の場合、帰無仮説を棄却して「2群の母比率に差がある」と判断します（母比率の差が0であるとは考えにくいという結論）。</li>
+                </ul>
+              </div>
+              <div class="mdc-info-box">
+                <ul>
+                  <li>CIは、母比率の差がどの程度ありそうか、推定にどれくらいの幅があるかの補助的な判断材料としてください。</li>
+                  <li>CIの幅は、推定の不確かさを表します。観測データ件数（Sample Size）が少ないと、区間は広くなりやすいです。</li>
+                  <li>CIの区間が広いこと自体は、検定が失敗したことを意味しません。無理に狭めようとせず、不確かさを踏まえて結果を読み取ってください。</li>
+                </ul>
+              </div>
+
+              <details>
+                <summary>不確かさを抑えたい場合の検討項目</summary>
+                <ol>
+                  <li>入力データが正しく読み取られているか、ページ上部の確認表を確認する。</li>
+                  <li>あらかじめ予定していた計画に沿って、観測データ件数を増やす。</li>
+                  <li>恣意的にならない範囲で観測条件や対象者条件をそろえるなど、群間の比較条件を整える。</li>
+                </ol>
+              </details>
+
+              <details>
+                <summary>p値とCIの結果が不整合の場合</summary>
+                <ul>
+                  <li><strong>p値が有意で、CIが0を含む場合:</strong>
+                    差があると判断できますが、境界付近（p値が有意水準に近い、またはCIの端が0に近い）のため、結果が揺らぎやすい状態です。差の大きさは、CIの幅も踏まえて控えめに捉えてください。</li>
+                  <li><strong>p値が有意でなく、CIが0を含まない場合:</strong> 差があると断定せず、「差がある可能性が示唆される」にとどめてください。</li>
+                </ul>
+              </details>
+
 
 
               <h3 id="result-pair-p">カイ二乗検定（ペア）の結果</h3>
-              <p>ここではHolm法（p値）とBonferroni同時CI（信頼区間）での補正値を表示します。</p>
-              <p>2群の場合のp値とCIは、補正なしの値と同じです。</p>
+              <ul>
+                <li>Holm法（p値）とBonferroni同時CI（信頼区間）での補正値を表示します。</li>
+                <li>2群の場合のp値とCIは、補正なしの値と同じです。</li>
+                <li>p値が有意水準以下の場合は、黄色で塗りつぶし表示されます。</li>
+              </ul>
+
+              <p id="pair-count"></p>
+              <div class="table-wrap" id="pair-table"></div>
+              <div id="pair-warning"></div>
+
+              <details>
+                <summary>表の意味</summary>
+                <ul>
+                  <li>diff は比率の差（B - A なら B群の比率からA群の比率を差し引いた値）。</li>
+                  <li>relative diff (%) 相対差 = diff / 基準群（B - A なら A）の比率 × 100。</li>
+                  <li>Odds Ratio = 左の群のオッズ / 右の群のオッズ（オッズ = 比率 / (1 − 比率)）。基準となる値が0で計算できないときは「—」。</li>
+                  <li>χ² と dof は2×2のPearsonカイ二乗検定（Yates補正なし）の値。</li>
+                  <li>p-valueは上記のp値をHolm法で調整した値（2群をプールした比率を使って求めるため、diff / SE から χ² は再現できない）。</li>
+                  <li>SE (points) は diff の標準誤差（群ごとの比率からそのまま求める非プールのSE）。SE = √(p̂₁(1−p̂₁)/n₁ + p̂₂(1−p̂₂)/n₂) × 100　（p̂
+                    は各群の標本比率、n は
+                    Sample Size）</li>
+                  <li>CI は diff ± 臨界値z × SE（Wald法）。Bonferroni同時CIの臨界値は z = Φ⁻¹(1 − α / (2m))　（Φ⁻¹ は標準正規分布の分位点関数、m はペア数）
+                  </li>
+                </ul>
+                <p id="pair-ci-note" class="note-text"></p>
+              </details>
 
               <details>
                 <summary>Holm法のp値とBonferroni同時CIについて</summary>
@@ -221,27 +279,6 @@
                 </ul>
               </details>
 
-              <p id="pair-count"></p>
-              <div class="table-wrap" id="pair-table"></div>
-              <details>
-                <summary>表の意味</summary>
-                <ul>
-                  <li>diff は比率の差（B - A なら B群の比率からA群の比率を差し引いた値）。</li>
-                  <li>relative diff (%) 相対差 = diff / 基準群（B - A なら A）の比率 × 100。</li>
-                  <li>Odds Ratio = 左の群のオッズ / 右の群のオッズ（オッズ = 比率 / (1 − 比率)）。基準となる値が0で計算できないときは「—」。</li>
-                  <li>χ² と dof は2×2のPearsonカイ二乗検定（Yates補正なし）の値。</li>
-                  <li>p-valueは上記のp値をHolm法で調整した値（2群をプールした比率を使って求めるため、diff / SE から χ² は再現できない）。有意水準以下であれば塗りつぶし表示。</li>
-                  <li>SE (points) は diff の標準誤差（群ごとの比率からそのまま求める非プールのSE）。SE = √(p̂₁(1−p̂₁)/n₁ + p̂₂(1−p̂₂)/n₂) × 100　（p̂
-                    は各群の標本比率、n は
-                    Sample Size）</li>
-                  <li>CI は diff ± 臨界値z × SE（Wald法）。Bonferroni同時CIの臨界値は z = Φ⁻¹(1 − α / (2m))　（Φ⁻¹ は標準正規分布の分位点関数、m はペア数）
-                  </li>
-                </ul>
-
-                <p id="pair-ci-note" class="note-text"></p>
-
-              </details>
-              <div id="pair-warning"></div>
               <div id="pair-chart" class="chart-box"></div>
 
 

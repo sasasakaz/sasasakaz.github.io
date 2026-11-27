@@ -63,8 +63,8 @@ const input = ToolCommon.createMeansInput({
  */
 function renderOmniSummary(omni, alpha) {
   const verdict = omni.significant
-    ? `有意差あり（p &lt; ${alpha}）少なくとも1つの群の平均が他と異なります`
-    : `有意差なし（p ≥ ${alpha}）`;
+    ? `有意差あり（p ≤ ${alpha}）少なくとも1つの群の平均が他と異なります`
+    : `有意差なし（p &gt; ${alpha}）`;
   const pText = omni.p < 0.0001 ? omni.p.toExponential(2) : omni.p.toFixed(4);
   return `<ul>
       <li>Welch ANOVA: F(${omni.df1}, ${omni.df2.toFixed(1)}) = ${omni.f.toFixed(3)}, p = ${pText}</li>

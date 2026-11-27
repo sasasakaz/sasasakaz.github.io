@@ -83,7 +83,7 @@ def welch_anova(n, mean, std_unbiased, alpha):
     df1 = k - 1
     df2 = (k ** 2 - 1) / (3 * lam)
     p = float(sps.f.sf(f_welch, df1, df2))
-    return {"f": float(f_welch), "df1": int(df1), "df2": float(df2), "p": p, "significant": bool(p < alpha)}
+    return {"f": float(f_welch), "df1": int(df1), "df2": float(df2), "p": p, "significant": bool(p <= alpha)}
 
 
 def pairwise(ids, n, mean, std_unbiased, alpha, level):

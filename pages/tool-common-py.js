@@ -87,7 +87,7 @@ def p_bh(p):
 def html_table(headers, kinds, rows, alpha=0.05):
     """結果表のHTML文字列を作る。kinds は列ごとの種別:
     text: ラベル（class="col-label"）/ int: 桁区切りの整数 / f2: 小数2桁 /
-    p: p値（小数4桁。alpha 未満は class="is-sig"）
+    p: p値（小数4桁。alpha 以下は class="is-sig"）
     値が None のセルは、種別によらず「—」を表示する（基準が0で計算できない相対差など）"""
     head = "".join(f"<th>{h}</th>" for h in headers)
     body = []
@@ -101,7 +101,7 @@ def html_table(headers, kinds, rows, alpha=0.05):
             elif kind == "int":
                 cells.append(f"<td>{int(v):,}</td>")
             elif kind == "p":
-                cls = ' class="is-sig"' if v < alpha else ""
+                cls = ' class="is-sig"' if v <= alpha else ""
                 cells.append(f"<td{cls}>{v:.4f}</td>")
             else:
                 cells.append(f"<td>{v:.2f}</td>")
