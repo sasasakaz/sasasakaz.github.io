@@ -461,7 +461,7 @@
       </details>
 
 
-      <h3 id="test-and-ci-results">検定と信頼区間でわかったこと</h3>
+      <h3 id="test-and-ci-results">わかったこと</h3>
       <p>検定と信頼区間は、同じ統計的枠組みに基づいています。サンプル事例のようにWelch t検定とそれに対応する95%信頼区間を用いる場合、2つの結果には整合性があります。</p>
       <table>
         <thead>
@@ -525,7 +525,7 @@
 
 
 
-      <h3>Webツールでベイズ推定</h3>
+      <h3 id="web-tool">Webツールでやってみる</h3>
       <p>ベイズ推定を自力でおこなうのは手間なので、ここではWebツールを利用します。</p>
       <p><a href="https://sasasakaz.github.io/pages/bayesian-means.html">Bayesian Comparison of Means</a></p>
       <ol>
@@ -577,6 +577,7 @@
           <li>MCMC: 後述の収束診断結果などを踏まえて、一部の設定はページ上部にて調整可能です。</li>
         </ul>
 
+
         <h4>確率モデル</h4>
         <p>t分布は、平均mu 尺度scale 自由度nu の3つのパラメーターで形状が決まります。</p>
         <ul>
@@ -590,6 +591,7 @@
         <p class="note-text">※確率モデルにt分布を用いる推定は、<a href="https://doi.org/10.2307/2290063">Lange, Little &amp;
             Taylor
             (1989) </a> などで知られた手法を踏襲しています。</p>
+
 
         <h4>t分布のパラメーターの事前分布</h4>
         <ul>
@@ -657,7 +659,7 @@
       <p>Trace Plotは、MCMCで得られたサンプルの分布と推移を、パラメーターごとに可視化したグラフです。左側に各チェーンのサンプル分布、右側にサンプリングの推移が表示されます。</p>
 
       <img src="../images/statistical-inference-trace-plot.jpg" alt="Trace Plot画像"
-        style="max-width: 80%; border: 1px solid var(--c-border, #ccc);">
+        style="max-width: 80%;">
 
       <table>
         <thead>
@@ -704,8 +706,7 @@
 
 
       <h4>パラメーターの要約統計量の読み解き方</h4>
-      <p>Trace Plotでサンプルの動きを目視確認するだけでなく、数値指標でもサンプリングの状態を確認します。</p>
-      <p>以下の4指標に注目します（目安を満たしていない箇所があった場合、本ツールでは赤く塗りつぶし表示されます）。</p>
+      <p>Trace Plotでサンプルの動きを目視確認するだけでなく、数値指標でもサンプリングの状態を確認します。以下4指標がポイントです。</p>
 
       <img src="../images/statistical-inference-summary-table.jpg" alt="パラメーター収束診断の表"
         style="max-width: 80%; border: 1px solid var(--c-border, #ccc);">
@@ -798,9 +799,17 @@
       </div>
 
       <!-- <img src="../images/statistical-inference-forest-plot.jpg" alt="Forest Plot画像"
-              style="max-width: 80%; border: 1px solid var(--c-border, #ccc);"> -->
+              style="max-width: 80%;"> -->
       <img src="../images/statistical-inference-diff-histogram.jpg" alt="Diff Histogram画像"
-        style="max-width: 80%; border: 1px solid var(--c-border, #ccc);">
+        style="max-width: 80%;">
+
+
+<h4>差の事後平均と94%HDI</h4>
+<h4>差が0を上回る確率</h4>
+<h4>確率をどのように判断するか</h4>
+
+
+
 
 
 
