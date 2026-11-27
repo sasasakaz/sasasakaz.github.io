@@ -120,7 +120,7 @@ function renderResults(result) {
   document.getElementById('summary-hdi').innerHTML = result.hdis;
   document.getElementById('summary-table-container').innerHTML = result.table;
   document.getElementById('estimation-note').textContent =
-    `※Mean・Std・HDI は、各群の事後分布から ${result.num_samples.toLocaleString()} 回サンプリングした値で計算しています（共役事後分布からの直接サンプリングでMCMCではないため、r_hat や ESS などの収束診断は不要です）。94% HDI はそのサンプルから求めた最短区間です。乱数の種は固定していないので、実行のたびに小数第2位あたりが少し変わることがあります。`;
+    `※Mean, Std, HDI は、各群の事後分布から ${result.num_samples.toLocaleString()} 回サンプリングした値で計算しています（共役事後分布からの直接サンプリングでMCMCではないため、r_hat や ESS などの収束診断は不要です）。94%HDI はそのサンプルから求めた最短区間です。乱数の種は固定していないので、実行のたびに小数第2位あたりが少し変わることがあります。`;
   // P(best) は3群以上のときだけ（2群は null）
   document.getElementById('best-table').innerHTML = result.best_table || '';
   document.getElementById('best-section').hidden = !result.best_table;

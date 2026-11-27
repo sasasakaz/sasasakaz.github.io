@@ -233,6 +233,7 @@ function renderResults(data) {
     ["parameter", "Group"],
     ["sample_size", "Sample Size", { digits: 0 }],
     ["observed_mean", "Observed Mean"],
+    ["observed_std", "Observed Std"],
     ["mean", "Mean"],
     ["hdi_3%", "HDI Lower"],
     ["hdi_97%", "HDI Upper"]
@@ -249,14 +250,14 @@ function renderResults(data) {
   renderTable("mcse-ratios", data.mcse_ratios, [
     ["parameter", "パラメータ"],
     ["mean", "mean"],
-    ["sd", "sd"],
+    ["sd", "std"],
     ["hdi_3%", "hdi_3%"],
     ["hdi_97%", "hdi_97%"],
     ["mcse_mean", "mcse_mean"],
     ["ess_bulk", "ess_bulk", { warn: warnUnless(v => v >= DIAGNOSTIC_LIMITS.essMin) }],
     ["ess_tail", "ess_tail", { warn: warnUnless(v => v >= DIAGNOSTIC_LIMITS.essMin) }],
     ["r_hat", "r_hat", { digits: 4, warn: warnUnless(v => v < DIAGNOSTIC_LIMITS.rHatMax) }],
-    ["mcse_mean / sd (%)", "mcse_mean / sd (%)", { warn: warnUnless(v => v <= DIAGNOSTIC_LIMITS.mcseRatioMax) }]
+    ["mcse_mean / sd (%)", "mcse_mean / std (%)", { warn: warnUnless(v => v <= DIAGNOSTIC_LIMITS.mcseRatioMax) }]
   ], 2);
   // 古いサーバー（diff_summary なし）でも落ちないよう ?? [] を付けている
   renderTable("diff-table", data.diff_summary ?? [], [
@@ -273,7 +274,7 @@ function renderResults(data) {
   // 古いサーバー（chains などなし）のときは注記を出さない
   if (data.chains && data.draws) {
     $("estimation-note").textContent =
-      `※MeanとHDI は、${data.chains}チェーン × ${data.draws.toLocaleString()}回（tune ${data.tune.toLocaleString()}回は除く）＝ ` +
+      `※ MeanとHDI は、${data.chains}チェーン × ${data.draws.toLocaleString()}回（tune ${data.tune.toLocaleString()}回は除く）＝ ` +
       `${(data.chains * data.draws).toLocaleString()}個の事後サンプルから計算しています。` +
       `ただしMCMCのサンプルは互いに独立ではないため、実質的なサンプル数は「収束診断」タブの ess_bulkおよびess_tail で確認してください。`;
   }
