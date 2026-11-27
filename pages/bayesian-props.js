@@ -28,7 +28,9 @@ ToolCommon.configurePyodide({
 });
 
 // 結果を入れるdivのid（Clear で空にする）
-const RESULT_IDS = ['summary-chart', 'summary-hdi', 'summary-table-container', 'estimation-note', 'best-table',
+// const RESULT_IDS = ['summary-chart', 'summary-hdi', 'summary-table-container', 'estimation-note', 'best-table',
+//   'diff-hdi', 'diff-table-container', 'diff-chart'];
+const RESULT_IDS = ['summary-chart', 'summary-table-container', 'estimation-note', 'best-table',
   'diff-hdi', 'diff-table-container', 'diff-chart'];
 
 // 結果タブ。Clear のときは既定のタブに戻す
@@ -117,7 +119,7 @@ function renderResults(result) {
   posterior.innerHTML = result.posterior;
   attachPosteriorHover(posterior, result.hover);
 
-  document.getElementById('summary-hdi').innerHTML = result.hdis;
+  // document.getElementById('summary-hdi').innerHTML = result.hdis;
   document.getElementById('summary-table-container').innerHTML = result.table;
   document.getElementById('estimation-note').textContent =
     `※Mean, Std, HDI は、各群の事後分布から ${result.num_samples.toLocaleString()} 回サンプリングした値で計算しています（共役事後分布からの直接サンプリングでMCMCではないため、r_hat や ESS などの収束診断は不要です）。94%HDI はそのサンプルから求めた最短区間です。乱数の種は固定していないので、実行のたびに小数第2位あたりが少し変わることがあります。`;
