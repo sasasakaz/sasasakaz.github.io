@@ -178,7 +178,7 @@
 
             <div id="panel-omni" class="result-panel" role="tabpanel" aria-labelledby="tab-omni">
               <h2 id="result-omni">全体動向</h2>
-              <p>「全群の平均が等しいか」を調べるために、等分散を仮定しないWelchの一元配置分散分析をおこないます。</p>
+              <p>「全群の母平均が等しいか」を調べるために、等分散を仮定しないWelchの一元配置分散分析をおこないます。</p>
               <p class="note-text">※2群の場合はWelch t検定の結果と同じです（検定統計量 <em>F=t^2</em>）。</p>
               <p class="note-text">※平均の検定では、3群以上にはANOVA（Analysis of Variance 分散分析）を用います（cf.比率の差に適用するカイ二乗検定は3群以上にも対応可能）。
               </p>
@@ -186,11 +186,11 @@
 
 
               <h3 id="result-omni-test">Welch ANOVAの結果</h3>
-              <p>帰無仮説: 全群の平均が等しい。</p>
+              <p>帰無仮説: 全群の母平均が等しい。</p>
               <div id="omni-summary"></div>
 
               <h3 id="result-group">各群の信頼区間</h3>
-              <p>各群の平均と信頼区間（t分布に基づく区間）です。</p>
+              <p>各群の母平均（Mean）と信頼区間（t分布に基づく区間）の推定値です。</p>
               <div class="table-wrap" id="group-table"></div>
               <div id="group-chart" class="chart-box"></div>
             </div>
@@ -201,19 +201,18 @@
               <h2 id="result-pair">群間の平均の差</h2>
               <p>Welch t検定を全ペアでおこないます。</p>
               <p>帰無仮説: 群間の母平均に差はない。</p>
+              <ul>
+                <li>帰無仮説の評価は、p値（Holm法）を参照してください。</li>
+                <li>あらかじめHolm法以外のp値（補正なし/Bonferroni法/BH法）を採用すると決めていた場合は、最下段に表示される該当のp値を参照してください。</li>
+                <li>p値が有意水準以下の場合は、黄色で塗りつぶし表示されます。</li>
+              </ul>
+
               <div class="mdc-warn-box">
                 <ul>
-                  <li>帰無仮説の評価には、p値（Holm法）を利用してください。</li>
-                  <li>あらかじめHolm法以外のp値（補正なし/Bonferroni法/BH法）を採用すると決めていた場合は、最下段に表示される該当のp値を利用してください。</li>
                   <li>p値が有意水準以下の場合、帰無仮説を棄却して「2群の母平均に差がある」と判断します（母平均の差が0であるとは考えにくいという結論）。</li>
-                </ul>
-              </div>
-
-              <div class="mdc-info-box">
-                <ul>
-                  <li>CIは、母平均の差がどの程度ありそうか、推定にどれくらいの幅があるかの補助的な判断材料としてください。</li>
+                  <li>CI（信頼区間）は、母平均の差がどの程度ありそうか、推定にどれくらいの幅があるかの補助的な判断材料としてください。</li>
                   <li>CIの幅は、推定の不確かさを表します。観測データ件数（Sample Size）が少ないと、区間は広くなりやすいです。</li>
-                  <li>CIの区間が広いこと自体は、検定が失敗したことを意味しません。無理に狭めようとせず、不確かさを踏まえて結果を読み取ってください。</li>
+                  <li>CIの区間が広いこと自体は、検定が失敗したことを意味しません。無理に狭めようとせず、不確かさを踏まえて結果を読み解いてください。</li>
                 </ul>
               </div>
 
@@ -240,7 +239,6 @@
               <ul>
                 <li>Holm法（p値）とBonferroni同時CI（信頼区間）での補正値を表示します。</li>
                 <li>2群の場合のp値とCIは、補正なしの値と同じです。</li>
-                <li>p値が有意水準以下の場合は、黄色で塗りつぶし表示されます。</li>
               </ul>
               <p id="pair-count"></p>
               <div class="table-wrap" id="pair-table"></div>
